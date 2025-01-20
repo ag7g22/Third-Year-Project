@@ -1,6 +1,88 @@
-import azure.functions as func
 import datetime
 import json
 import logging
+import os
+
+# shared_code folder imports
+from shared_code.user import user, UniqueUserError, InvalidUserError, InvalidPasswordError
+from shared_code.utility import utility
+
+# Azure imports
+import azure.functions as func
+from azure.cosmos import CosmosClient
 
 app = func.FunctionApp()
+utility = utility()
+
+cosmos = CosmosClient.from_connection_string(os.environ['AzureCosmosDBConnectionString'])
+db_proxy = cosmos.get_database_client(os.environ['DatabaseName'])
+users_proxy = db_proxy.get_container_client(os.environ['UserContainerName'])
+questions_proxy = db_proxy.get_container_client(os.environ['QuestionContainerName'])
+
+# Cosmos decorator for registering a new player.
+@app.cosmos_db_output(  arg_name="usercontainerbinding",
+        	            database_name=os.environ['DatabaseName'],
+                        container_name=os.environ['UserContainerName'],
+                        create_if_not_exists=True,
+                        connection='AzureCosmosDBConnectionString')
+@app.route(route="user/register", auth_level=func.AuthLevel.FUNCTION)
+def user_register(req: func.HttpRequest, usercontainerbinding: func.Out[func.Document]) -> func.HttpResponse:
+    """
+    Recieves a player's username and password in a JSON string to register to player container.
+    e.g. {"username":  "antoni_gn" , "password" : "ILoveTricia"}
+    """
+    input = req.get_json()
+    logging.info('Python HTTP trigger function processed a USER_REGISTER request: {}'.format(input))
+
+    # Converted to player object for validation.
+    input_user = user(user_proxy=users_proxy,username=input['username'], password=input['password'])
+    logging.info("Inputted new player: {}".format(input_user.to_dict()))
+
+    try:
+        if input_user.is_valid():
+            # Insert in DB if player successfully validated.
+            user_doc_for_cosmos = func.Document.from_dict(input_user.to_dict())
+            usercontainerbinding.set(user_doc_for_cosmos)
+            logging.info("SUCCESS: Input user added to database!")
+            return func.HttpResponse(body=json.dumps({"result": True, "msg": "OK"}),mimetype="application/json")
+
+    # Send error messages based on is_valid()'s result.
+    except UniqueUserError as e:
+        logging.info("FAILURE: {}".format(e))
+        response_body = json.dumps({"result": False, "msg": "Username already exists"})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+    
+    except InvalidUserError as e:
+        logging.info("FAILURE: {}".format(e))
+        response_body = json.dumps({"result": False, "msg": "Username less than 5 characters or more than 15 characters"})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+    
+    except InvalidPasswordError as e:
+        logging.info("FAILURE: {}".format(e))
+        response_body = json.dumps({"result": False, "msg": "Password less than 8 characters or more than 15 characters"})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+
+@app.route(route="user/login", auth_level=func.AuthLevel.FUNCTION)
+def user_login(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Recieves a login attempt in a JSON document and checks credentials in the DB.
+    e.g. {"username":  "antoni_gn" , "password" : "ILoveTricia"}
+    """
+    input = req.get_json()
+    logging.info('Python HTTP trigger function processed a PLAYER_LOGIN request: {}'.format(input))
+
+    # Extract the details from the inputted JSON.
+    username = input['username']
+    password = input['password']
+
+    # Search for the player's credentials in the database.
+    query = 'SELECT * FROM users WHERE CONTAINS(users.username, "{0}") AND users.password = "{1}"'.format(username, password)
+    players = utility.get_queryed_items(users_proxy,query=query)
+    if players:
+        logging.info("SUCCESS: login credentials validated.")
+        response_body = json.dumps({"result": True, "msg": "OK"})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+    else:
+        logging.info("FAILURE: Username or password incorrect")
+        response_body = json.dumps({"result": False, "msg": "Username or password incorrect"})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
