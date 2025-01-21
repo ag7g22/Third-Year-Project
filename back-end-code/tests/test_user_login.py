@@ -9,7 +9,7 @@ class test_player_login(unittest.TestCase):
     """
     # URLS to test on
     LOCAL_DEV_URL = "http://localhost:7071/user/login"
-    PUBLIC_URL = "n/a"
+    PUBLIC_URL = "https://driving-theory.azurewebsites.net/user/login"
     TEST_URL = LOCAL_DEV_URL
 
     # Configure the Proxy objects from the local.settings.json file.

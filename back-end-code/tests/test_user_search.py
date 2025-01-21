@@ -9,7 +9,7 @@ class test_user_search(unittest.TestCase):
     """
     # URLS to test on
     LOCAL_DEV_URL = "http://localhost:7071/user/search"
-    PUBLIC_URL = "n/a"
+    PUBLIC_URL = "https://driving-theory.azurewebsites.net/user/search"
     TEST_URL = LOCAL_DEV_URL
 
     # Configure the Proxy objects from the local.settings.json file.
