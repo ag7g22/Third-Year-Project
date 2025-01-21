@@ -1,6 +1,5 @@
 import uuid
 from azure.cosmos import ContainerProxy
-from shared_code.utility import utility
 
 class UniqueUserError(ValueError):
     pass
@@ -12,7 +11,6 @@ class user():
     """
     Holds the information of a single user.
     """
-    utility = utility()
 
     # Constructor to faciliate player creation:
     def __init__(self,user_proxy: ContainerProxy, username, password):
@@ -45,7 +43,7 @@ class user():
         # Check if there is a player username already stored
         username = self.username
         query = 'SELECT * FROM users WHERE CONTAINS(users.username, "{}")'.format(username)
-        existing_username = self.utility.get_queryed_items(proxy=self.user_proxy,query=query)
+        existing_username = list(self.user_proxy.query_items(query=query, enable_cross_partition_query=True))
         if not existing_username:
             # If no existing username, then its unique.
             return True

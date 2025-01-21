@@ -5,14 +5,12 @@ import os
 
 # shared_code folder imports
 from shared_code.user import user, UniqueUserError, InvalidUserError, InvalidPasswordError
-from shared_code.utility import utility
 
 # Azure imports
 import azure.functions as func
 from azure.cosmos import CosmosClient
 
 app = func.FunctionApp()
-utility = utility()
 
 cosmos = CosmosClient.from_connection_string(os.environ['AzureCosmosDBConnectionString'])
 db_proxy = cosmos.get_database_client(os.environ['DatabaseName'])
@@ -25,7 +23,7 @@ questions_proxy = db_proxy.get_container_client(os.environ['QuestionContainerNam
                         container_name=os.environ['UserContainerName'],
                         create_if_not_exists=True,
                         connection='AzureCosmosDBConnectionString')
-@app.route(route="user/register", auth_level=func.AuthLevel.FUNCTION)
+@app.route(route="user/register", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
 def user_register(req: func.HttpRequest, usercontainerbinding: func.Out[func.Document]) -> func.HttpResponse:
     """
     Recieves a player's username and password in a JSON string to register to player container.
@@ -62,7 +60,9 @@ def user_register(req: func.HttpRequest, usercontainerbinding: func.Out[func.Doc
         response_body = json.dumps({"result": False, "msg": "Password less than 8 characters or more than 15 characters"})
         return func.HttpResponse(body=response_body,mimetype="application/json")
 
-@app.route(route="user/login", auth_level=func.AuthLevel.FUNCTION)
+
+
+@app.route(route="user/login", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
 def user_login(req: func.HttpRequest) -> func.HttpResponse:
     """
     Recieves a login attempt in a JSON document and checks credentials in the DB.
@@ -77,7 +77,7 @@ def user_login(req: func.HttpRequest) -> func.HttpResponse:
 
     # Search for the player's credentials in the database.
     query = 'SELECT * FROM users WHERE CONTAINS(users.username, "{0}") AND users.password = "{1}"'.format(username, password)
-    players = utility.get_queryed_items(users_proxy,query=query)
+    players = list(users_proxy.query_items(query=query, enable_cross_partition_query=True))
     if players:
         logging.info("SUCCESS: login credentials validated.")
         response_body = json.dumps({"result": True, "msg": "OK"})
@@ -85,4 +85,96 @@ def user_login(req: func.HttpRequest) -> func.HttpResponse:
     else:
         logging.info("FAILURE: Username or password incorrect")
         response_body = json.dumps({"result": False, "msg": "Username or password incorrect"})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+
+
+
+@app.route(route="user/search", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
+def user_search(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Returns the search results from an inputted keyword.
+    e.g. {"search": "search"} 
+    (Note: to make it case in-sensitive, all search MUST be lowercase)
+    """
+    input = req.get_json()
+    logging.info('Python HTTP trigger function processed a USER_SEARCH request.')
+
+    # Collect all the users registered:
+    search = input['search']
+    query = 'SELECT * FROM users WHERE LOWER(users.username) LIKE LOWER("%{}%")'.format(search)
+    query_result = list(users_proxy.query_items(query=query, enable_cross_partition_query=True))
+    if query_result:
+        # Retrieve the users
+        logging.info('Successfully collected all usernames similar to "{}"!'.format(search))
+        users = []
+        for user in query_result:
+            logging.info('id: {0}, username: {1}'.format(user['id'], user['username']))
+            users.append({"id": user['id'], "username": user['username']})
+
+        # Send Response
+        response_body = json.dumps({"result": True, "msg": users})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+    else:
+        # If the query result gives nothing
+        response_body = json.dumps({"result": False, "msg": "Unable to retrieve users"})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+
+@app.route(route="user/friend/request", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
+def user_friend_request(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Requesting user gets added the to requested user's "friend_requests" list.
+    e.g. {"sender_id": "sender_id", "sender_username": "antoni_gn", "recipient_id": "recipient_id"}
+    """
+    input = req.get_json()
+    logging.info('Python HTTP trigger function processed a USER_FRIEND_REQUEST request.')
+
+    # Extract json input
+    sender_id = input['sender_id']
+    sender_username = input['sender_username']
+    recipient_id = input['recipient_id']
+
+    # Get the recipient based on username and id
+    query = 'SELECT * FROM users WHERE users.id = "{}"'.format(recipient_id)
+    query_result = list(users_proxy.query_items(query=query, enable_cross_partition_query=True))
+
+    logging.info("User found: {}".format(query_result))
+
+    if query_result:
+        user_to_update = query_result[0]
+        friend_request_list = user_to_update['friend_requests']
+        friend_list = user_to_update['friends']
+        new_friend = {"id": sender_id, "username": sender_username}
+
+        # Check if that user already requested:
+        if new_friend in friend_request_list:
+            response_body = json.dumps({"result": False, "msg": "Already sent a friend request!"})
+            return func.HttpResponse(body=response_body,mimetype="application/json")
+        elif new_friend in friend_list:
+            response_body = json.dumps({"result": False, "msg": "Already friends!"})
+            return func.HttpResponse(body=response_body,mimetype="application/json")
+        else:
+            # Add to the friend_request_list
+            new_friend_request_list = []
+            new_friend_request_list.append({"id": sender_id, "username": sender_username})
+
+            # If the friend_request_list already has contents inside
+            if friend_request_list != []:
+
+                for friend in friend_request_list:
+                    new_friend_request_list.append({"id": friend['id'], "username": friend['username']})
+
+            # Modify the user via field names as keys:
+            user_to_update['friend_requests'] = new_friend_request_list
+
+            # Save changes in database
+            users_proxy.replace_item(item=user_to_update['id'], body=user_to_update)
+
+            logging.info("New state of user: {}".format(user_to_update))
+
+            # Send Response
+            response_body = json.dumps({"result": True, "msg": "OK"})
+            return func.HttpResponse(body=response_body,mimetype="application/json")
+    else:
+        # If the query result gives nothing
+        response_body = json.dumps({"result": False, "msg": "Unable to send friend request."})
         return func.HttpResponse(body=response_body,mimetype="application/json")

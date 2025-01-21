@@ -2,11 +2,10 @@ import unittest
 import requests
 import json
 from azure.cosmos import CosmosClient
-from shared_code.user import user
 
 class test_player_login(unittest.TestCase):
     """
-    This test set focuses on testing the responses from the server on the PlayerLogin function.
+    This test set focuses on testing the responses from the server on the user_login function.
     """
     # URLS to test on
     LOCAL_DEV_URL = "http://localhost:7071/user/login"
@@ -45,7 +44,7 @@ class test_player_login(unittest.TestCase):
     def test_successful_login(self):
         # Try a login with correct credentials
         dict_login = {"username": "antoni_gn", "password": "ILoveTricia"}
-        response = requests.get(self.TEST_URL,params={"code": self.FUNCTION_KEY},json=dict_login)
+        response = requests.post(self.TEST_URL,params={"code": self.FUNCTION_KEY},json=dict_login)
 
         # Get json response, check the response code for brevity
         self.assertEqual(200,response.status_code)
@@ -59,7 +58,7 @@ class test_player_login(unittest.TestCase):
     def test_wrong_username(self):
         # Try a login with incorrect username
         dict_login = {"username": "lesacafe", "password": "ILoveTricia"}
-        response = requests.get(self.TEST_URL,params={"code": self.FUNCTION_KEY},json=dict_login)
+        response = requests.post(self.TEST_URL,params={"code": self.FUNCTION_KEY},json=dict_login)
 
         # Get json response, check the response code for brevity
         self.assertEqual(200,response.status_code)
@@ -71,9 +70,9 @@ class test_player_login(unittest.TestCase):
 
 
     def test_wrong_password(self):
-        # Try a login with incorrect username
+        # Try a login with incorrect password
         dict_login = {"username": "antoni_gn", "password": "ILoveTrisha"}
-        response = requests.get(self.TEST_URL,params={"code": self.FUNCTION_KEY},json=dict_login)
+        response = requests.post(self.TEST_URL,params={"code": self.FUNCTION_KEY},json=dict_login)
 
         # Get json response, check the response code for brevity
         self.assertEqual(200,response.status_code)
