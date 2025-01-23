@@ -155,7 +155,7 @@ def user_friend_request(req: func.HttpRequest) -> func.HttpResponse:
         else:
             # Add to the friend_request_list
             new_friend_request_list = []
-            new_friend_request_list.append({"id": sender_id, "username": sender_username})
+            new_friend_request_list.append(new_friend)
 
             # If the friend_request_list already has contents inside
             if friend_request_list != []:
@@ -216,7 +216,7 @@ def user_friend_accept(req: func.HttpRequest) -> func.HttpResponse:
         else:
             # Add to the friend_list
             new_friend_list = []
-            new_friend_list.append({"id": sender_id, "username": sender_username})
+            new_friend_list.append(new_friend)
 
             # If the friend_list already has contents inside
             if friend_list != []:
@@ -229,7 +229,7 @@ def user_friend_accept(req: func.HttpRequest) -> func.HttpResponse:
 
             if friend_request_list != []:
                 for friend in friend_request_list:
-                    if friend != {"id": sender_id, "username": sender_username}:
+                    if friend != new_friend:
                         new_friend_request_list.append({"id": friend['id'], "username": friend['username']})
 
             # Modify the user via field names as keys:
@@ -247,4 +247,63 @@ def user_friend_accept(req: func.HttpRequest) -> func.HttpResponse:
     else:
         # If the query result gives nothing
         response_body = json.dumps({"result": False, "msg": "Unable to add friend."})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+
+
+@app.route(route="user/friend/reject", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
+def user_friend_reject(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Requesting user gets removed from the to requested user's "friend_requests" list.
+    e.g. {"sender_id": "sender_id", "sender_username": "antoni_gn", "recipient_id": "recipient_id"}
+    """
+    input = req.get_json()  
+    logging.info('Python HTTP trigger function processed a USER_FRIEND_REJECT request.')
+
+    # Extract json input
+    sender_id = input['sender_id']
+    sender_username = input['sender_username']
+    recipient_id = input['recipient_id']
+
+    # Get the recipient based on id
+    query = 'SELECT * FROM users WHERE users.id = "{}"'.format(recipient_id)
+    query_result = list(users_proxy.query_items(query=query, enable_cross_partition_query=True))
+
+    logging.info("User found: {}".format(query_result))
+
+    if query_result:
+        user_to_update = query_result[0]
+        friend_request_list = user_to_update['friend_requests']
+        friend_list = user_to_update['friends']
+        new_friend = {"id": sender_id, "username": sender_username}
+
+        # Check if that user already requested:
+        if new_friend in friend_list:
+            response_body = json.dumps({"result": False, "msg": "Already friends!"})
+            return func.HttpResponse(body=response_body,mimetype="application/json")
+        elif new_friend not in friend_request_list:
+            response_body = json.dumps({"result": False, "msg": "Haven't sent friend request!"})
+            return func.HttpResponse(body=response_body,mimetype="application/json")
+        else:
+            # Remove from friend_requests_list
+            new_friend_request_list = []
+
+            if friend_request_list != []:
+                for friend in friend_request_list:
+                    if friend != new_friend:
+                        new_friend_request_list.append({"id": friend['id'], "username": friend['username']})
+
+            # Modify the user via field names as keys:
+            user_to_update['friend_requests'] = new_friend_request_list
+
+            # Save changes in database
+            users_proxy.replace_item(item=user_to_update['id'], body=user_to_update)
+
+            logging.info("New state of user after REJECTING friend request: {}".format(user_to_update))
+
+            # Send Response
+            response_body = json.dumps({"result": True, "msg": "OK"})
+            return func.HttpResponse(body=response_body,mimetype="application/json")
+    else:
+        # If the query result gives nothing
+        response_body = json.dumps({"result": False, "msg": "Unable to remove friend request."})
         return func.HttpResponse(body=response_body,mimetype="application/json")
