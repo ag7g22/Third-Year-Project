@@ -119,6 +119,37 @@ def user_search(req: func.HttpRequest) -> func.HttpResponse:
         response_body = json.dumps({"result": False, "msg": "Unable to retrieve users"})
         return func.HttpResponse(body=response_body,mimetype="application/json")
 
+
+@app.route(route="user/friend/all", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
+def user_friend_all(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Retrieve all the inputted user's friends and friend requests.
+    e.g. {"username": "antoni_gn"}
+    """
+    input = req.get_json()
+    logging.info('Python HTTP trigger function processed a USER_FRIEND_ALL request.')
+
+    # Extract json input
+    username = input['username']
+
+    # Get the recipient based on username
+    query = 'SELECT * FROM users WHERE users.username = "{}"'.format(username)
+    query_result = list(users_proxy.query_items(query=query, enable_cross_partition_query=True))
+
+    if query_result:
+        user = query_result[0]
+        user_friend_stats = {"friends": user["friends"], "friend_requests": user["friend_requests"]}
+        logging.info('username: {0}, -> {1}'.format(user['username'], user_friend_stats))
+
+        # Send Response
+        response_body = json.dumps({"result": True, "msg": user_friend_stats})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+    else:
+        # If the query result gives nothing
+        response_body = json.dumps({"result": False, "msg": "Unable to find user."})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+
+
 @app.route(route="user/friend/request", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
 def user_friend_request(req: func.HttpRequest) -> func.HttpResponse:
     """
@@ -137,9 +168,8 @@ def user_friend_request(req: func.HttpRequest) -> func.HttpResponse:
     query = 'SELECT * FROM users WHERE users.id = "{}"'.format(recipient_id)
     query_result = list(users_proxy.query_items(query=query, enable_cross_partition_query=True))
 
-    logging.info("User found: {}".format(query_result))
-
     if query_result:
+        logging.info("User found: {}".format(query_result))
         user_to_update = query_result[0]
         friend_request_list = user_to_update['friend_requests']
         friend_list = user_to_update['friends']
@@ -198,9 +228,8 @@ def user_friend_accept(req: func.HttpRequest) -> func.HttpResponse:
     query = 'SELECT * FROM users WHERE users.id = "{}"'.format(recipient_id)
     query_result = list(users_proxy.query_items(query=query, enable_cross_partition_query=True))
 
-    logging.info("User found: {}".format(query_result))
-
     if query_result:
+        logging.info("User found: {}".format(query_result))
         user_to_update = query_result[0]
         friend_request_list = user_to_update['friend_requests']
         friend_list = user_to_update['friends']
@@ -268,9 +297,8 @@ def user_friend_reject(req: func.HttpRequest) -> func.HttpResponse:
     query = 'SELECT * FROM users WHERE users.id = "{}"'.format(recipient_id)
     query_result = list(users_proxy.query_items(query=query, enable_cross_partition_query=True))
 
-    logging.info("User found: {}".format(query_result))
-
     if query_result:
+        logging.info("User found: {}".format(query_result))
         user_to_update = query_result[0]
         friend_request_list = user_to_update['friend_requests']
         friend_list = user_to_update['friends']
