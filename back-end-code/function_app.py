@@ -1,10 +1,12 @@
 import datetime
+import random
 import json
 import logging
 import os
 
 # shared_code folder imports
 from shared_code.user import user, UniqueUserError, InvalidUserError, InvalidPasswordError
+from shared_code.question import question
 
 # Azure imports
 import azure.functions as func
@@ -334,4 +336,75 @@ def user_friend_reject(req: func.HttpRequest) -> func.HttpResponse:
     else:
         # If the query result gives nothing
         response_body = json.dumps({"result": False, "msg": "Unable to remove friend request."})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+    
+
+@app.route(route="question/get/category", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
+def question_get_category(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Returns a randomised set of questions by category
+    No_of_Qs: How many questions
+    {"No_of_Qs": int, "topic": "topic"}
+    """
+    input = req.get_json()  
+    logging.info('Python HTTP trigger function processed a QUESTION_GET_CATEGORY request.')
+
+    No_of_Qs = input['No_of_Qs']
+    topic = input['topic']
+
+    # Get the questions by category
+    query = 'SELECT * FROM questions WHERE questions.topic = "{}"'.format(topic)
+    query_result = list(questions_proxy.query_items(query=query, enable_cross_partition_query=True))
+
+    if query_result:
+        # Create the question bank, with randomised questions.
+        random_Qs = random.sample(query_result,No_of_Qs)
+        quiz_Qs = []
+        for q in random_Qs:
+            quiz_Q = question(q['questions'], q['topic'], q['correct_answers'], q['incorrect_answers'])
+            quiz_Qs.append(quiz_Q.to_dict())
+
+        logging.info("Quiz Bank for the '{0}' topic created! First 3 Qs: {1}".format(topic, quiz_Qs[:3]))
+
+        # Send Response
+        response_body = json.dumps({"result": True, "msg": quiz_Qs})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+    else:
+        # If the query result gives nothing
+        response_body = json.dumps({"result": False, "msg": "Unable to get questions."})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+
+
+@app.route(route="question/get/all", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
+def question_get_all(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Returns a randomised set of questions by all categories
+    No_of_Qs: How many questions
+    {"No_of_Qs": int}
+    """
+    input = req.get_json()  
+    logging.info('Python HTTP trigger function processed a QUESTION_GET_ALL request.')
+
+    No_of_Qs = input['No_of_Qs']
+
+    # Get the questions by category
+    query = 'SELECT * FROM questions'
+    query_result = list(questions_proxy.query_items(query=query, enable_cross_partition_query=True))
+
+    if query_result:
+        # Create the question bank, with randomised questions.
+        random_Qs = random.sample(query_result,No_of_Qs)
+        quiz_Qs = []
+        for q in random_Qs:
+            quiz_Q = question(q['questions'], q['topic'], q['correct_answers'], q['incorrect_answers'])
+            quiz_Qs.append(quiz_Q.to_dict())
+
+        logging.info("Quiz Bank created! First 3 Qs: {}".format(quiz_Qs[:3]))
+
+        # Send Response
+        response_body = json.dumps({"result": True, "msg": quiz_Qs})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+    else:
+        # If the query result gives nothing
+        response_body = json.dumps({"result": False, "msg": "Unable to get questions."})
         return func.HttpResponse(body=response_body,mimetype="application/json")
