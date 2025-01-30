@@ -29,6 +29,9 @@ class utility():
         list: The list to select elements from.
         num_elements: Number of elements to select
         """
+        if num_elements == 0:
+            return []
+
         if num_elements > len(list):
             raise ElementSizeError("num_elements cannot be greater than the length of the list")
         
@@ -47,18 +50,3 @@ class utility():
         query_result = self.query_items(proxy=proxy,query=query)
 
         return self.select_random(query_result, No_of_Qs)
-    
-    def get_topic_training_questions(self, proxy: ContainerProxy, topic: str, percentage: float, No_of_Qs: int):
-        """
-        Returns the training topic questions according to the given percentage and number of total questions.
-        """
-
-        # Get the questions by category
-        query = 'SELECT * FROM questions WHERE questions.topic = "{}"'.format(topic)
-        query_result = self.query_items(proxy=proxy,query=query)
-
-        # Only sample the given percentage of No_of_Qs
-        Q_size = math.floor(No_of_Qs * percentage)
-        
-        return self.select_random(query_result, Q_size)
-

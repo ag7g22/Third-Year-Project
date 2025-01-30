@@ -148,15 +148,15 @@ class test_question_get_all(unittest.TestCase):
     def test_questions_get_all_1(self):
         # Send a request to register same user. (Input is a dictionary)
         request =   { 
-                        "No_of_Qs": 40, 
+                        "No_of_Qs": 50, 
                         "topic_percentages":    {
-                                                    "Driving Off": 0.14,
-                                                    "Urban Driving": 0.15,
-                                                    "Rural Driving": 0.12,
+                                                    "Driving Off": 0.15,
+                                                    "Urban Driving": 0.12,
+                                                    "Rural Driving": 0.13,
                                                     "Bigger Roads": 0.10,
                                                     "Motorways": 0.18,
-                                                    "Tricky Conditions": 0.16,
-                                                    "Breakdowns": 0.15,
+                                                    "Tricky Conditions": 0.11,
+                                                    "Breakdowns": 0.11,
                                                 }
                     }
         response = requests.post(self.TEST_URL,params={"code": self.FUNCTION_KEY},json=request)
@@ -166,10 +166,10 @@ class test_question_get_all(unittest.TestCase):
         dict_response = response.json()     
 
         # Check if you actually got randomised questions.
-        # print(dict_response['msg'])
+        print(dict_response['msg'])
         self.assertTrue(dict_response['result'])
 
-    unittest.skip
+    @unittest.skip
     def test_questions_get_random(self):
         # Send a request to register same user. (Input is a dictionary)
         request =   { "No_of_Qs": 40, "topic_percentages": "n/a" }

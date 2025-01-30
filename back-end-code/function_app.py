@@ -1,5 +1,5 @@
 import datetime
-import random
+import math
 import json
 import logging
 import os
@@ -437,13 +437,13 @@ def question_get_all(req: func.HttpRequest) -> func.HttpResponse:
             return func.HttpResponse(body=response_body,mimetype="application/json")
         else:
             Qs = []
-            Qs.extend(utility.get_topic_training_questions(proxy=questions_proxy,topic="Driving Off",percentage=topics['Driving Off'],No_of_Qs=No_of_Qs))
-            Qs.extend(utility.get_topic_training_questions(proxy=questions_proxy,topic="Urban Driving",percentage=topics['Urban Driving'],No_of_Qs=No_of_Qs))
-            Qs.extend(utility.get_topic_training_questions(proxy=questions_proxy,topic="Rural Driving",percentage=topics['Rural Driving'],No_of_Qs=No_of_Qs))
-            Qs.extend(utility.get_topic_training_questions(proxy=questions_proxy,topic="Bigger Roads",percentage=topics['Bigger Roads'],No_of_Qs=No_of_Qs))
-            Qs.extend(utility.get_topic_training_questions(proxy=questions_proxy,topic="Motorways",percentage=topics['Motorways'],No_of_Qs=No_of_Qs))
-            Qs.extend(utility.get_topic_training_questions(proxy=questions_proxy,topic="Tricky Conditions",percentage=topics['Tricky Conditions'],No_of_Qs=No_of_Qs))
-            Qs.extend(utility.get_topic_training_questions(proxy=questions_proxy,topic="Breakdowns",percentage=topics['Breakdowns'],No_of_Qs=No_of_Qs))
+            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Driving Off",No_of_Qs=math.ceil(No_of_Qs * topics['Driving Off'])))
+            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Urban Driving",No_of_Qs=math.ceil(No_of_Qs * topics['Urban Driving'])))
+            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Rural Driving",No_of_Qs=math.ceil(No_of_Qs * topics['Rural Driving'])))
+            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Bigger Roads",No_of_Qs=math.ceil(No_of_Qs * topics['Bigger Roads'])))
+            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Motorways",No_of_Qs=math.ceil(No_of_Qs * topics['Motorways'])))
+            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Tricky Conditions",No_of_Qs=math.ceil(No_of_Qs * topics['Tricky Conditions'])))
+            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Breakdowns",No_of_Qs=math.ceil(No_of_Qs * topics['Breakdowns'])))
 
             random_Qs = utility.select_random(Qs, len(Qs))
             quiz_Qs = []
@@ -461,7 +461,7 @@ def question_get_all(req: func.HttpRequest) -> func.HttpResponse:
         # If the query result gives nothing
         response_body = json.dumps({"result": False, "msg": "Unable to get questions."})
         return func.HttpResponse(body=response_body,mimetype="application/json")
-    except ElementSizeError as e:
+    except ElementSizeError:
         # If the random.sample method fails
-        response_body = json.dumps({"result": False, "msg": e})
+        response_body = json.dumps({"result": False, "msg": "num_elements cannot be greater than the length of the list"})
         return func.HttpResponse(body=response_body,mimetype="application/json")
