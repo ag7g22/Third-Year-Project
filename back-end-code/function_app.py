@@ -7,12 +7,14 @@ import os
 # shared_code folder imports
 from shared_code.user import user, UniqueUserError, InvalidUserError, InvalidPasswordError
 from shared_code.question import question
+from shared_code.utility import utility, NoQueryError, ElementSizeError
 
 # Azure imports
 import azure.functions as func
 from azure.cosmos import CosmosClient
 
 app = func.FunctionApp()
+utility = utility()
 
 cosmos = CosmosClient.from_connection_string(os.environ['AzureCosmosDBConnectionString'])
 db_proxy = cosmos.get_database_client(os.environ['DatabaseName'])
@@ -77,17 +79,20 @@ def user_login(req: func.HttpRequest) -> func.HttpResponse:
     username = input['username']
     password = input['password']
 
-    # Search for the player's credentials in the database.
-    query = 'SELECT * FROM users WHERE CONTAINS(users.username, "{0}") AND users.password = "{1}"'.format(username, password)
-    players = list(users_proxy.query_items(query=query, enable_cross_partition_query=True))
-    if players:
-        logging.info("SUCCESS: login credentials validated.")
-        response_body = json.dumps({"result": True, "msg": "OK"})
-        return func.HttpResponse(body=response_body,mimetype="application/json")
-    else:
+    try:
+        # Search for the player's credentials in the database.
+        query = 'SELECT * FROM users WHERE CONTAINS(users.username, "{0}") AND users.password = "{1}"'.format(username, password)
+        users = utility.query_items(proxy=users_proxy,query=query)
+        if users:
+            logging.info("SUCCESS: login credentials validated.")
+            response_body = json.dumps({"result": True, "msg": "OK"})
+            return func.HttpResponse(body=response_body,mimetype="application/json") 
+
+    # Handle error if theres no result returned (i.e. users = [])
+    except NoQueryError:
         logging.info("FAILURE: Username or password incorrect")
         response_body = json.dumps({"result": False, "msg": "Username or password incorrect"})
-        return func.HttpResponse(body=response_body,mimetype="application/json")
+        return func.HttpResponse(body=response_body,mimetype="application/json")       
 
 
 
@@ -103,20 +108,26 @@ def user_search(req: func.HttpRequest) -> func.HttpResponse:
 
     # Collect all the users registered:
     search = input['search']
-    query = 'SELECT * FROM users WHERE LOWER(users.username) LIKE LOWER("%{}%")'.format(search)
-    query_result = list(users_proxy.query_items(query=query, enable_cross_partition_query=True))
-    if query_result:
-        # Retrieve the users
-        logging.info('Successfully collected all usernames similar to "{}"!'.format(search))
-        users = []
-        for user in query_result:
-            logging.info('id: {0}, username: {1}'.format(user['id'], user['username']))
-            users.append({"id": user['id'], "username": user['username']})
 
-        # Send Response
-        response_body = json.dumps({"result": True, "msg": users})
-        return func.HttpResponse(body=response_body,mimetype="application/json")
-    else:
+    try:
+        query = 'SELECT * FROM users WHERE LOWER(users.username) LIKE LOWER("%{}%")'.format(search)
+        query_result = utility.query_items(proxy=users_proxy,query=query)
+
+        if query_result:
+            # Retrieve the users
+            logging.info('Successfully collected all usernames similar to "{}"!'.format(search))
+            users = []
+
+            for user in query_result:
+                logging.info('id: {0}, username: {1}'.format(user['id'], user['username']))
+                users.append({"id": user['id'], "username": user['username']})
+
+            # Send Response
+            response_body = json.dumps({"result": True, "msg": users})
+            return func.HttpResponse(body=response_body,mimetype="application/json")
+        
+    # Handle error if theres no result returned (i.e. query_result = [])
+    except NoQueryError:
         # If the query result gives nothing
         response_body = json.dumps({"result": False, "msg": "Unable to retrieve users"})
         return func.HttpResponse(body=response_body,mimetype="application/json")
@@ -134,19 +145,21 @@ def user_friend_all(req: func.HttpRequest) -> func.HttpResponse:
     # Extract json input
     username = input['username']
 
-    # Get the recipient based on username
-    query = 'SELECT * FROM users WHERE users.username = "{}"'.format(username)
-    query_result = list(users_proxy.query_items(query=query, enable_cross_partition_query=True))
+    try:
+        # Get the recipient based on username
+        query = 'SELECT * FROM users WHERE users.username = "{}"'.format(username)
+        query_result = utility.query_items(proxy=users_proxy,query=query)
 
-    if query_result:
-        user = query_result[0]
-        user_friend_stats = {"friends": user["friends"], "friend_requests": user["friend_requests"]}
-        logging.info('username: {0}, -> {1}'.format(user['username'], user_friend_stats))
+        if query_result:
+            user = query_result[0]
+            user_friend_stats = {"friends": user["friends"], "friend_requests": user["friend_requests"]}
+            logging.info('username: {0}, -> {1}'.format(user['username'], user_friend_stats))
 
         # Send Response
         response_body = json.dumps({"result": True, "msg": user_friend_stats})
         return func.HttpResponse(body=response_body,mimetype="application/json")
-    else:
+    
+    except NoQueryError:
         # If the query result gives nothing
         response_body = json.dumps({"result": False, "msg": "Unable to find user."})
         return func.HttpResponse(body=response_body,mimetype="application/json")
@@ -166,47 +179,49 @@ def user_friend_request(req: func.HttpRequest) -> func.HttpResponse:
     sender_username = input['sender_username']
     recipient_id = input['recipient_id']
 
-    # Get the recipient based on id
-    query = 'SELECT * FROM users WHERE users.id = "{}"'.format(recipient_id)
-    query_result = list(users_proxy.query_items(query=query, enable_cross_partition_query=True))
+    try:
+        # Get the recipient based on id
+        query = 'SELECT * FROM users WHERE users.id = "{}"'.format(recipient_id)
+        query_result = utility.query_items(proxy=users_proxy,query=query)
 
-    if query_result:
-        logging.info("User found: {}".format(query_result))
-        user_to_update = query_result[0]
-        friend_request_list = user_to_update['friend_requests']
-        friend_list = user_to_update['friends']
-        new_friend = {"id": sender_id, "username": sender_username}
+        if query_result:
+            logging.info("User found: {}".format(query_result))
+            user_to_update = query_result[0]
+            friend_request_list = user_to_update['friend_requests']
+            friend_list = user_to_update['friends']
+            new_friend = {"id": sender_id, "username": sender_username}
 
-        # Check if that user already requested:
-        if new_friend in friend_request_list:
-            response_body = json.dumps({"result": False, "msg": "Already sent a friend request!"})
-            return func.HttpResponse(body=response_body,mimetype="application/json")
-        elif new_friend in friend_list:
-            response_body = json.dumps({"result": False, "msg": "Already friends!"})
-            return func.HttpResponse(body=response_body,mimetype="application/json")
-        else:
-            # Add to the friend_request_list
-            new_friend_request_list = []
-            new_friend_request_list.append(new_friend)
+            # Check if that user already requested:
+            if new_friend in friend_request_list:
+                response_body = json.dumps({"result": False, "msg": "Already sent a friend request!"})
+                return func.HttpResponse(body=response_body,mimetype="application/json")
+            elif new_friend in friend_list:
+                response_body = json.dumps({"result": False, "msg": "Already friends!"})
+                return func.HttpResponse(body=response_body,mimetype="application/json")
+            else:
+                # Add to the friend_request_list
+                new_friend_request_list = []
+                new_friend_request_list.append(new_friend)
 
-            # If the friend_request_list already has contents inside
-            if friend_request_list != []:
+                # If the friend_request_list already has contents inside
+                if friend_request_list != []:
 
-                for friend in friend_request_list:
-                    new_friend_request_list.append({"id": friend['id'], "username": friend['username']})
+                    for friend in friend_request_list:
+                        new_friend_request_list.append({"id": friend['id'], "username": friend['username']})
 
-            # Modify the user via field names as keys:
-            user_to_update['friend_requests'] = new_friend_request_list
+                # Modify the user via field names as keys:
+                user_to_update['friend_requests'] = new_friend_request_list
 
-            # Save changes in database
-            users_proxy.replace_item(item=user_to_update['id'], body=user_to_update)
+                # Save changes in database
+                users_proxy.replace_item(item=user_to_update['id'], body=user_to_update)
 
-            logging.info("New state of user after REQUESTING friend: {}".format(user_to_update))
+                logging.info("New state of user after REQUESTING friend: {}".format(user_to_update))
 
-            # Send Response
-            response_body = json.dumps({"result": True, "msg": "OK"})
-            return func.HttpResponse(body=response_body,mimetype="application/json")
-    else:
+                # Send Response
+                response_body = json.dumps({"result": True, "msg": "OK"})
+                return func.HttpResponse(body=response_body,mimetype="application/json")
+    
+    except NoQueryError:
         # If the query result gives nothing
         response_body = json.dumps({"result": False, "msg": "Unable to send friend request."})
         return func.HttpResponse(body=response_body,mimetype="application/json")
@@ -226,56 +241,58 @@ def user_friend_accept(req: func.HttpRequest) -> func.HttpResponse:
     sender_username = input['sender_username']
     recipient_id = input['recipient_id']
 
-    # Get the recipient based on id
-    query = 'SELECT * FROM users WHERE users.id = "{}"'.format(recipient_id)
-    query_result = list(users_proxy.query_items(query=query, enable_cross_partition_query=True))
+    try:
+        # Get the recipient based on id
+        query = 'SELECT * FROM users WHERE users.id = "{}"'.format(recipient_id)
+        query_result = utility.query_items(proxy=users_proxy,query=query)
 
-    if query_result:
-        logging.info("User found: {}".format(query_result))
-        user_to_update = query_result[0]
-        friend_request_list = user_to_update['friend_requests']
-        friend_list = user_to_update['friends']
-        new_friend = {"id": sender_id, "username": sender_username}
+        if query_result:
+            logging.info("User found: {}".format(query_result))
+            user_to_update = query_result[0]
+            friend_request_list = user_to_update['friend_requests']
+            friend_list = user_to_update['friends']
+            new_friend = {"id": sender_id, "username": sender_username}
 
-        # Check if that user already befriended:
-        if new_friend in friend_list:
-            response_body = json.dumps({"result": False, "msg": "Already friends!"})
-            return func.HttpResponse(body=response_body,mimetype="application/json")
-        elif new_friend not in friend_request_list:
-            response_body = json.dumps({"result": False, "msg": "Haven't sent friend request!"})
-            return func.HttpResponse(body=response_body,mimetype="application/json")
-        else:
-            # Add to the friend_list
-            new_friend_list = []
-            new_friend_list.append(new_friend)
+            # Check if that user already befriended:
+            if new_friend in friend_list:
+                response_body = json.dumps({"result": False, "msg": "Already friends!"})
+                return func.HttpResponse(body=response_body,mimetype="application/json")
+            elif new_friend not in friend_request_list:
+                response_body = json.dumps({"result": False, "msg": "Haven't sent friend request!"})
+                return func.HttpResponse(body=response_body,mimetype="application/json")
+            else:
+                # Add to the friend_list
+                new_friend_list = []
+                new_friend_list.append(new_friend)
 
-            # If the friend_list already has contents inside
-            if friend_list != []:
+                # If the friend_list already has contents inside
+                if friend_list != []:
 
-                for friend in friend_list:
-                    new_friend_list.append({"id": friend['id'], "username": friend['username']})
+                    for friend in friend_list:
+                        new_friend_list.append({"id": friend['id'], "username": friend['username']})
 
-            # Remove from friend_requests_list
-            new_friend_request_list = []
+                # Remove from friend_requests_list
+                new_friend_request_list = []
 
-            if friend_request_list != []:
-                for friend in friend_request_list:
-                    if friend != new_friend:
-                        new_friend_request_list.append({"id": friend['id'], "username": friend['username']})
+                if friend_request_list != []:
+                    for friend in friend_request_list:
+                        if friend != new_friend:
+                            new_friend_request_list.append({"id": friend['id'], "username": friend['username']})
 
-            # Modify the user via field names as keys:
-            user_to_update['friends'] = new_friend_list
-            user_to_update['friend_requests'] = new_friend_request_list
+                # Modify the user via field names as keys:
+                user_to_update['friends'] = new_friend_list
+                user_to_update['friend_requests'] = new_friend_request_list
 
-            # Save changes in database
-            users_proxy.replace_item(item=user_to_update['id'], body=user_to_update)
+                # Save changes in database
+                users_proxy.replace_item(item=user_to_update['id'], body=user_to_update)
 
-            logging.info("New state of user after ADDING friend: {}".format(user_to_update))
+                logging.info("New state of user after ADDING friend: {}".format(user_to_update))
 
-            # Send Response
-            response_body = json.dumps({"result": True, "msg": "OK"})
-            return func.HttpResponse(body=response_body,mimetype="application/json")
-    else:
+                # Send Response
+                response_body = json.dumps({"result": True, "msg": "OK"})
+                return func.HttpResponse(body=response_body,mimetype="application/json")
+            
+    except NoQueryError:
         # If the query result gives nothing
         response_body = json.dumps({"result": False, "msg": "Unable to add friend."})
         return func.HttpResponse(body=response_body,mimetype="application/json")
@@ -295,45 +312,46 @@ def user_friend_reject(req: func.HttpRequest) -> func.HttpResponse:
     sender_username = input['sender_username']
     recipient_id = input['recipient_id']
 
+    try:
     # Get the recipient based on id
-    query = 'SELECT * FROM users WHERE users.id = "{}"'.format(recipient_id)
-    query_result = list(users_proxy.query_items(query=query, enable_cross_partition_query=True))
+        query = 'SELECT * FROM users WHERE users.id = "{}"'.format(recipient_id)
+        query_result = utility.query_items(proxy=users_proxy,query=query)
 
-    if query_result:
-        logging.info("User found: {}".format(query_result))
-        user_to_update = query_result[0]
-        friend_request_list = user_to_update['friend_requests']
-        friend_list = user_to_update['friends']
-        new_friend = {"id": sender_id, "username": sender_username}
+        if query_result:
+            logging.info("User found: {}".format(query_result))
+            user_to_update = query_result[0]
+            friend_request_list = user_to_update['friend_requests']
+            friend_list = user_to_update['friends']
+            new_friend = {"id": sender_id, "username": sender_username}
 
-        # Check if that user already requested:
-        if new_friend in friend_list:
-            response_body = json.dumps({"result": False, "msg": "Already friends!"})
-            return func.HttpResponse(body=response_body,mimetype="application/json")
-        elif new_friend not in friend_request_list:
-            response_body = json.dumps({"result": False, "msg": "Haven't sent friend request!"})
-            return func.HttpResponse(body=response_body,mimetype="application/json")
-        else:
-            # Remove from friend_requests_list
-            new_friend_request_list = []
+            # Check if that user already requested:
+            if new_friend in friend_list:
+                response_body = json.dumps({"result": False, "msg": "Already friends!"})
+                return func.HttpResponse(body=response_body,mimetype="application/json")
+            elif new_friend not in friend_request_list:
+                response_body = json.dumps({"result": False, "msg": "Haven't sent friend request!"})
+                return func.HttpResponse(body=response_body,mimetype="application/json")
+            else:
+                # Remove from friend_requests_list
+                new_friend_request_list = []
 
-            if friend_request_list != []:
-                for friend in friend_request_list:
-                    if friend != new_friend:
-                        new_friend_request_list.append({"id": friend['id'], "username": friend['username']})
+                if friend_request_list != []:
+                    for friend in friend_request_list:
+                        if friend != new_friend:
+                            new_friend_request_list.append({"id": friend['id'], "username": friend['username']})
 
-            # Modify the user via field names as keys:
-            user_to_update['friend_requests'] = new_friend_request_list
+                # Modify the user via field names as keys:
+                user_to_update['friend_requests'] = new_friend_request_list
 
-            # Save changes in database
-            users_proxy.replace_item(item=user_to_update['id'], body=user_to_update)
+                # Save changes in database
+                users_proxy.replace_item(item=user_to_update['id'], body=user_to_update)
 
-            logging.info("New state of user after REJECTING friend request: {}".format(user_to_update))
+                logging.info("New state of user after REJECTING friend request: {}".format(user_to_update))
 
-            # Send Response
-            response_body = json.dumps({"result": True, "msg": "OK"})
-            return func.HttpResponse(body=response_body,mimetype="application/json")
-    else:
+                # Send Response
+                response_body = json.dumps({"result": True, "msg": "OK"})
+                return func.HttpResponse(body=response_body,mimetype="application/json")
+    except NoQueryError:
         # If the query result gives nothing
         response_body = json.dumps({"result": False, "msg": "Unable to remove friend request."})
         return func.HttpResponse(body=response_body,mimetype="application/json")
@@ -342,8 +360,8 @@ def user_friend_reject(req: func.HttpRequest) -> func.HttpResponse:
 @app.route(route="question/get/category", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
 def question_get_category(req: func.HttpRequest) -> func.HttpResponse:
     """
-    Returns a randomised set of questions by category
-    No_of_Qs: How many questions
+    Returns a randomised set of questions by category.
+    No_of_Qs: How many questions in total.
     {"No_of_Qs": int, "topic": "topic"}
     """
     input = req.get_json()  
@@ -352,59 +370,98 @@ def question_get_category(req: func.HttpRequest) -> func.HttpResponse:
     No_of_Qs = input['No_of_Qs']
     topic = input['topic']
 
-    # Get the questions by category
-    query = 'SELECT * FROM questions WHERE questions.topic = "{}"'.format(topic)
-    query_result = list(questions_proxy.query_items(query=query, enable_cross_partition_query=True))
-
-    if query_result:
-        # Create the question bank, with randomised questions.
-        random_Qs = random.sample(query_result,No_of_Qs)
+    try:
+        # Create the TOPIC question bank, with randomised questions.
+        random_Qs = utility.get_random_questions_topic(proxy=questions_proxy, topic=topic,No_of_Qs=No_of_Qs)
         quiz_Qs = []
+        
         for q in random_Qs:
-            quiz_Q = question(q['questions'], q['topic'], q['correct_answers'], q['incorrect_answers'])
+            quiz_Q = question(q['questions'], q['topic'], q['image'], q['correct_answers'], q['incorrect_answers'])
             quiz_Qs.append(quiz_Q.to_dict())
 
-        logging.info("Quiz Bank for the '{0}' topic created! First 3 Qs: {1}".format(topic, quiz_Qs[:3]))
-
+        logging.info("'{0}' topic quiz Bank of {1} questions created! First Question: {2}".format(topic, len(quiz_Qs), quiz_Qs[0]))
         # Send Response
         response_body = json.dumps({"result": True, "msg": quiz_Qs})
         return func.HttpResponse(body=response_body,mimetype="application/json")
-    else:
+        
+    except NoQueryError:
         # If the query result gives nothing
         response_body = json.dumps({"result": False, "msg": "Unable to get questions."})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+    except ElementSizeError as e:
+        # If the random.sample method fails
+        response_body = json.dumps({"result": False, "msg": e})
         return func.HttpResponse(body=response_body,mimetype="application/json")
 
 
 @app.route(route="question/get/all", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
 def question_get_all(req: func.HttpRequest) -> func.HttpResponse:
     """
-    Returns a randomised set of questions by all categories
-    No_of_Qs: How many questions
-    {"No_of_Qs": int}
+    Returns a randomised set of questions by all categories, you can define the amount by percentage of each category you want.
+    The percentage is to what to reccommend to the user depending on their recent quiz performances, handled by the ML model.
+    (i.e. Higher percentages means the user performed more poorly on that specific topic)
+    No_of_Qs: How many questions in total.
+    ML model returns result
+    {"No_of_Qs": int, "topic_percentages":  {
+                                                "Driving Off": 0.14,
+                                                "Urban Driving": 0.15,
+                                                "Rural Driving": 0.12,
+                                                "Bigger Roads": 0.10,
+                                                "Motorways": 0.18,
+                                                "Tricky Conditions": 0.16,
+                                                "Breakdowns": 0.15,
+                                            }
+                                        }
+    OR No ML model result was used
+    {"No_of_Qs": int, "topic_percentages": "n/a"}
     """
     input = req.get_json()  
     logging.info('Python HTTP trigger function processed a QUESTION_GET_ALL request.')
 
     No_of_Qs = input['No_of_Qs']
+    topics = input['topic_percentages']
 
-    # Get the questions by category
-    query = 'SELECT * FROM questions'
-    query_result = list(questions_proxy.query_items(query=query, enable_cross_partition_query=True))
+    try:
+        if topics == "n/a":
+            # Create the question bank, with randomised questions.
+            random_Qs = utility.get_random_questions(proxy=questions_proxy,No_of_Qs=No_of_Qs)
 
-    if query_result:
-        # Create the question bank, with randomised questions.
-        random_Qs = random.sample(query_result,No_of_Qs)
-        quiz_Qs = []
-        for q in random_Qs:
-            quiz_Q = question(q['questions'], q['topic'], q['correct_answers'], q['incorrect_answers'])
-            quiz_Qs.append(quiz_Q.to_dict())
+            quiz_Qs = []
+            for q in random_Qs:
+                quiz_Q = question(q['questions'], q['topic'], q['image'], q['correct_answers'], q['incorrect_answers'])
+                quiz_Qs.append(quiz_Q.to_dict())
 
-        logging.info("Quiz Bank created! First 3 Qs: {}".format(quiz_Qs[:3]))
+            logging.info("Quiz Bank of {} questions created! First Question: {}".format(len(quiz_Qs), quiz_Qs[0]))
+            # Send Response
+            response_body = json.dumps({"result": True, "msg": quiz_Qs})
+            return func.HttpResponse(body=response_body,mimetype="application/json")
+        else:
+            Qs = []
+            Qs.extend(utility.get_topic_training_questions(proxy=questions_proxy,topic="Driving Off",percentage=topics['Driving Off'],No_of_Qs=No_of_Qs))
+            Qs.extend(utility.get_topic_training_questions(proxy=questions_proxy,topic="Urban Driving",percentage=topics['Urban Driving'],No_of_Qs=No_of_Qs))
+            Qs.extend(utility.get_topic_training_questions(proxy=questions_proxy,topic="Rural Driving",percentage=topics['Rural Driving'],No_of_Qs=No_of_Qs))
+            Qs.extend(utility.get_topic_training_questions(proxy=questions_proxy,topic="Bigger Roads",percentage=topics['Bigger Roads'],No_of_Qs=No_of_Qs))
+            Qs.extend(utility.get_topic_training_questions(proxy=questions_proxy,topic="Motorways",percentage=topics['Motorways'],No_of_Qs=No_of_Qs))
+            Qs.extend(utility.get_topic_training_questions(proxy=questions_proxy,topic="Tricky Conditions",percentage=topics['Tricky Conditions'],No_of_Qs=No_of_Qs))
+            Qs.extend(utility.get_topic_training_questions(proxy=questions_proxy,topic="Breakdowns",percentage=topics['Breakdowns'],No_of_Qs=No_of_Qs))
 
-        # Send Response
-        response_body = json.dumps({"result": True, "msg": quiz_Qs})
-        return func.HttpResponse(body=response_body,mimetype="application/json")
-    else:
+            random_Qs = utility.select_random(Qs, len(Qs))
+            quiz_Qs = []
+            for q in random_Qs:
+                quiz_Q = question(q['questions'], q['topic'], q['image'], q['correct_answers'], q['incorrect_answers'])
+                quiz_Qs.append(quiz_Q.to_dict())
+
+            logging.info("Quiz Bank of {} questions created! First Question: {}".format(len(quiz_Qs), quiz_Qs[0]))
+
+            # Send Response
+            response_body = json.dumps({"result": True, "msg": quiz_Qs})
+            return func.HttpResponse(body=response_body,mimetype="application/json")
+        
+    except NoQueryError:
         # If the query result gives nothing
         response_body = json.dumps({"result": False, "msg": "Unable to get questions."})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+    except ElementSizeError as e:
+        # If the random.sample method fails
+        response_body = json.dumps({"result": False, "msg": e})
         return func.HttpResponse(body=response_body,mimetype="application/json")

@@ -65,7 +65,7 @@ class test_user_friend_request(unittest.TestCase):
         self.assertEqual(dict_response['msg'],'OK')
 
         # Check if friend request was added:
-        sender = self.users_proxy.read_item(item="user_id_1",partition_key="user_id_1")
+        sender = self.users_proxy.read_item(item="user_id_2",partition_key="user_id_2")
         friend_request = sender['friend_requests']
         recipient = friend_request[0]
         self.assertEqual({'id': 'user_id_4', 'username': 'lesacafe'}, recipient)

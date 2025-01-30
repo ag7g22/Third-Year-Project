@@ -25,54 +25,117 @@ class test_question_get_category(unittest.TestCase):
     # @unittest.skip       
     def setUp(self):
         # Dummy questions
-        for i in range(1,11):
-            self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Setting Off",
+        for i in range(1,8):
+            self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Driving Off",
+                                                    "image": "n/a",
                                                     "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
                                                     "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
                                                                           "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
                                               })
+            
+        for i in range(8,11):
+            self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Driving Off",
+                                                    "image": "image.jpg",
+                                                    "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
+                                                    "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
+                                                                            "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
+                                                })
 
-        for i in range(1,11):
-            self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["CSq{}a".format(i), "CSq{}b".format(i), "CSq{}c".format(i), "CSq{}d".format(i)], "topic": "City Streets",
+        for i in range(1,8):
+            self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Urban Driving",
+                                                    "image": "n/a",
                                                     "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
                                                     "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
                                                                           "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
                                               })
+            
+        for i in range(8,11):
+            self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Urban Driving",
+                                                    "image": "image.jpg",
+                                                    "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
+                                                    "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
+                                                                            "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
+                                                })
 
-        for i in range(1,11):
-            self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SRq{}a".format(i), "SRq{}b".format(i), "SRq{}c".format(i), "SRq{}d".format(i)], "topic": "Scenic Routes",
+        for i in range(1,8):
+            self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Rural Driving",
+                                                    "image": "n/a",
                                                     "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
                                                     "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
                                                                           "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
                                               })
+            
+        for i in range(8,11):
+            self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Rural Driving",
+                                                    "image": "image.jpg",
+                                                    "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
+                                                    "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
+                                                                            "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
+                                                })
 
-        for i in range(1,11):
-            self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["BRq{}a".format(i), "BRq{}b".format(i), "BRq{}c".format(i), "BRq{}d".format(i)], "topic": "Bigger Roads",
+        for i in range(1,8):
+            self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Bigger Roads",
+                                                    "image": "n/a",
                                                     "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
                                                     "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
                                                                           "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
                                               })
+            
+        for i in range(8,11):
+            self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Bigger Roads",
+                                                    "image": "image.jpg",
+                                                    "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
+                                                    "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
+                                                                            "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
+                                                })
 
-        for i in range(1,11):
-            self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["Mq{}a".format(i), "Mq{}b".format(i), "Mq{}c".format(i), "Mq{}d".format(i)], "topic": "Motorways",
+        for i in range(1,8):
+            self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Motorways",
+                                                    "image": "n/a",
                                                     "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
                                                     "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
                                                                           "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
                                               })
+            
+        for i in range(8,11):
+            self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Motorways",
+                                                    "image": "image.jpg",
+                                                    "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
+                                                    "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
+                                                                            "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
+                                                })
 
-        for i in range(1,11):
-            self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["TCq{}a".format(i), "TCq{}b".format(i), "TCq{}c".format(i), "TCq{}d".format(i)], "topic": "Tricky Conditions",
+        for i in range(1,8):
+            self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Tricky Conditions",
+                                                    "image": "n/a",
                                                     "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
                                                     "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
                                                                           "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
                                               })
+            
+        for i in range(8,11):
+            self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Tricky Conditions",
+                                                    "image": "image.jpg",
+                                                    "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
+                                                    "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
+                                                                            "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
+                                                })
 
-        for i in range(1,11):
-            self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["Bq{}a".format(i), "Bq{}b".format(i), "Bq{}c".format(i), "Bq{}d".format(i)], "topic": "Breakdowns",
+        for i in range(1,8):
+            self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Breakdowns",
+                                                    "image": "n/a",
                                                     "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
                                                     "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
                                                                           "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
                                               })
+            
+        for i in range(8,11):
+            self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Breakdowns",
+                                                    "image": "image.jpg",
+                                                    "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
+                                                    "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
+                                                                            "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
+                                                })
 
     # tearDown method executed before each test
     # @unittest.skip
@@ -82,9 +145,23 @@ class test_question_get_category(unittest.TestCase):
             self.questions_proxy.delete_item(item=doc,partition_key=doc['id'])
 
 
-    def test_questions_get_category(self):
+    def test_questions_get_category_1(self):
         # Send a request to register same user. (Input is a dictionary)
-        request = {"No_of_Qs": 5, "topic": "Setting Off"}
+        request = {"No_of_Qs": 5, "topic": "Driving Off"}
+        response = requests.post(self.TEST_URL,params={"code": self.FUNCTION_KEY},json=request)
+
+        # Get json response, check the response code for brevity
+        self.assertEqual(200,response.status_code)
+        dict_response = response.json()     
+
+        # Check if you actually got randomised questions.
+        print(dict_response['msg'])
+        self.assertTrue(dict_response['result'])
+
+
+    def test_questions_get_category_2(self):
+        # Send a request to register same user. (Input is a dictionary)
+        request = {"No_of_Qs": 7, "topic": "Breakdowns"}
         response = requests.post(self.TEST_URL,params={"code": self.FUNCTION_KEY},json=request)
 
         # Get json response, check the response code for brevity
