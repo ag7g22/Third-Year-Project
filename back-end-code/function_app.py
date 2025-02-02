@@ -9,11 +9,11 @@ from shared_code.user import user, UniqueUserError, InvalidUserError, InvalidPas
 from shared_code.question import question
 from shared_code.utility import utility, NoQueryError, ElementSizeError
 from shared_code.open_ai import open_ai, ResponseError
+from shared_code.evaluator import evaluator
 
 # Azure imports
 import azure.functions as func
 from azure.cosmos import CosmosClient
-from azure.core.credentials import AzureKeyCredential
 from openai import AzureOpenAI
 
 app = func.FunctionApp()
@@ -29,7 +29,7 @@ openai_proxy = AzureOpenAI(api_key=os.environ['OAIKey'], api_version="2024-02-01
 
 utility = utility()
 oai = open_ai()
-
+ml_model = evaluator()
 
 # Cosmos decorator for registering a new player.
 @app.cosmos_db_output(  arg_name="usercontainerbinding",
@@ -323,7 +323,7 @@ def user_friend_reject(req: func.HttpRequest) -> func.HttpResponse:
     recipient_id = input['recipient_id']
 
     try:
-    # Get the recipient based on id
+        # Get the recipient based on id
         query = 'SELECT * FROM users WHERE users.id = "{}"'.format(recipient_id)
         query_result = utility.query_items(proxy=users_proxy,query=query)
 
@@ -404,35 +404,26 @@ def question_get_category(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(body=response_body,mimetype="application/json")
 
 
-@app.route(route="question/get/all", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
-def question_get_all(req: func.HttpRequest) -> func.HttpResponse:
+@app.route(route="question/get/quiz", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
+def question_get_quiz(req: func.HttpRequest) -> func.HttpResponse:
     """
     Returns a randomised set of questions by all categories, you can define the amount by percentage of each category you want.
     The percentage is to what to reccommend to the user depending on their recent quiz performances, handled by the ML model.
     (i.e. Higher percentages means the user performed more poorly on that specific topic)
     No_of_Qs: How many questions in total.
     ML model returns result
-    {"No_of_Qs": int, "topic_percentages":  {
-                                                "Driving Off": 0.14,
-                                                "Urban Driving": 0.15,
-                                                "Rural Driving": 0.12,
-                                                "Bigger Roads": 0.10,
-                                                "Motorways": 0.18,
-                                                "Tricky Conditions": 0.16,
-                                                "Breakdowns": 0.15,
-                                            }
-                                        }
+    {"No_of_Qs": int, "username": "username"}
     OR No ML model result was used
-    {"No_of_Qs": int, "topic_percentages": "n/a"}
+    {"No_of_Qs": int, "username": "n/a"}
     """
     input = req.get_json()  
     logging.info('Python HTTP trigger function processed a QUESTION_GET_ALL request.')
 
     No_of_Qs = input['No_of_Qs']
-    topics = input['topic_percentages']
+    username = input['username']
 
     try:
-        if topics == "n/a":
+        if username == "n/a":
             # Create the question bank, with randomised questions.
             random_Qs = utility.get_random_questions(proxy=questions_proxy,No_of_Qs=No_of_Qs)
 
@@ -446,14 +437,27 @@ def question_get_all(req: func.HttpRequest) -> func.HttpResponse:
             response_body = json.dumps({"result": True, "msg": quiz_Qs})
             return func.HttpResponse(body=response_body,mimetype="application/json")
         else:
+
+            # Get the user based on the username
+            query = 'SELECT * FROM users WHERE users.username = "{}"'.format(username)
+            query_result = utility.query_items(proxy=users_proxy,query=query)
+
+            user = query_result[0]
+            recent_category_scores = {'recent_category_scores': user['recent_category_scores'] }
+            logging.info(recent_category_scores)
+
+            # Run the ml model to get the suggested distribution of topics in this quiz.
+            topics = ml_model.get_predicted_scores(recent_category_scores=recent_category_scores)
+            logging.info('Ratios of topics: {}'.format(topics))
+
             Qs = []
-            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Driving Off",No_of_Qs=math.ceil(No_of_Qs * topics['Driving Off'])))
-            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Urban Driving",No_of_Qs=math.ceil(No_of_Qs * topics['Urban Driving'])))
-            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Rural Driving",No_of_Qs=math.ceil(No_of_Qs * topics['Rural Driving'])))
-            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Bigger Roads",No_of_Qs=math.ceil(No_of_Qs * topics['Bigger Roads'])))
-            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Motorways",No_of_Qs=math.ceil(No_of_Qs * topics['Motorways'])))
-            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Tricky Conditions",No_of_Qs=math.ceil(No_of_Qs * topics['Tricky Conditions'])))
-            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Breakdowns",No_of_Qs=math.ceil(No_of_Qs * topics['Breakdowns'])))
+            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Driving Off",No_of_Qs=math.floor(No_of_Qs * topics['Driving Off'])))
+            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Urban Driving",No_of_Qs=math.floor(No_of_Qs * topics['Urban Driving'])))
+            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Rural Driving",No_of_Qs=math.floor(No_of_Qs * topics['Rural Driving'])))
+            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Bigger Roads",No_of_Qs=math.floor(No_of_Qs * topics['Bigger Roads'])))
+            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Motorways",No_of_Qs=math.floor(No_of_Qs * topics['Motorways'])))
+            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Tricky Conditions",No_of_Qs=math.floor(No_of_Qs * topics['Tricky Conditions'])))
+            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Breakdowns",No_of_Qs=math.floor(No_of_Qs * topics['Breakdowns'])))
 
             random_Qs = utility.select_random(Qs, len(Qs))
             quiz_Qs = []
