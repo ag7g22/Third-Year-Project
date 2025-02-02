@@ -3,7 +3,7 @@ import requests
 import json
 from azure.cosmos import CosmosClient
 
-class test_player_register(unittest.TestCase):
+class test_user_register(unittest.TestCase):
     """
     This test set focuses on testing the responses from the server on the user_register function.
     """

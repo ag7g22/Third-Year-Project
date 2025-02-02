@@ -7,13 +7,14 @@ import os
 # shared_code folder imports
 from shared_code.user import user, UniqueUserError, InvalidUserError, InvalidPasswordError
 from shared_code.question import question
-from shared_code.utility import utility, NoQueryError, ElementSizeError
+from shared_code.utility import utility, NoQueryError, ElementSizeError, InvalidStreakError, InvalidScoreError, BadPasswordError, BadUserError, ExistentUserError
 from shared_code.open_ai import open_ai, ResponseError
 from shared_code.evaluator import evaluator
 
 # Azure imports
 import azure.functions as func
 from azure.cosmos import CosmosClient
+from azure.cosmos.exceptions import CosmosResourceNotFoundError
 from openai import AzureOpenAI
 
 app = func.FunctionApp()
@@ -140,6 +141,101 @@ def user_search(req: func.HttpRequest) -> func.HttpResponse:
     except NoQueryError:
         # If the query result gives nothing
         response_body = json.dumps({"result": False, "msg": "Unable to retrieve users"})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+
+
+@app.route(route="user/get/info", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
+def user_get_info(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Returns a user's profile info.
+    { "id": "id" }
+    """
+    input = req.get_json()
+    logging.info('Python HTTP trigger function processed a USER_GET_INFO request.')
+
+    # Retrieve the user with the corrosponding id:
+    id = input['id']
+
+    try:
+        query = 'SELECT * FROM users WHERE users.id = "{}"'.format(id)
+        query_result = utility.query_items(proxy=users_proxy,query=query)
+
+        if query_result:
+            # Retrieve the user's info
+            user = query_result[0]
+            info = { "id": user['id'], "username": user['username'], "streak": user['streak'], "daily_training_score": user['daily_training_score'] }
+            logging.info('User info extracted: {}'.format(info))
+
+            # Send Response
+            response_body = json.dumps({"result": True, "msg": info})
+            return func.HttpResponse(body=response_body,mimetype="application/json")
+        
+    # Handle error if theres no result returned (i.e. query_result = [])
+    except NoQueryError:
+        # If the query result gives nothing
+        response_body = json.dumps({"result": False, "msg": "Unable to retrieve user."})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+
+@app.route(route="user/update/info", methods=[func.HttpMethod.PUT], auth_level=func.AuthLevel.FUNCTION)
+def user_update_info(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Updates a user's profile info with the given info, can be flexible as long as they're matching keys
+    { 'id': 'id', 'updates': {
+            'username': 'AntWazHere',
+            'password': 'IFrigginLoveTricia',
+            ...
+        }
+    }
+    {'id': 'user_id_1', 'username': 'antoni_gn', 'password': 'ILoveTricia', 'streak': 1, 'daily_training_score': 100}
+    """
+    input = req.get_json()
+    logging.info('Python HTTP trigger function processed a USER_UPDATE_INFO request.')
+
+    # Retrieve the user with the corrosponding id:
+    id = input['id']
+    updates = input['updates']
+
+    try:
+        utility.update_user(proxy=users_proxy,id=id,info=updates)
+
+        # Send Response
+        response_body = json.dumps({"result": True, "msg": "OK"})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+        
+    # Handle error if the update is invalid.
+    except NoQueryError as e:
+        logging.info("FAILURE: {}".format(e))
+        response_body = json.dumps({"result": False, "msg": "Unable to retrieve user."})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+    
+    except CosmosResourceNotFoundError:
+        logging.info("FAILURE: Entity with the specified id does not exist in the system.")
+        response_body = json.dumps({"result": False, "msg": "Unable to retrieve user."})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+    
+    except ExistentUserError as e:
+        logging.info("FAILURE: {}".format(e))
+        response_body = json.dumps({"result": False, "msg": "Username already exists"})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+    
+    except BadUserError as e:
+        logging.info("FAILURE: {}".format(e))
+        response_body = json.dumps({"result": False, "msg": "Username less than 5 characters or more than 15 characters"})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+    
+    except BadPasswordError as e:
+        logging.info("FAILURE: {}".format(e))
+        response_body = json.dumps({"result": False, "msg": "Password less than 8 characters or more than 15 characters"})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+    
+    except InvalidStreakError as e:
+        logging.info("FAILURE: {}".format(e))
+        response_body = json.dumps({"result": False, "msg": "Invalid streak value."})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+    
+    except InvalidScoreError as e:
+        logging.info("FAILURE: {}".format(e))
+        response_body = json.dumps({"result": False, "msg": "Invalid daily_training_score value."})
         return func.HttpResponse(body=response_body,mimetype="application/json")
 
 

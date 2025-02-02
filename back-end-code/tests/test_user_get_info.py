@@ -3,13 +3,13 @@ import requests
 import json
 from azure.cosmos import CosmosClient
 
-class test_user_login(unittest.TestCase):
+class test_user_get_info(unittest.TestCase):
     """
-    This test set focuses on testing the responses from the server on the user_login function.
+    This test set focuses on testing the responses from the server on the user_get_info function.
     """
     # URLS to test on
-    LOCAL_DEV_URL = "http://localhost:7071/user/login"
-    PUBLIC_URL = "https://driving-theory.azurewebsites.net/user/login"
+    LOCAL_DEV_URL = "http://localhost:7071/user/get/info"
+    PUBLIC_URL = "https://driving-theory.azurewebsites.net/user/get/info"
     TEST_URL = LOCAL_DEV_URL
 
     # Configure the Proxy objects from the local.settings.json file.
@@ -30,10 +30,9 @@ class test_user_login(unittest.TestCase):
         for doc in self.users_proxy.read_all_items():
             self.users_proxy.delete_item(item=doc,partition_key=doc['id'])
 
-    
-    def test_successful_login(self):
+    def test_successful_info(self):
         # Try a login with correct credentials
-        dict_login = {"username": "antoni_gn", "password": "ILoveTricia"}
+        dict_login = {"id": "user_id_1"}
         response = requests.post(self.TEST_URL,params={"code": self.FUNCTION_KEY},json=dict_login)
 
         # Get json response, check the response code for brevity
@@ -42,12 +41,12 @@ class test_user_login(unittest.TestCase):
 
         # Check if you got the OK response for successful login.
         self.assertTrue(dict_response['result'])
-        self.assertEqual(dict_response['msg'],'OK')
+        self.assertEqual(dict_response['msg'],{'id': 'user_id_1', 'username': 'antoni_gn', 'streak': 0, 'daily_training_score': 0})
 
 
-    def test_wrong_username(self):
+    def test_nonexistent_user(self):
         # Try a login with incorrect username
-        dict_login = {"username": "lesacafe", "password": "ILoveTricia"}
+        dict_login = {"id": "user_id_2"}
         response = requests.post(self.TEST_URL,params={"code": self.FUNCTION_KEY},json=dict_login)
 
         # Get json response, check the response code for brevity
@@ -56,18 +55,4 @@ class test_user_login(unittest.TestCase):
 
         # Check if you got the error response for failed login.
         self.assertFalse(dict_response['result'])
-        self.assertEqual(dict_response['msg'],'Username or password incorrect')
-
-
-    def test_wrong_password(self):
-        # Try a login with incorrect password
-        dict_login = {"username": "antoni_gn", "password": "ILoveTrisha"}
-        response = requests.post(self.TEST_URL,params={"code": self.FUNCTION_KEY},json=dict_login)
-
-        # Get json response, check the response code for brevity
-        self.assertEqual(200,response.status_code)
-        dict_response = response.json()   
-
-        # Check if you got the error response for failed login.
-        self.assertFalse(dict_response['result'])
-        self.assertEqual(dict_response['msg'],'Username or password incorrect')
+        self.assertEqual(dict_response['msg'],'Unable to retrieve user.')

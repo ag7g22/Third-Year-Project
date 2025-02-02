@@ -140,7 +140,15 @@ class test_question_get_quiz(unittest.TestCase):
             
         self.users_proxy.create_item({'id': 'user_id_1', 'username': 'antoni_gn', 'password': 'ILoveTricia',
                                 'friends': [], 'friend_requests': [], 'streak': 0, 'daily_training_score': 0,
-                                'recent_category_scores': {'Driving Off': [0.29, 0.07, 0.94, 0.66, 0.11], 'Urban Driving': [0.03, 0.86, 0.28, 0.13, 0.73], 'Rural Driving': [0.81, 0.76, 0.57, 0.43, 0.1], 'Bigger Roads': [0.88, 0.82, 0.38, 0.4, 0.14], 'Motorways': [0.52, 0.98, 0.79, 0.45, 0.8], 'Tricky Conditions': [0.8, 0.01, 0.22, 0.68, 0.54], 'Breakdowns': [0.99, 0.09, 0.21, 0.77, 0.7]}
+                                'recent_category_scores': 
+                                    {
+                                        'Driving Off': [0.29, 0.07, 0.94, 0.66, 0.11], 
+                                        'Urban Driving': [0.03, 0.86, 0.28, 0.13, 0.73], 
+                                        'Rural Driving': [0.81, 0.76, 0.57, 0.43, 0.1], 
+                                        'Bigger Roads': [0.88, 0.82, 0.38, 0.4, 0.14], 
+                                        'Motorways': [0.52, 0.98, 0.79, 0.45, 0.8],
+                                        'Tricky Conditions': [0.8, 0.01, 0.22, 0.68, 0.54],
+                                        'Breakdowns': [0.99, 0.09, 0.21, 0.77, 0.7]}
                                })
 
     # tearDown method executed before each test
