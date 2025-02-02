@@ -57,9 +57,14 @@ class user():
         Function return player info as a dictionary.
         """
         dict_representation = {'id': self.id, 'username': self.username, 'password': self.password,
-                               'streak': 0, 'friends': [], 'friend_requests': [], 'daily_training_score': 0,
+                               'friends': [], 'friend_requests': [], 'streak': 0, 'daily_training_score': 0,
                                'recent_category_scores': {
-                                   'category_1': [],
-                                   'category_2': []
+                                    "Driving Off": [],
+                                    "Urban Driving": [],
+                                    "Rural Driving": [],
+                                    "Bigger Roads": [],
+                                    "Motorways": [],
+                                    "Tricky Conditions": [],
+                                    "Breakdowns": [],
                                }}
         return dict_representation

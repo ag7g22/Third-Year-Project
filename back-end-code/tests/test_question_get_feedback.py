@@ -1,5 +1,4 @@
 import unittest
-import uuid
 import requests
 import json
 from azure.cosmos import CosmosClient

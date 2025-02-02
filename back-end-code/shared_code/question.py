@@ -1,6 +1,3 @@
-import uuid
-import random
-from azure.cosmos import ContainerProxy
 from shared_code.utility import utility
 
 class question():

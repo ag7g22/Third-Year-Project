@@ -1,4 +1,3 @@
-import math
 import random
 from azure.cosmos import ContainerProxy
 
