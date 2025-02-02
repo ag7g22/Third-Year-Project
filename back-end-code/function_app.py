@@ -8,18 +8,28 @@ import os
 from shared_code.user import user, UniqueUserError, InvalidUserError, InvalidPasswordError
 from shared_code.question import question
 from shared_code.utility import utility, NoQueryError, ElementSizeError
+from shared_code.open_ai import open_ai, ResponseError
 
 # Azure imports
 import azure.functions as func
 from azure.cosmos import CosmosClient
+from azure.core.credentials import AzureKeyCredential
+from openai import AzureOpenAI
 
 app = func.FunctionApp()
-utility = utility()
 
 cosmos = CosmosClient.from_connection_string(os.environ['AzureCosmosDBConnectionString'])
 db_proxy = cosmos.get_database_client(os.environ['DatabaseName'])
 users_proxy = db_proxy.get_container_client(os.environ['UserContainerName'])
 questions_proxy = db_proxy.get_container_client(os.environ['QuestionContainerName'])
+openai_proxy = AzureOpenAI(api_key=os.environ['OAIKey'], api_version="2024-02-01",
+                        azure_endpoint=os.environ['OAIEndpoint'],
+                        azure_deployment="gpt-35-turbo"
+                        )
+
+utility = utility()
+oai = open_ai()
+
 
 # Cosmos decorator for registering a new player.
 @app.cosmos_db_output(  arg_name="usercontainerbinding",
@@ -464,4 +474,34 @@ def question_get_all(req: func.HttpRequest) -> func.HttpResponse:
     except ElementSizeError:
         # If the random.sample method fails
         response_body = json.dumps({"result": False, "msg": "num_elements cannot be greater than the length of the list"})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+    
+
+@app.route(route="question/get/feedback", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
+def question_get_feedback(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Returns AI generated responses to give specific feedback about incorrect answers from a quiz.
+    { "incorrect_answers": [
+                                { 
+                                    "question": "What does a Yield sign indicate to a driver?",
+                                    "correct_ans": "You must slow down and give the right-of-way to other vehicles or pedestrians."
+                                    "incorrect_ans": "You must come to a complete stop before proceeding."  
+                                }, ...
+                            ] 
+    }
+    """
+    input = req.get_json()  
+    logging.info('Python HTTP trigger function processed a QUESTION_GET_FEEDBACK request.')
+
+    incorrect_answers = input['incorrect_answers']
+
+    try:
+        feedback = oai.evaluate_wrong_answers(ai_proxy=openai_proxy,incorrect_answers=incorrect_answers)
+        logging.info("SUCCESS: generated feedback!")
+        response_body = json.dumps({"result": True, "msg": feedback})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+
+    except ResponseError:
+        logging.info("FAILURE: Cannot generate feedback.")
+        response_body = json.dumps({"result": False, "msg": "Cannot generate feedback." })
         return func.HttpResponse(body=response_body,mimetype="application/json")
