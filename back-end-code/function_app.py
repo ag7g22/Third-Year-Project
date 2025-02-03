@@ -7,7 +7,7 @@ import os
 # shared_code folder imports
 from shared_code.user import user, UniqueUserError, InvalidUserError, InvalidPasswordError
 from shared_code.question import question
-from shared_code.utility import utility, NoQueryError, ElementSizeError, InvalidStreakError, InvalidScoreError
+from shared_code.utility import utility, NoQueryError, ElementSizeError, InvalidStreakError, InvalidScoreError, InvalidRCSError
 from shared_code.open_ai import open_ai, ResponseError
 from shared_code.evaluator import evaluator
 
@@ -76,7 +76,6 @@ def user_register(req: func.HttpRequest, usercontainerbinding: func.Out[func.Doc
         return func.HttpResponse(body=response_body,mimetype="application/json")
 
 
-
 @app.route(route="user/login", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
 def user_login(req: func.HttpRequest) -> func.HttpResponse:
     """
@@ -104,7 +103,6 @@ def user_login(req: func.HttpRequest) -> func.HttpResponse:
         logging.info("FAILURE: Username or password incorrect")
         response_body = json.dumps({"result": False, "msg": "Username or password incorrect"})
         return func.HttpResponse(body=response_body,mimetype="application/json")       
-
 
 
 @app.route(route="user/search", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
@@ -176,6 +174,7 @@ def user_get_info(req: func.HttpRequest) -> func.HttpResponse:
         response_body = json.dumps({"result": False, "msg": "Unable to retrieve user."})
         return func.HttpResponse(body=response_body,mimetype="application/json")
 
+
 @app.route(route="user/update/info", methods=[func.HttpMethod.PUT], auth_level=func.AuthLevel.FUNCTION)
 def user_update_info(req: func.HttpRequest) -> func.HttpResponse:
     """
@@ -237,6 +236,46 @@ def user_update_info(req: func.HttpRequest) -> func.HttpResponse:
         logging.info("FAILURE: {}".format(e))
         response_body = json.dumps({"result": False, "msg": "Invalid daily_training_score value."})
         return func.HttpResponse(body=response_body,mimetype="application/json")
+
+
+@app.route(route="user/update/scores", methods=[func.HttpMethod.PUT], auth_level=func.AuthLevel.FUNCTION)
+def user_update_scores(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    This updates the recent_category_scores attribute for a given user.
+    { 'id': 'id', 'updates': {
+            "Driving Off": 0.65,
+            "Urban Driving": 0.57, ...
+        }
+    }
+    """
+    input = req.get_json()
+    logging.info('Python HTTP trigger function processed a USER_UPDATE_SCORES request.')
+
+    id = input['id']
+    updates = input['updates']
+    logging.info('Updates: {}'.format(updates))
+
+    try:
+        utility.update_scores(proxy=users_proxy,id=id,scores=updates)
+        # Send Response
+        response_body = json.dumps({"result": True, "msg": "OK"})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+
+    except NoQueryError:
+        # If the query result gives nothing
+        response_body = json.dumps({"result": False, "msg": "Unable to find user."})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+    
+    except CosmosResourceNotFoundError:
+        logging.info("FAILURE: Entity with the specified id does not exist in the system.")
+        response_body = json.dumps({"result": False, "msg": "Unable to retrieve user."})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+    
+    except InvalidRCSError:
+        logging.info("FAILURE: Score not between 0 and 1.")
+        response_body = json.dumps({"result": False, "msg": "Score not between 0 and 1."})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+
 
 
 @app.route(route="user/friend/all", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
@@ -504,7 +543,7 @@ def question_get_category(req: func.HttpRequest) -> func.HttpResponse:
 def question_get_quiz(req: func.HttpRequest) -> func.HttpResponse:
     """
     Returns a randomised set of questions by all categories, you can define the amount by percentage of each category you want.
-    The percentage is to what to reccommend to the user depending on their recent quiz performances, handled by the ML model.
+    The percentage is to what to reccommend to the user depending on their recent quiz performances in recent_category_scores, handled by the ML model.
     (i.e. Higher percentages means the user performed more poorly on that specific topic)
     No_of_Qs: How many questions in total.
     ML model returns result
@@ -519,7 +558,17 @@ def question_get_quiz(req: func.HttpRequest) -> func.HttpResponse:
     username = input['username']
 
     try:
-        if username == "n/a":
+        # Get the user based on the username
+        query = 'SELECT * FROM users WHERE users.username = "{}"'.format(username)
+        query_result = utility.query_items(proxy=users_proxy,query=query)
+
+        user = query_result[0]
+        recent_category_scores = {'recent_category_scores': user['recent_category_scores'] }
+        logging.info(recent_category_scores)
+        result = not utility.check_score_lists(user['recent_category_scores'])
+        logging.info(result)
+
+        if username == "n/a" or not utility.check_score_lists(user['recent_category_scores']):
             # Create the question bank, with randomised questions.
             random_Qs = utility.get_random_questions(proxy=questions_proxy,No_of_Qs=No_of_Qs)
 
@@ -533,15 +582,6 @@ def question_get_quiz(req: func.HttpRequest) -> func.HttpResponse:
             response_body = json.dumps({"result": True, "msg": quiz_Qs})
             return func.HttpResponse(body=response_body,mimetype="application/json")
         else:
-
-            # Get the user based on the username
-            query = 'SELECT * FROM users WHERE users.username = "{}"'.format(username)
-            query_result = utility.query_items(proxy=users_proxy,query=query)
-
-            user = query_result[0]
-            recent_category_scores = {'recent_category_scores': user['recent_category_scores'] }
-            logging.info(recent_category_scores)
-
             # Run the ml model to get the suggested distribution of topics in this quiz.
             topics = ml_model.get_predicted_scores(recent_category_scores=recent_category_scores)
             logging.info('Ratios of topics: {}'.format(topics))

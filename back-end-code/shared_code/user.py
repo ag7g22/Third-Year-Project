@@ -65,6 +65,6 @@ class user():
                                     "Bigger Roads": [],
                                     "Motorways": [],
                                     "Tricky Conditions": [],
-                                    "Breakdowns": [],
+                                    "Breakdowns": []
                                }}
         return dict_representation

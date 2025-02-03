@@ -150,6 +150,32 @@ class test_question_get_quiz(unittest.TestCase):
                                         'Tricky Conditions': [0.8, 0.01, 0.22, 0.68, 0.54],
                                         'Breakdowns': [0.99, 0.09, 0.21, 0.77, 0.7]}
                                })
+        
+        self.users_proxy.create_item({'id': 'user_id_2', 'username': 'AntWazHere', 'password': 'ILoveTricia',
+                                'friends': [], 'friend_requests': [], 'streak': 0, 'daily_training_score': 0,
+                                'recent_category_scores': 
+                                    {
+                                        'Driving Off': [0.29, 0.07], 
+                                        'Urban Driving': [0.03, 0.86], 
+                                        'Rural Driving': [0.81, 0.76], 
+                                        'Bigger Roads': [0.88, 0.82], 
+                                        'Motorways': [0.52, 0.98],
+                                        'Tricky Conditions': [0.8, 0.01],
+                                        'Breakdowns': [0.99, 0.09]}
+                               })
+        
+        self.users_proxy.create_item({'id': 'user_id_3', 'username': 'lesacafe', 'password': 'ILoveAnthony',
+                                'friends': [], 'friend_requests': [], 'streak': 0, 'daily_training_score': 0,
+                                'recent_category_scores': 
+                                    {
+                                        'Driving Off': [0.29], 
+                                        'Urban Driving': [0.03], 
+                                        'Rural Driving': [0.81], 
+                                        'Bigger Roads': [0.88], 
+                                        'Motorways': [0.52],
+                                        'Tricky Conditions': [0.8],
+                                        'Breakdowns': [0.99]}
+                               })
 
     # tearDown method executed before each test
     # @unittest.skip
@@ -160,7 +186,7 @@ class test_question_get_quiz(unittest.TestCase):
         for doc in self.questions_proxy.read_all_items():
             self.questions_proxy.delete_item(item=doc,partition_key=doc['id'])
 
-    # @unittest.skip
+    @unittest.skip
     def test_questions_get_all_1(self):
         # Send a request to register same user. (Input is a dictionary)
         request =   { "No_of_Qs": 50, "username": "antoni_gn" }
@@ -173,6 +199,22 @@ class test_question_get_quiz(unittest.TestCase):
         # Check if you actually got randomised questions.
         print(dict_response['msg'])
         self.assertTrue(dict_response['result'])
+
+
+    # @unittest.skip
+    def test_questions_get_all_2(self):
+        # Send a request to register same user. (Input is a dictionary)
+        request =   { "No_of_Qs": 50, "username": "lesacafe" }
+        response = requests.post(self.TEST_URL,params={"code": self.FUNCTION_KEY},json=request)
+
+        # Get json response, check the response code for brevity
+        self.assertEqual(200,response.status_code)
+        dict_response = response.json()     
+
+        # Check if you actually got randomised questions.
+        print(dict_response['msg'])
+        self.assertTrue(dict_response['result'])
+
 
     @unittest.skip
     def test_questions_get_random(self):

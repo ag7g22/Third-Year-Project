@@ -1,5 +1,5 @@
 import random
-from typing import Dict
+from typing import Dict, List
 from azure.cosmos import ContainerProxy
 from shared_code.user import UniqueUserError, InvalidUserError, InvalidPasswordError
 
@@ -10,6 +10,8 @@ class ElementSizeError(ValueError):
 class InvalidStreakError(ValueError):
     pass
 class InvalidScoreError(ValueError):
+    pass
+class InvalidRCSError(ValueError):
     pass
 class utility():
     """
@@ -34,7 +36,7 @@ class utility():
         
         user_to_update = proxy.read_item(item=id,partition_key=id)
 
-        if self.update_is_valid(proxy=proxy, info=info):
+        if self.update_user_is_valid(proxy=proxy, info=info):
 
             for key, value in info.items():
                 user_to_update[key] = value
@@ -42,7 +44,7 @@ class utility():
             proxy.replace_item(item=id, body=user_to_update)
 
 
-    def update_is_valid(self, proxy: ContainerProxy, info: Dict):
+    def update_user_is_valid(self, proxy: ContainerProxy, info: Dict):
         """
         Check if the update info is valid or not:
         """
@@ -80,6 +82,49 @@ class utility():
         else:
             # If there is, username already taken.
             return False
+        
+
+    def update_scores(self, proxy: ContainerProxy, id ,scores: Dict):
+        """
+        Updates a player's recent_category_scores attribute based on key, value changes.
+        """
+        user_to_update = proxy.read_item(item=id, partition_key=id)
+        recent_category_scores = user_to_update['recent_category_scores']
+
+        if self.update_scores_is_valid(scores):
+            for key, value in scores.items():
+                # Add the score to the user's appropriate recent_category_scores attribute
+                self.add_score_to_category(recent_category_scores[key], value)
+
+            proxy.replace_item(item=id, body=user_to_update)
+                
+
+    def add_score_to_category(self, scores: list, score_entry):
+        """
+        Add the score to the category, remove the least recent if the list exceeds 10.
+        """
+        scores.append(score_entry)
+        if len(scores) > 10:
+            scores.pop(0)
+
+        return scores
+
+
+    def update_scores_is_valid(self, scores: Dict):
+        """
+        Validates the scores in the updates attribute.
+        """
+        for key, value in scores.items():
+            if not (0 <= value <= 1):
+                raise InvalidRCSError("Score not between 0 and 1.")
+            
+        return True
+    
+    def check_score_lists(self, lists: Dict):
+        for key, list in lists.items():
+            if len(list) < 2:
+                return False
+        return True 
 
     
     def select_random(self, list, num_elements):
