@@ -1,7 +1,7 @@
 import random
-from typing import List, Dict, Any
-from azure.cosmos import ContainerProxy, CosmosDict
-from shared_code.user import user
+from typing import Dict
+from azure.cosmos import ContainerProxy
+from shared_code.user import UniqueUserError, InvalidUserError, InvalidPasswordError
 
 class NoQueryError(ValueError):
     pass
@@ -10,12 +10,6 @@ class ElementSizeError(ValueError):
 class InvalidStreakError(ValueError):
     pass
 class InvalidScoreError(ValueError):
-    pass
-class ExistentUserError(ValueError):
-    pass
-class BadUserError(ValueError):
-    pass
-class BadPasswordError(ValueError):
     pass
 class utility():
     """
@@ -40,7 +34,7 @@ class utility():
         
         user_to_update = proxy.read_item(item=id,partition_key=id)
 
-        if self.update_is_valid(proxy=proxy,user_to_update=user_to_update, info=info):
+        if self.update_is_valid(proxy=proxy, info=info):
 
             for key, value in info.items():
                 user_to_update[key] = value
@@ -48,7 +42,7 @@ class utility():
             proxy.replace_item(item=id, body=user_to_update)
 
 
-    def update_is_valid(self, proxy: ContainerProxy, user_to_update: CosmosDict, info: Dict):
+    def update_is_valid(self, proxy: ContainerProxy, info: Dict):
         """
         Check if the update info is valid or not:
         """
@@ -57,12 +51,12 @@ class utility():
             
             if key == 'username':
                 if not (5 <= len(value) <= 15):
-                    raise BadUserError("Username less than 5 characters or more than 15 characters")    
+                    raise InvalidUserError("Username less than 5 characters or more than 15 characters")    
                 elif not self.is_unique(proxy=proxy, username=value):
-                    raise ExistentUserError("Username already exists")  
+                    raise UniqueUserError("Username already exists")  
             elif key == 'password':
                 if not (8 <= len(value) <= 15):
-                    raise BadPasswordError("Password less than 8 characters or more than 15 characters")
+                    raise InvalidPasswordError("Password less than 8 characters or more than 15 characters")
             elif key == 'streak':
                 if value < 0:
                     raise InvalidStreakError('Invalid streak value.')

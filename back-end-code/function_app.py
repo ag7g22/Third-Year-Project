@@ -7,7 +7,7 @@ import os
 # shared_code folder imports
 from shared_code.user import user, UniqueUserError, InvalidUserError, InvalidPasswordError
 from shared_code.question import question
-from shared_code.utility import utility, NoQueryError, ElementSizeError, InvalidStreakError, InvalidScoreError, BadPasswordError, BadUserError, ExistentUserError
+from shared_code.utility import utility, NoQueryError, ElementSizeError, InvalidStreakError, InvalidScoreError
 from shared_code.open_ai import open_ai, ResponseError
 from shared_code.evaluator import evaluator
 
@@ -213,17 +213,17 @@ def user_update_info(req: func.HttpRequest) -> func.HttpResponse:
         response_body = json.dumps({"result": False, "msg": "Unable to retrieve user."})
         return func.HttpResponse(body=response_body,mimetype="application/json")
     
-    except ExistentUserError as e:
+    except UniqueUserError as e:
         logging.info("FAILURE: {}".format(e))
         response_body = json.dumps({"result": False, "msg": "Username already exists"})
         return func.HttpResponse(body=response_body,mimetype="application/json")
     
-    except BadUserError as e:
+    except InvalidUserError as e:
         logging.info("FAILURE: {}".format(e))
         response_body = json.dumps({"result": False, "msg": "Username less than 5 characters or more than 15 characters"})
         return func.HttpResponse(body=response_body,mimetype="application/json")
     
-    except BadPasswordError as e:
+    except InvalidPasswordError as e:
         logging.info("FAILURE: {}".format(e))
         response_body = json.dumps({"result": False, "msg": "Password less than 8 characters or more than 15 characters"})
         return func.HttpResponse(body=response_body,mimetype="application/json")

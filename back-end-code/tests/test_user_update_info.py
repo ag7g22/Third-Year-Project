@@ -32,7 +32,7 @@ class test_user_update_info(unittest.TestCase):
             self.users_proxy.delete_item(item=doc,partition_key=doc['id'])
 
 
-    @unittest.skip
+    # @unittest.skip
     def test_update_username(self):
         # Try a login with correct credentials
         dict = {"id": "user_id_1", 
@@ -55,7 +55,7 @@ class test_user_update_info(unittest.TestCase):
         self.assertEqual(username,'AntWazHere')
 
 
-    @unittest.skip
+    # @unittest.skip
     def test_update_password(self):
         # Try a login with correct credentials
         dict = {"id": "user_id_1", 
@@ -78,7 +78,7 @@ class test_user_update_info(unittest.TestCase):
         self.assertEqual(password,'Moon_River')
 
 
-    @unittest.skip
+    # @unittest.skip
     def test_update_streak(self):
         # Try a login with correct credentials
         dict = {"id": "user_id_2", 
@@ -101,7 +101,7 @@ class test_user_update_info(unittest.TestCase):
         self.assertEqual(streak, 3)
 
 
-    @unittest.skip
+    # @unittest.skip
     def test_update_score(self):
         # Try a login with correct credentials
         dict = {"id": "user_id_2", 
@@ -124,7 +124,7 @@ class test_user_update_info(unittest.TestCase):
         self.assertEqual(score, 400)
 
 
-    @unittest.skip
+    # @unittest.skip
     def test_update_multiple(self):
         # Try a login with correct credentials
         dict = {"id": "user_id_1", 
@@ -149,7 +149,7 @@ class test_user_update_info(unittest.TestCase):
         self.assertEqual(username, 'AntWazHere')
         self.assertEqual(password, 'Moon_River')
 
-    @unittest.skip
+    # @unittest.skip
     def test_nonexistent_user(self):
         # Try a login with incorrect username
         dict = {"id": "user_id_3",
@@ -183,7 +183,7 @@ class test_user_update_info(unittest.TestCase):
         self.assertFalse(dict_response['result'])
         self.assertEqual(dict_response['msg'],'Username already exists')
 
-    unittest.skip
+    # @unittest.skip
     def test_invalid_username_error(self):
         # Try a login with incorrect username
         dict = {"id": "user_id_1",
@@ -199,3 +199,57 @@ class test_user_update_info(unittest.TestCase):
         # Check if you got the error response for failed login.
         self.assertFalse(dict_response['result'])
         self.assertEqual(dict_response['msg'],'Username less than 5 characters or more than 15 characters')
+
+
+    # @unittest.skip
+    def test_invalid_password_error(self):
+        # Try a login with incorrect username
+        dict = {"id": "user_id_1",
+                "updates": {
+                    'password': 'ILov'
+                }}
+        response = requests.put(self.TEST_URL,params={"code": self.FUNCTION_KEY},json=dict)
+
+        # Get json response, check the response code for brevity
+        self.assertEqual(200,response.status_code)
+        dict_response = response.json()   
+
+        # Check if you got the error response for failed login.
+        self.assertFalse(dict_response['result'])
+        self.assertEqual(dict_response['msg'],'Password less than 8 characters or more than 15 characters')
+
+
+    # @unittest.skip
+    def test_invalid_streak_error(self):
+        # Try a login with incorrect username
+        dict = {"id": "user_id_1",
+                "updates": {
+                    'streak': -1
+                }}
+        response = requests.put(self.TEST_URL,params={"code": self.FUNCTION_KEY},json=dict)
+
+        # Get json response, check the response code for brevity
+        self.assertEqual(200,response.status_code)
+        dict_response = response.json()   
+
+        # Check if you got the error response for failed login.
+        self.assertFalse(dict_response['result'])
+        self.assertEqual(dict_response['msg'],'Invalid streak value.')
+
+
+    # @unittest.skip
+    def test_invalid_score_error(self):
+        # Try a login with incorrect username
+        dict = {"id": "user_id_1",
+                "updates": {
+                    'daily_training_score': -1
+                }}
+        response = requests.put(self.TEST_URL,params={"code": self.FUNCTION_KEY},json=dict)
+
+        # Get json response, check the response code for brevity
+        self.assertEqual(200,response.status_code)
+        dict_response = response.json()   
+
+        # Check if you got the error response for failed login.
+        self.assertFalse(dict_response['result'])
+        self.assertEqual(dict_response['msg'],'Invalid daily_training_score value.')
