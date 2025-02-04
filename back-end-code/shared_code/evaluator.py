@@ -12,7 +12,7 @@ class evaluator():
         # Predict the next score for each category
         predicted_scores = {}
         for category, scores in recent_category_scores['recent_category_scores'].items():
-            predicted_scores[category] = 1 - self.predict_next_score(scores)
+            predicted_scores[category] = max(0.25, 1 - self.predict_next_score(scores))
 
         # Normalise the scores by dividing all predicted scores with sum of all scores to 2 sf
         total_score = sum(predicted_scores.values())
