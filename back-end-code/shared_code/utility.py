@@ -1,5 +1,5 @@
 import random
-from typing import Dict, List
+from typing import Dict, List, Any
 from azure.cosmos import ContainerProxy
 from shared_code.user import UniqueUserError, InvalidUserError, InvalidPasswordError
 
@@ -155,3 +155,21 @@ class utility():
         query_result = self.query_items(proxy=proxy,query=query)
 
         return self.select_random(query_result, No_of_Qs)
+    
+    def sort_to_score_and_streak(self, user_stats: List[Dict[str,Any]]) -> List[Dict[str, Any]]:
+        """
+        Returns a list of users_stats to ascending order:
+        First daily_training_score, then higher streak
+        """
+        leaderboard = sorted(user_stats, key=lambda x: (-x['daily_training_score'], -x['streak'], x['username'].lower()))
+        if len(leaderboard) > 10:
+            leaderboard = leaderboard[:10]
+        return leaderboard
+    
+    def convert_to_query_list(self, users: List[str]):
+        """
+        Returns a list of strings to this format for SQL:
+        i.e. ["a","b","c"] -> ("a","b","c")
+        """
+        return '("' + '", "'.join(users) + '")'
+    

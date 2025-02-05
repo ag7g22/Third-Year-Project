@@ -500,7 +500,73 @@ def user_friend_reject(req: func.HttpRequest) -> func.HttpResponse:
         # If the query result gives nothing
         response_body = json.dumps({"result": False, "msg": "Unable to remove friend request."})
         return func.HttpResponse(body=response_body,mimetype="application/json")
+
+
+@app.route(route="user/leaderboard", methods=[func.HttpMethod.GET], auth_level=func.AuthLevel.FUNCTION)
+def user_leaderboard(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Returns the top (at most 10) users in a leaderboard according to the daily_training_score and streak.
+    """
+    logging.info('Python HTTP trigger function processed a USER_LEADERBOARD request.')
+
+    try: 
+        # Query for the list of players
+        query = "SELECT p.username, p.streak, p.daily_training_score FROM users p"
+        query_result = utility.query_items(proxy=users_proxy, query=query)
+
+        # Order the players in ranking order and get at most the top 10 users.
+        leaderboard = utility.sort_to_score_and_streak(query_result)
+        logging.info("FINAL LEADERBOARD: {}".format(leaderboard))
+
+        response_body = json.dumps({"result": True, "msg": leaderboard})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
     
+    except NoQueryError:
+        # If the query result gives nothing
+        response_body = json.dumps({"result": False, "msg": "No users registered to get leaderboard!"})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+    
+
+@app.route(route="user/leaderboard/friend", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
+def user_leaderboard_friend(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Returns the top (at most 10) for a user's friends in a leaderboard according to the daily_training_score and streak.
+    {"id": "id"}
+    """
+    input = req.get_json()  
+    logging.info('Python HTTP trigger function processed a USER_LEADERBOARD request.')
+
+    id = input['id']
+
+    try: 
+        # Query for the list of the user's friends' ids
+        query = "SELECT f.id FROM c JOIN f IN c.friends WHERE c.id = '{}'".format(id)
+        query_result = utility.query_items(proxy=users_proxy, query=query)
+
+        id_list = []
+        id_list.append(id)
+
+        for user in query_result:
+            id_list.append(user['id'])
+
+        user_query_list = utility.convert_to_query_list(id_list)
+        logging.info("Users found: {}".format(user_query_list))
+
+        query_friends = "SELECT u.id, u.username, u.streak, u.daily_training_score FROM u WHERE u.id IN {}".format(user_query_list)
+        query_friends_result = utility.query_items(proxy=users_proxy, query=query_friends)
+
+        # Order the players in ranking order and get at most the top 10 users.
+        leaderboard = utility.sort_to_score_and_streak(query_friends_result)
+        logging.info("FINAL LEADERBOARD: {}".format(leaderboard))
+
+        response_body = json.dumps({"result": True, "msg": leaderboard})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+    
+    except NoQueryError:
+        # If the query result gives nothing
+        response_body = json.dumps({"result": False, "msg": "No users registered to get leaderboard!"})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+
 
 @app.route(route="question/get/category", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
 def question_get_category(req: func.HttpRequest) -> func.HttpResponse:
