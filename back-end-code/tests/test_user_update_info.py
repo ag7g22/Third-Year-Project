@@ -22,8 +22,8 @@ class test_user_update_info(unittest.TestCase):
 
     # SetUp method executed before each test       
     def setUp(self):
-        self.users_proxy.create_item({'id': 'user_id_1', 'username': 'antoni_gn', 'password': 'ILoveTricia', 'streak': 0, 'daily_training_score': 0})
-        self.users_proxy.create_item({'id': 'user_id_2', 'username': 'lesacafe', 'password': 'ILoveTricia', 'streak': 2, 'daily_training_score': 0})
+        self.users_proxy.create_item({'id': 'user_id_1', 'username': 'antoni_gn', 'password': 'ILoveTricia', 'streak': 0, 'daily_training_score': 0, 'training_completion_date': '06-02-2025'})
+        self.users_proxy.create_item({'id': 'user_id_2', 'username': 'lesacafe', 'password': 'ILoveTricia', 'streak': 2, 'daily_training_score': 0, 'training_completion_date': 'n/a'})
 
     # tearDown method executed before each test
     def tearDown(self) -> None:
@@ -122,6 +122,29 @@ class test_user_update_info(unittest.TestCase):
         new_user = self.users_proxy.read_item(item='user_id_2',partition_key='user_id_2')
         score = new_user['daily_training_score']
         self.assertEqual(score, 400)
+
+
+    # @unittest.skip
+    def test_update_date(self):
+        # Try a login with correct credentials
+        dict = {"id": "user_id_1", 
+                "updates": {
+                    'training_completion_date': '07-02-2025'
+                }}
+        response = requests.put(self.TEST_URL,params={"code": self.FUNCTION_KEY},json=dict)
+
+        # Get json response, check the response code for brevity
+        self.assertEqual(200,response.status_code)
+        dict_response = response.json()   
+
+        # Check if you got the OK response for success.
+        self.assertTrue(dict_response['result'])
+        self.assertEqual(dict_response['msg'],'OK')
+
+        # Check if the items were updated:
+        new_user = self.users_proxy.read_item(item='user_id_1',partition_key='user_id_1')
+        date = new_user['training_completion_date']
+        self.assertEqual(date, '07-02-2025')
 
 
     # @unittest.skip

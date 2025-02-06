@@ -22,7 +22,7 @@ class test_user_get_info(unittest.TestCase):
 
     # SetUp method executed before each test       
     def setUp(self):
-        self.users_proxy.create_item({'id': 'user_id_1', 'username': 'antoni_gn', 'password': 'ILoveTricia', 'streak': 0, 'daily_training_score': 0})
+        self.users_proxy.create_item({'id': 'user_id_1', 'username': 'antoni_gn', 'password': 'ILoveTricia', 'streak': 0, 'daily_training_score': 0, 'training_completion_date': 'n/a'})
 
     # tearDown method executed before each test
     def tearDown(self) -> None:
@@ -41,7 +41,7 @@ class test_user_get_info(unittest.TestCase):
 
         # Check if you got the OK response for successful login.
         self.assertTrue(dict_response['result'])
-        self.assertEqual(dict_response['msg'],{'id': 'user_id_1', 'username': 'antoni_gn', 'streak': 0, 'daily_training_score': 0})
+        self.assertEqual(dict_response['msg'],{'id': 'user_id_1', 'username': 'antoni_gn', 'streak': 0, 'daily_training_score': 0, 'training_completion_date': 'n/a'})
 
 
     def test_nonexistent_user(self):
