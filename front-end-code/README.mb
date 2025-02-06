@@ -1,0 +1,27 @@
+# front-end-code
+## Project setup
+```
+npm install
+```
+### Compiles and hot-reloads for development
+```
+npm run serve
+```
+### Compiles and minifies for production
+```
+npm run build
+```
+### Lints and fixes files
+```
+npm run lint
+```
+### Customize configuration
+See [Configuration Reference](https://cli.vuejs.org/config/).
+## Client Structure
+start: cd client -> npm install -> npm run serve
+- `src/components/`: Contains all reusable Vue components (e.g., Header.vue used in both Main and Lecture pages as a header component).
+- `src/views/`: Contains all Vue page components (e.g., LoginPage.vue for the login interface).
+- `src/router/`: Vue Router for linking views to paths
+- `src/store/`: Vuex for vue states
+- `src/assets/`: static resources
+Already set global font as Roboto and white background and black font color in `src/assets/main.css`.
