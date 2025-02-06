@@ -8,6 +8,7 @@ const state = {
 }
 
 export default new Vuex.Store({
+    // Vuex for vue states, to be saved and referenced later.
     state,
     mutations: {
         setUser(state, user) {

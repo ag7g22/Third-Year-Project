@@ -7,6 +7,7 @@ import MainPage from '@/views/MainPage.vue'
 Vue.use(Router)
 
 export default new Router({
+  // Vue Router for linking views to paths
   mode: 'history', 
   routes: [
     {

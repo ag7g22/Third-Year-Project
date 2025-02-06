@@ -4,14 +4,14 @@
 
 <script>
   export default {
+    // Page member variables and methods:
     data() {
       return {
       };
     },
-    methods: {
-    }
+    methods: {},
   }
 </script>
 
-<style lang="scss" scoped>
+  <style lang="scss" scoped>
 </style>

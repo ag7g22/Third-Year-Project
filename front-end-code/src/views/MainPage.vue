@@ -4,6 +4,7 @@
 
 <script>
   export default {
+    // Page member variables and methods:
     data() {
       return {
       };

@@ -1,4 +1,5 @@
 <template>
+    <!-- This is the navigation menu for the different pages (Testing purposes only) -->
     <header>
         <nav>
             <ul>
@@ -10,12 +11,14 @@
 </template>
 
 <script>
+// Vue Component, to be referenced in other parts of the app:
 export default {
     name: 'Header'
 }
 </script>
 
 <style lang="scss" scoped>
+/** This section applies SCSS styles to the component: */
 header {
     background-color: #f8f8f8;
     padding: 10px 20px;
