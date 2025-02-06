@@ -150,10 +150,13 @@ class utility():
         return self.select_random(query_result, No_of_Qs)
     
     def get_random_questions_topic(self, proxy: ContainerProxy, topic: str, No_of_Qs: int):
-        # Get the questions by category
+        # Get the questions by category OR get the sign questions:
         query = 'SELECT * FROM questions WHERE questions.topic = "{}"'.format(topic)
-        query_result = self.query_items(proxy=proxy,query=query)
+        
+        if topic == "sign_question":
+            query = 'SELECT * FROM questions WHERE questions.sign_question = true'
 
+        query_result = self.query_items(proxy=proxy,query=query)
         return self.select_random(query_result, No_of_Qs)
     
     def sort_to_score_and_streak(self, user_stats: List[Dict[str,Any]]) -> List[Dict[str, Any]]:
