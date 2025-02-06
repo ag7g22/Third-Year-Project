@@ -18,7 +18,7 @@ npm run lint
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
 ## Client Structure
-start: cd client -> npm install -> npm run serve
+start: cd front-end-code -> npm install -> npm run serve
 - `src/components/`: Contains all reusable Vue components (e.g., Header.vue used in both Main and Lecture pages as a header component).
 - `src/views/`: Contains all Vue page components (e.g., LoginPage.vue for the login interface).
 - `src/router/`: Vue Router for linking views to paths

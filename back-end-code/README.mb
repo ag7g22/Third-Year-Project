@@ -2,3 +2,9 @@
 - Azure API Functions
 - Machine Learning File(s)
 - Database Management in CosmosDB
+
+LOCAL DEPLOYMENT
+- func start
+
+DEPLOYMENT
+- func azure functionapp publish driving-theory
