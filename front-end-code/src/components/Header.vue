@@ -4,7 +4,8 @@
         <nav>
             <ul>
                 <li><router-link to="/main">Main</router-link></li>
-                <li><router-link to="/login">Login</router-link></li>
+                <li><router-link to="/authentication">Authentication</router-link></li>
+                <li><router-link to="/dashboard">Dashboard</router-link></li>
             </ul>
         </nav>
     </header>

@@ -1,15 +1,27 @@
 <template>
-    <div>I'm the main page</div>
+  <div class="container">
+    <h1 class="title">Welcome to <span>{{ appName }}</span>!</h1>
+    <div class="buttons">
+      <button @click="next_page('authentication')">Sign in</button>
+    </div>
+  </div>
 </template>
 
 <script>
   export default {
     // Page member variables and methods:
+    name: "mainPage",
     data() {
       return {
+        appName: "Vroom Vroom Quiz"
       };
     },
-    methods: {},
+    methods: {
+      next_page(page) {
+        console.log("Moving on to the " + page + " page!");
+        this.$router.push(`/${page}`);
+      }
+    },
   };
 </script>
 

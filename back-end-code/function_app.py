@@ -80,7 +80,7 @@ def user_register(req: func.HttpRequest, usercontainerbinding: func.Out[func.Doc
 def user_login(req: func.HttpRequest) -> func.HttpResponse:
     """
     Recieves a login attempt in a JSON document and checks credentials in the DB.
-    e.g. {"username":  "antoni_gn" , "password" : "ILoveTricia"}
+    e.g. {"username":  "antoni_gn" , "password" : "ILoveTricia"} 
     """
     input = req.get_json()
     logging.info('Python HTTP trigger function processed a PLAYER_LOGIN request: {}'.format(input))

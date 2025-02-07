@@ -1,0 +1,20 @@
+runtime: python39
+env: standard
+
+handlers:
+  - url: /css
+    static_dir: dist/css
+
+  - url: /js
+    static_dir: dist/js
+
+  - url: /img
+    static_dir: dist/img
+
+  - url: /
+    static_files: dist/index.html
+    upload: dist/index.html
+
+  - url: /.*
+    static_files: dist/index.html
+    upload: dist/index.html
