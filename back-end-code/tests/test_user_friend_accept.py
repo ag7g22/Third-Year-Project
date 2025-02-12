@@ -56,11 +56,23 @@ class test_user_friend_accept(unittest.TestCase):
         self.assertTrue(dict_response['result'])
         self.assertEqual(dict_response['msg'],'OK')
 
-        # Check if friend was added:
-        sender = self.users_proxy.read_item(item="user_id_1",partition_key="user_id_1")
-        friends = sender['friends']
-        recipient = friends[0]
-        self.assertEqual({'id': 'user_id_3', 'username': 'river'}, recipient)
+        # Check if both friends were added:
+        user_1 = self.users_proxy.read_item(item="user_id_1",partition_key="user_id_1")
+        user_1_actual_friends = user_1['friends']
+        user_1_expected_friends = [
+            {'id': 'user_id_2', 'username': 'AntWazHere'},
+            {'id': 'user_id_3', 'username': 'river'}
+        ]
+
+        self.assertListEqual(user_1_expected_friends, user_1_actual_friends)
+
+        user_2 = self.users_proxy.read_item(item="user_id_3",partition_key="user_id_3")
+        user_2_actual_friends = user_2['friends']
+        user_2_expected_friends = [
+            {'id': 'user_id_1', 'username': 'antoni_gn'}
+        ]
+
+        self.assertListEqual(user_2_expected_friends, user_2_actual_friends)
 
 
     # @unittest.skip
@@ -76,18 +88,3 @@ class test_user_friend_accept(unittest.TestCase):
         # Check if you actually got OK response for valid user.
         self.assertFalse(dict_response['result'])
         self.assertEqual(dict_response['msg'],'Already friends!')
-
-
-    # @unittest.skip
-    def test_accept_no_friend_request(self):
-        # Send a request to register same user. (Input is a dictionary)
-        request = {"sender_id": "user_id_3", "sender_username": "lesacafe", "recipient_id": "user_id_2"}
-        response = requests.post(self.TEST_URL,params={"code": self.FUNCTION_KEY},json=request)
-
-        # Get json response, check the response code for brevity
-        self.assertEqual(200,response.status_code)
-        dict_response = response.json()     
-
-        # Check if you actually got OK response for valid user.
-        self.assertFalse(dict_response['result'])
-        self.assertEqual(dict_response['msg'],"Haven't sent friend request!")

@@ -7,7 +7,7 @@ import os
 # shared_code folder imports
 from shared_code.user import user, UniqueUserError, InvalidUserError, InvalidPasswordError
 from shared_code.question import question
-from shared_code.utility import utility, NoQueryError, ElementSizeError, InvalidStreakError, InvalidScoreError, InvalidRCSError
+from shared_code.utility import utility, NoQueryError, ElementSizeError, InvalidStreakError, InvalidScoreError, InvalidRCSError, AlreadyFriendsError
 from shared_code.open_ai import open_ai, ResponseError
 from shared_code.evaluator import evaluator
 
@@ -376,70 +376,40 @@ def user_friend_request(req: func.HttpRequest) -> func.HttpResponse:
 def user_friend_accept(req: func.HttpRequest) -> func.HttpResponse:
     """
     Requesting user gets added the to requested user's "friends" list.
-    e.g. {"sender_id": "sender_id", "sender_username": "antoni_gn", "recipient_id": "recipient_id"}
+    e.g. {"sender_id": "sender_id", "recipient_id": "recipient_id"}
     """
     input = req.get_json()
     logging.info('Python HTTP trigger function processed a USER_FRIEND_ACCEPT request.')
 
     # Extract json input
     sender_id = input['sender_id']
-    sender_username = input['sender_username']
     recipient_id = input['recipient_id']
 
     try:
-        # Get the recipient based on id
-        query = 'SELECT * FROM users WHERE users.id = "{}"'.format(recipient_id)
-        query_result = utility.query_items(proxy=users_proxy,query=query)
+        # Get the sender and recipient based on id
+        sender = users_proxy.read_item(item=sender_id,partition_key=sender_id)
+        recipient = users_proxy.read_item(item=recipient_id,partition_key=recipient_id)
 
-        if query_result:
-            logging.info("User found: {}".format(query_result))
-            user_to_update = query_result[0]
-            friend_request_list = user_to_update['friend_requests']
-            friend_list = user_to_update['friends']
-            new_friend = {"id": sender_id, "username": sender_username}
+        logging.info('Found the two users {0} and {1}'.format(sender['username'], recipient['username']))
 
-            # Check if that user already befriended:
-            if new_friend in friend_list:
-                response_body = json.dumps({"result": False, "msg": "Already friends!"})
-                return func.HttpResponse(body=response_body,mimetype="application/json")
-            elif new_friend not in friend_request_list:
-                response_body = json.dumps({"result": False, "msg": "Haven't sent friend request!"})
-                return func.HttpResponse(body=response_body,mimetype="application/json")
-            else:
-                # Add to the friend_list
-                new_friend_list = []
-                new_friend_list.append(new_friend)
+        # Add friends to both users
+        utility.add_friends(proxy=users_proxy, user_1=sender, user_2=recipient)
+        logging.info('UPDATED USER {}'.format(sender['username']))
 
-                # If the friend_list already has contents inside
-                if friend_list != []:
+        utility.add_friends(proxy=users_proxy, user_1=recipient, user_2=sender)
+        logging.info('UPDATED USER {}'.format(recipient['username']))
 
-                    for friend in friend_list:
-                        new_friend_list.append({"id": friend['id'], "username": friend['username']})
-
-                # Remove from friend_requests_list
-                new_friend_request_list = []
-
-                if friend_request_list != []:
-                    for friend in friend_request_list:
-                        if friend != new_friend:
-                            new_friend_request_list.append({"id": friend['id'], "username": friend['username']})
-
-                # Modify the user via field names as keys:
-                user_to_update['friends'] = new_friend_list
-                user_to_update['friend_requests'] = new_friend_request_list
-
-                # Save changes in database
-                users_proxy.replace_item(item=user_to_update['id'], body=user_to_update)
-
-                logging.info("New state of user after ADDING friend: {}".format(user_to_update))
-
-                # Send Response
-                response_body = json.dumps({"result": True, "msg": "OK"})
-                return func.HttpResponse(body=response_body,mimetype="application/json")
+        # Send Response
+        response_body = json.dumps({"result": True, "msg": "OK"})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
             
-    except NoQueryError:
-        # If the query result gives nothing
-        response_body = json.dumps({"result": False, "msg": "Unable to add friend."})
+    except CosmosResourceNotFoundError:
+        logging.info("FAILURE: Entity with the specified id does not exist in the system.")
+        response_body = json.dumps({"result": False, "msg": "Unable to retrieve user."})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+    except AlreadyFriendsError:
+        logging.info("FAILURE: Already friends!")
+        response_body = json.dumps({"result": False, "msg": "Already friends!"})
         return func.HttpResponse(body=response_body,mimetype="application/json")
 
 

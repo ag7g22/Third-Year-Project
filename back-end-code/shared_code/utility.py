@@ -1,6 +1,6 @@
 import random
 from typing import Dict, List, Any
-from azure.cosmos import ContainerProxy
+from azure.cosmos import ContainerProxy, CosmosDict
 from shared_code.user import UniqueUserError, InvalidUserError, InvalidPasswordError
 
 class NoQueryError(ValueError):
@@ -12,6 +12,8 @@ class InvalidStreakError(ValueError):
 class InvalidScoreError(ValueError):
     pass
 class InvalidRCSError(ValueError):
+    pass
+class AlreadyFriendsError(ValueError):
     pass
 class utility():
     """
@@ -28,6 +30,34 @@ class utility():
             raise NoQueryError("Unable to find result.")
         
         return result
+    
+
+    def add_friends(self, proxy: ContainerProxy, user_1: CosmosDict, user_2: CosmosDict):
+        """
+        - Adds user 2 to user 1's friend list.
+        - Removes user 2 from user 1's friend request list if it hasn't already.
+        """
+        # Extract the appropriate info from the two users:
+        user_1_request_list = user_1['friend_requests']
+        user_1_friend_list = user_1['friends']
+        user_2_entry = { 'id': user_2['id'], 'username': user_2['username'] }
+
+        if user_2_entry in user_1_friend_list:
+            raise AlreadyFriendsError('Already friends!')
+        
+        # Add to the friend_list
+        user_1_friend_list.append(user_2_entry)
+
+        # Only remove if user_2 is IN the friend_request list
+        user_1['friend_requests'] = [
+            {"id": friend['id'], "username": friend['username']} 
+            for friend in user_1_request_list 
+            if friend != user_2_entry
+        ]
+
+        # Save changes in database
+        proxy.replace_item(item=user_1['id'], body=user_1)
+        
     
     def update_user(self, proxy: ContainerProxy, id ,info: Dict):
         """

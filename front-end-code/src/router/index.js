@@ -12,6 +12,10 @@ import Dashboard from '@/views/Dashboard.vue'
 import AccountPage from '@/views/Account/AccountPage.vue'
 import AccountUpdate from '@/views/Account/AccountUpdate.vue'
 
+// Social-related pages
+import FriendsList from '@/views/Social/FriendsList.vue'
+import Leaderboard from '@/views/Social/Leaderboard.vue'
+
 Vue.use(Router)
 
 export default new Router({
@@ -42,6 +46,16 @@ export default new Router({
       path: '/update',
       name: 'update',
       component: AccountUpdate
+    },
+    {
+      path: '/friends',
+      name: 'friends',
+      component: FriendsList
+    },
+    {
+      path: '/leaderboard',
+      name: 'leaderboard',
+      component: Leaderboard
     }
 
   ]
