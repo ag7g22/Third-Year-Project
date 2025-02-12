@@ -32,7 +32,7 @@ class test_user_get_info(unittest.TestCase):
 
     def test_successful_info(self):
         # Try a login with correct credentials
-        dict_login = {"id": "user_id_1"}
+        dict_login = {"username": "antoni_gn"}
         response = requests.post(self.TEST_URL,params={"code": self.FUNCTION_KEY},json=dict_login)
 
         # Get json response, check the response code for brevity
@@ -46,7 +46,7 @@ class test_user_get_info(unittest.TestCase):
 
     def test_nonexistent_user(self):
         # Try a login with incorrect username
-        dict_login = {"id": "user_id_2"}
+        dict_login = {"username": "dddddddd"}
         response = requests.post(self.TEST_URL,params={"code": self.FUNCTION_KEY},json=dict_login)
 
         # Get json response, check the response code for brevity

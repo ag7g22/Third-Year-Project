@@ -4,8 +4,9 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 
 const state = {
-    currentUser: '',
-    currentPassword: '',
+    currentUser: '', // Current logged in user
+    currentPassword: '', // Current password of the logged in user
+    currentStats: { id: 'n/a', streak: 0, daily_training_score: 0, training_completion_date: 'n/a'} // Current stats of the logged in user
 }
 
 export default new Vuex.Store({
@@ -19,5 +20,9 @@ export default new Vuex.Store({
         setCurrentPassword(state, password) {
             state.currentPassword = password
         },
+
+        setCurrentStats(state, stats) {
+            state.currentStats = stats
+        }
     },
 })

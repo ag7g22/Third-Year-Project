@@ -146,16 +146,16 @@ def user_search(req: func.HttpRequest) -> func.HttpResponse:
 def user_get_info(req: func.HttpRequest) -> func.HttpResponse:
     """
     Returns a user's profile info.
-    { "id": "id" }
+    { "username": "username" }
     """
     input = req.get_json()
     logging.info('Python HTTP trigger function processed a USER_GET_INFO request.')
 
     # Retrieve the user with the corrosponding id:
-    id = input['id']
+    username = input['username']
 
     try:
-        query = 'SELECT * FROM users WHERE users.id = "{}"'.format(id)
+        query = 'SELECT * FROM users WHERE users.username = "{}"'.format(username)
         query_result = utility.query_items(proxy=users_proxy,query=query)
 
         if query_result:

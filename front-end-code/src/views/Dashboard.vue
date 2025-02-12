@@ -1,8 +1,9 @@
 <template>
     <div class="container">
-        <h1 class="title">DASHBOARD</h1>
+        <h1 class="title">DASHBOARD | {{ logged_in_user }}</h1>
         <div class="buttons">
-            <button>Account</button>
+            <button @click="next_page('account')">Account</button>
+            <button>Friends</button>
             <button>Daily Training</button>
             <button>Category Practice</button>
             <button>Road Sign Practice</button>
@@ -17,13 +18,14 @@ export default {
     name: "dashboard",
     data() {
         return {
-            
+            logged_in_user: this.$store.state.currentUser
         };
     },
     methods: {
         logout() {
             this.$store.commit("setCurrentUser", "");
             this.$store.commit("setCurrentPassword", "");
+            this.$store.commit("setCurrentStats", { id: 'n/a', streak: 0, daily_training_score: 0, training_completion_date: 'n/a'});
             console.log("Current User and Password:", this.$store.state.currentUser, this.$store.state.currentPassword);
             this.next_page('authentication')
         },

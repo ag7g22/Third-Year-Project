@@ -70,13 +70,16 @@ export default {
       const response = await this.POST_azure_function('/user/login', {"username": this.loginUsername , "password" : this.loginPassword})
 
       if (response.msg == "OK" && response.result) {
-          this.message.success = "Successfully logged in!";
-
+          this.message.success = "Successfully logged in! Loading Account Stats ...";
           this.$store.commit("setCurrentUser", this.loginUsername);
           this.$store.commit("setCurrentPassword", this.loginPassword);
+
+          // GET USER STATS:
+          this.retrieve_stats(this.$store.state.currentUser);
+
           console.log("Logged in as Current User and Password:", this.$store.state.currentUser, this.$store.state.currentPassword);
 
-          this.next_page('dashboard')
+          this.next_page('dashboard');
       } else {
         this.message.error = response.msg || "Login failed.";
       }
@@ -114,6 +117,22 @@ export default {
       this.registerUsername = "";
       this.registerPassword = "";
 
+    },
+    async retrieve_stats(username) {
+      // This retrieves the current stats of the logged in user:
+      const user_stats = this.$store.state.currentStats;
+
+      if (JSON.stringify(user_stats) === JSON.stringify({ id: 'n/a', streak: 0, daily_training_score: 0, training_completion_date: 'n/a' })) {
+        const response = await this.POST_azure_function('/user/get/info', {"username": username});
+        if (response.result) { 
+          const info = response.msg;
+          const stats = { id: info.id, streak: info.streak, daily_training_score: info.daily_training_score, training_completion_date: info.training_completion_date}
+
+          this.$store.commit("setCurrentStats", stats);
+        } else {
+          this.message.error = response.msg || "Loading failed.";
+        }
+      }
     },
     async POST_azure_function(function_route, json_doc) {
       console.log("Calling API request: " + function_route + ", params: " + JSON.stringify(json_doc));
