@@ -37,23 +37,7 @@ class test_user_search(unittest.TestCase):
 
     # @unittest.skip
     def test_search_1(self):
-        request = { "search": "Ant" }
-        response = requests.post(self.TEST_URL,params={"code": self.FUNCTION_KEY},json=request)
-
-        # Get json response, check the response code for brevity
-        self.assertEqual(200,response.status_code)
-        dict_response = response.json()   
-
-        # Check if you got the True response for successful search.
-        self.assertTrue(dict_response['result'])
-        actual_result = dict_response['msg']
-        self.assertEqual(actual_result[0]['id'],'user_id_1')
-        self.assertEqual(actual_result[1]['id'],'user_id_2')
-
-
-    # @unittest.skip
-    def test_search_2(self):
-        request = { "search": "er" }
+        request = { "username": "antoni_gn", "search": "Ant" }
         response = requests.post(self.TEST_URL,params={"code": self.FUNCTION_KEY},json=request)
 
         # Get json response, check the response code for brevity
@@ -64,11 +48,25 @@ class test_user_search(unittest.TestCase):
         self.assertTrue(dict_response['result'])
         actual_result = dict_response['msg']
         self.assertEqual(actual_result[0]['id'],'user_id_2')
-        self.assertEqual(actual_result[1]['id'],'user_id_3')
+
+
+    # @unittest.skip
+    def test_search_2(self):
+        request = { "username": "river", "search": "er" }
+        response = requests.post(self.TEST_URL,params={"code": self.FUNCTION_KEY},json=request)
+
+        # Get json response, check the response code for brevity
+        self.assertEqual(200,response.status_code)
+        dict_response = response.json()   
+
+        # Check if you got the True response for successful search.
+        self.assertTrue(dict_response['result'])
+        actual_result = dict_response['msg']
+        self.assertEqual(actual_result[0]['id'],'user_id_2')
 
 
     def test_search_3(self):
-        request = { "search": "" }
+        request = { "username": "river", "search": "" }
         response = requests.post(self.TEST_URL,params={"code": self.FUNCTION_KEY},json=request)
 
         # Get json response, check the response code for brevity

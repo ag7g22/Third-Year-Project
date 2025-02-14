@@ -108,8 +108,8 @@ def user_login(req: func.HttpRequest) -> func.HttpResponse:
 @app.route(route="user/search", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
 def user_search(req: func.HttpRequest) -> func.HttpResponse:
     """
-    Returns the search results from an inputted keyword.
-    e.g. {"search": "search"} 
+    Returns the search results from an inputted keyword, excludes the included username
+    e.g. {"username": "username", "search": "search"} 
     (Note: to make it case in-sensitive, all search MUST be lowercase)
     """
     input = req.get_json()
@@ -117,9 +117,10 @@ def user_search(req: func.HttpRequest) -> func.HttpResponse:
 
     # Collect all the users registered:
     search = input['search']
+    logged_user = input['username']
 
     try:
-        query = 'SELECT * FROM users WHERE LOWER(users.username) LIKE LOWER("%{}%")'.format(search)
+        query = 'SELECT * FROM users WHERE LOWER(users.username) LIKE LOWER("%{0}%") AND LOWER(users.username) != "{1}"'.format(search, logged_user)
         query_result = utility.query_items(proxy=users_proxy,query=query)
 
         if query_result:
