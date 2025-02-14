@@ -14,7 +14,10 @@
         <div v-if="current_list === 'friends'">
             <h2>Friends List</h2>
             <ul v-if="social_lists.friends.length">
-                <li v-for="friend in social_lists.friends" :key="friend.id">{{ friend.username }}</li>
+                <li v-for="friend in social_lists.friends" :key="friend.id">{{ friend.username }}
+                    <button>View</button>
+                    <button>Remove Friend</button>
+                </li>
             </ul>
             <div v-else>
                 <p v-if="message.error" class="error-message">{{ message.error }}</p>

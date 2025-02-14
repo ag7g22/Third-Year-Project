@@ -15,6 +15,8 @@ class InvalidRCSError(ValueError):
     pass
 class AlreadyFriendsError(ValueError):
     pass
+class NotFriendsError(ValueError):
+    pass
 class utility():
     """
     Utility class for CosmosDB services.
@@ -57,6 +59,38 @@ class utility():
 
         # Save changes in database
         proxy.replace_item(item=user_1['id'], body=user_1)
+
+    
+    def remove_friends(self, proxy: ContainerProxy, user_1: CosmosDict, user_2: CosmosDict):
+        """
+        Remove user_2 from user_1's friend list and vice versa
+        """
+        # Extract the id and username to remove the entries
+        user_1_entry = { "id": user_1['id'], "username": user_1['username'] }
+        user_2_entry = { "id": user_2['id'], "username": user_2['username'] }
+
+        user_1_friends = user_1['friends']
+        user_2_friends = user_2['friends']
+
+        if user_2_entry not in user_1_friends or user_1_entry not in user_2_friends:
+            raise NotFriendsError('Not friends!')
+
+        # Remove the users from their friend lists:
+        user_1['friends'] = [
+            {"id": friend['id'], "username": friend['username']} 
+            for friend in user_1_friends 
+            if friend != user_2_entry
+        ]
+
+        user_2['friends'] = [
+            {"id": friend['id'], "username": friend['username']} 
+            for friend in user_2_friends
+            if friend != user_1_entry
+        ]
+
+        # Save changes in database
+        proxy.replace_item(item=user_1['id'], body=user_1)
+        proxy.replace_item(item=user_2['id'], body=user_2)
         
     
     def update_user(self, proxy: ContainerProxy, id ,info: Dict):

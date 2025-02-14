@@ -7,7 +7,7 @@ import os
 # shared_code folder imports
 from shared_code.user import user, UniqueUserError, InvalidUserError, InvalidPasswordError
 from shared_code.question import question
-from shared_code.utility import utility, NoQueryError, ElementSizeError, InvalidStreakError, InvalidScoreError, InvalidRCSError, AlreadyFriendsError
+from shared_code.utility import utility, NoQueryError, ElementSizeError, InvalidStreakError, InvalidScoreError, InvalidRCSError, AlreadyFriendsError, NotFriendsError
 from shared_code.open_ai import open_ai, ResponseError
 from shared_code.evaluator import evaluator
 
@@ -470,6 +470,43 @@ def user_friend_reject(req: func.HttpRequest) -> func.HttpResponse:
     except NoQueryError:
         # If the query result gives nothing
         response_body = json.dumps({"result": False, "msg": "Unable to remove friend request."})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+
+
+@app.route(route="user/friend/remove", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
+def user_friend_remove(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Delete friends from both users friend lists.
+    {"id_1": "id_1", "id_2": "id_2"}
+    """
+    input = req.get_json()
+    logging.info('Python HTTP trigger function processed a USER_FRIEND_REMOVE request.')
+
+    # Extract JSON input:
+    id_1 = input['id_1']
+    id_2 = input['id_2']
+
+    try:
+        # Get both users from their username:
+        user_1 = users_proxy.read_item(item=id_1,partition_key=id_1)
+        user_2 = users_proxy.read_item(item=id_2,partition_key=id_2)
+
+        logging.info('Found the two users {0} and {1}'.format(user_1['username'], user_2['username']))
+        utility.remove_friends(proxy=users_proxy, user_1=user_1, user_2=user_2)
+        logging.info('Removed friends!')
+
+        # Send Response
+        response_body = json.dumps({"result": True, "msg": "OK"})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+
+    except CosmosResourceNotFoundError:
+        logging.info("FAILURE: Entity with the specified id does not exist in the system.")
+        response_body = json.dumps({"result": False, "msg": "Unable to retrieve user."})
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+    
+    except NotFriendsError:
+        logging.info("Users are not friends.")
+        response_body = json.dumps({"result": False, "msg": "Users are not friends."})
         return func.HttpResponse(body=response_body,mimetype="application/json")
 
 
