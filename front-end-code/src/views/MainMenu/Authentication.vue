@@ -75,7 +75,7 @@ export default {
           this.$store.commit("setCurrentPassword", this.loginPassword);
 
           // GET USER STATS:
-          this.retrieve_stats(this.$store.state.currentUser);
+          this.retrieve_stats_and_rank(this.$store.state.currentUser);
 
           console.log("Logged in as Current User and Password:", this.$store.state.currentUser, this.$store.state.currentPassword);
 
@@ -118,7 +118,7 @@ export default {
       this.registerPassword = "";
 
     },
-    async retrieve_stats(username) {
+    async retrieve_stats_and_rank(username) {
       // This retrieves the current stats of the logged in user:
       const user_stats = this.$store.state.currentStats;
 
@@ -126,9 +126,14 @@ export default {
         const response = await this.POST_azure_function('/user/get/info', {"username": username});
         if (response.result) { 
           const info = response.msg;
-          const stats = { id: info.id, streak: info.streak, daily_training_score: info.daily_training_score, training_completion_date: info.training_completion_date}
 
+          // Update the rank in the state:
+          this.$store.commit("setCurrentRank", info.rank);
+
+          // Update the stats in the state:
+          const stats = { id: info.id, streak: info.streak, daily_training_score: info.daily_training_score, training_completion_date: info.training_completion_date}
           this.$store.commit("setCurrentStats", stats);
+
         } else {
           this.message.error = response.msg || "Loading failed.";
         }

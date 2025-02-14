@@ -162,7 +162,10 @@ def user_get_info(req: func.HttpRequest) -> func.HttpResponse:
         if query_result:
             # Retrieve the user's info
             user = query_result[0]
-            info = {"id": user['id'], "username": user['username'], "streak": user['streak'], "daily_training_score": user['daily_training_score'], "training_completion_date": user['training_completion_date']}
+            info = {"id": user['id'], "username": user['username'], 'rank': user['rank'], 
+                    "streak": user['streak'], "daily_training_score": user['daily_training_score'], 
+                    "training_completion_date": user['training_completion_date']}
+            
             logging.info('User info extracted: {}'.format(info))
 
             # Send Response

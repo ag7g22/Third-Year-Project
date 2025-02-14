@@ -15,15 +15,10 @@
             <h2>Friends List</h2>
             <ul v-if="social_lists.friends.length">
                 <li v-for="friend in social_lists.friends" :key="friend.id">{{ friend.username }}
-                    <button>View</button>
-                    <button>Remove Friend</button>
+                    <button @click="view_user(friend.username)"">View</button>
+                    <button @click="remove_friend(friend.id, friend.username)">Remove Friend</button>
                 </li>
             </ul>
-            <div v-else>
-                <p v-if="message.error" class="error-message">{{ message.error }}</p>
-                <p v-else-if="message.success" class="success-message">{{ message.success }}</p>
-                <p v-else>No friends yet.</p>
-            </div>
         </div>
 
         <div v-if="current_list === 'requests'">
@@ -35,11 +30,6 @@
                 <button @click="reject_request(request.id, request.username)">Decline</button>
                 </li>
             </ul>
-            <div v-else>
-                <p v-if="message.error" class="error-message">{{ message.error }}</p>
-                <p v-else-if="message.success" class="success-message">{{ message.success }}</p>
-                <p v-else>No friend requests.</p>
-            </div>
         </div>
 
         <div v-if="current_list === 'search'">
@@ -49,14 +39,14 @@
             <ul v-if="search.users.length">
                 <li v-for="user in search.users" :key="user.id">
                 {{ user.username }}
+                <button @click="view_user(user.username)"">View</button>
                 <button @click="send_friend_request(user.id)">Add Friend</button>
                 </li>
             </ul>
-            <div v-else>
-                <p v-if="message.error" class="error-message">{{ message.error }}</p>
-                <p v-else-if="message.success" class="success-message">{{ message.success }}</p>
-            </div>
         </div>
+
+        <p v-if="message.error" class="error-message">{{ message.error }}</p>
+        <p v-else-if="message.success" class="success-message">{{ message.success }}</p>
     </div>
 </template>
   
@@ -83,54 +73,99 @@ export default {
 
             this.current_list = list;
         },
-        async accept_request(recipient_id, recipient_username) {
+        async view_user(username) {
+            // Load up user's stats to be viewed
+            const response = await this.azure_function('POST', '/user/get/info', {"username": username});
+            if (response.result) { 
+                // Collect the user's info
+                const info = response.msg;
+                const rank = info.rank;
+                const stats = { id: info.id, streak: info.streak, daily_training_score: info.daily_training_score, training_completion_date: info.training_completion_date};
+
+                this.$router.push({
+                    path: `/account`,
+                    query: { view: 'user', username: username, rank: rank, stats: stats }
+                });
+
+            } else {
+                this.message.error = response.msg || "Loading user failed.";
+            }
+        },
+        async remove_friend(id, username) {
+            // Reset messages
+            this.message.error = "";
+            this.message.success = "";
+
+            // Remove both friends:
+            const input = {"id_1": this.stats.id, "id_2": id}
+            const remove = await this.azure_function("POST", "/user/friend/remove", input)
+            if (remove.result) {
+                this.message.success = 'Removed friend!'
+                
+                // Remove from the friends list
+                let friends = this.social_lists.friends;
+                let friend_requests = this.social_lists.friend_requests;
+                friends = friends.filter(friend => (friend.id !== id, friend.username !== username))
+
+                console.log('Friends:', friends)
+
+                this.$store.commit("setCurrentSocialLists", {friends: friends, friend_requests: friend_requests});
+                this.social_lists = {friends: friends, friend_requests: friend_requests}
+
+            } else {
+                this.message.error = accept.msg || "Friend removal Failed."
+            }
+        },
+        async accept_request(id, username) {
             // Reset messages
             this.message.error = "";
             this.message.success = "";
 
             // Accept the friend request:
-            const input = {"sender_id": this.stats.id, "recipient_id": recipient_id};
+            const input = {"sender_id": this.stats.id, "recipient_id": id};
             const accept = await this.azure_function("POST", "/user/friend/accept", input)
             if (accept.result) {
-                this.message.success = 'Rejected request!';
+                this.message.success = 'Accepted request!';
 
-                // Update the social lists
+                // Remove from the friend request list and add to friend list
                 let friends = this.social_lists.friends;
                 let friend_requests = this.social_lists.friend_requests;
-                friend_requests = friends.filter(friend => friend !== recipient_username)
-                friends.push({'id': recipient_id, 'username': recipient_username})
+                friend_requests = friend_requests.filter(friend => (friend.id !== id, friend.username !== username))
+                friends.push({'id': id, 'username': username})
+
+                console.log('Friend requests:', friend_requests)
+                console.log('Friends:', friends)
                 
                 this.$store.commit("setCurrentSocialLists", {friends: friends, friend_requests: friend_requests});
-                this.social_lists = this.$store.state.currentSocialLists
-
+                this.social_lists = {friends: friends, friend_requests: friend_requests}
             } else {
                 this.message.error = accept.msg || "Friend accept Failed."
             }
-
         },
-        async reject_request(recipient_id, recipient_username) {
+        async reject_request(id, username) {
             // Reset messages
             this.message.error = "";
             this.message.success = "";
 
             // Reject the friend request:
-            const input = {"sender_id": recipient_id, "sender_username": recipient_username, "recipient_id": this.stats.id};
+            const input = {"sender_id": id, "sender_username": username, "recipient_id": this.stats.id};
             const reject = await this.azure_function("POST", "/user/friend/reject", input)
             if (reject.result) {
                 this.message.success = 'Rejected request!';
 
-                // Update the social lists
+                // Remove from friend request list ONLY
                 let friends = this.social_lists.friends;
                 let friend_requests = this.social_lists.friend_requests;
-                friend_requests = friends.filter(friend => friend !== recipient_username)
+                friend_requests = friend_requests.filter((friend => (friend.id !== id, friend.username !== username)))
+
+                console.log('Friend requests:', friend_requests)
                 
                 this.$store.commit("setCurrentSocialLists", {friends: friends, friend_requests: friend_requests});
-                this.social_lists = this.$store.state.currentSocialLists
+                this.social_lists = {friends: friends, friend_requests: friend_requests}
 
             } else {
                 this.message.error = reject.msg || "Friend reject Failed."
             }
-
         },
         async send_friend_request(recipient_id) {
             // Reset messages
@@ -145,7 +180,6 @@ export default {
             } else {
                 this.message.error = search.msg || "Friend request Failed."
             }
-
         },
         async search_users() {
             // Reset messages
@@ -159,7 +193,7 @@ export default {
             }
             
             // Search for users in the API:
-            const search = await this.azure_function("POST", "/user/search", {"search": this.search.query})
+            const search = await this.azure_function("POST", "/user/search", {"username": this.logged_in_user, "search": this.search.query})
             if (search.result) {
                 this.message.success = 'Found users!'
                 // Populate the search queries
@@ -167,7 +201,6 @@ export default {
             } else {
                 this.message.error = search.msg || "Username search Failed."
             }
-
         },
         async azure_function(function_type, function_route, json_doc) {
             console.log("Calling API request: " + function_route + ", params: " + JSON.stringify(json_doc));
@@ -184,6 +217,7 @@ export default {
             }
         },
         next_page(page) {
+            // Move onto either dashboard or friend account page:
             console.log("Moving on to the " + page + " page!");
             this.$router.push(`/${page}`);
         }

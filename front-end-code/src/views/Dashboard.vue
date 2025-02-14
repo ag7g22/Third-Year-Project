@@ -30,9 +30,18 @@ export default {
             // Reset State
             this.$store.commit("setCurrentUser", "");
             this.$store.commit("setCurrentPassword", "");
+            this.$store.commit("setCurrentRank", { level: 'n/a', exp: 0, exp_threshold: 0 });
             this.$store.commit("setCurrentStats", { id: 'n/a', streak: 0, daily_training_score: 0, training_completion_date: 'n/a'});
+            this.$store.commit("setCurrentSocialLists", {friends: [], friend_requests: []})
             console.log("Current User and Password:", this.$store.state.currentUser, this.$store.state.currentPassword);
             this.next_page('authentication')
+        },
+        async load_account_page() {
+            this.$router.push({
+                path: `/account`,
+                query: { view: 'logged_user', username: this.logged_in_user, 
+                rank: this.$store.state.currentRank, stats: this.$store.state.currentStats }
+            });
         },
         async load_friends_list() {
             // Get API update of latest status of friends
