@@ -67,7 +67,8 @@ export default {
         return;
       }
       
-      const response = await this.POST_azure_function('/user/login', {"username": this.loginUsername , "password" : this.loginPassword})
+      this.message.success = "Logging in ...";
+      const response = await this.azure_function('POST', '/user/login', {"username": this.loginUsername , "password" : this.loginPassword})
 
       if (response.msg == "OK" && response.result) {
           this.message.success = "Successfully logged in! Loading Account Stats ...";
@@ -75,12 +76,13 @@ export default {
           this.$store.commit("setCurrentPassword", this.loginPassword);
 
           // GET USER STATS:
-          this.retrieve_stats_and_rank(this.$store.state.currentUser);
+          await this.retrieve_stats_and_rank(this.$store.state.currentUser);
 
           console.log("Logged in as Current User and Password:", this.$store.state.currentUser, this.$store.state.currentPassword);
 
           this.next_page('dashboard');
       } else {
+        this.message.success = "";
         this.message.error = response.msg || "Login failed.";
       }
 
@@ -105,11 +107,13 @@ export default {
         return;
       }
 
-      const response = await this.POST_azure_function('/user/register', {"username": this.registerUsername , "password" : this.registerPassword});
+      this.message.success = "Registering user ...";
+      const response = await this.azure_function('POST', '/user/register', {"username": this.registerUsername , "password" : this.registerPassword});
 
       if (response.msg == "OK" && response.result) {
           this.message.success = "Successfully registered! You may now login.";
       } else {
+        this.message.success = "";
         this.message.error = response.msg || "Registration failed.";
       }
 
@@ -123,7 +127,7 @@ export default {
       const user_stats = this.$store.state.currentStats;
 
       if (JSON.stringify(user_stats) === JSON.stringify({ id: 'n/a', streak: 0, daily_training_score: 0, training_completion_date: 'n/a' })) {
-        const response = await this.POST_azure_function('/user/get/info', {"username": username});
+        const response = await this.azure_function('POST', '/user/get/info', {"username": username});
         if (response.result) { 
           const info = response.msg;
 
@@ -139,22 +143,22 @@ export default {
         }
       }
     },
-    async POST_azure_function(function_route, json_doc) {
-      console.log("Calling API request: " + function_route + ", params: " + JSON.stringify(json_doc));
-      // Call Azure function with POST request
-      try {
-        const url = process.env.VUE_APP_BACKEND_URL + function_route + '?code=' + process.env.VUE_APP_MASTER_KEY
-        const response = await fetch( url, { method: "POST", headers: { "Content-Type": "application/json"},body: JSON.stringify(json_doc)});
-        const API_reply = await response.json();
-        console.log("API Response: " + JSON.stringify(API_reply));
-        return API_reply
-      } catch (error) {
-        console.error("API error:", error);
-        this.message.error = "An API error occurred. Please try again later.";
-      }
-    },
+    async azure_function(function_type, function_route, json_doc) {
+        console.log(function_route);
+        // Call Azure function with request
+        try {
+            const url = process.env.VUE_APP_BACKEND_URL + function_route + '?code=' + process.env.VUE_APP_MASTER_KEY
+            const response = await fetch( url, { method: function_type, headers: { "Content-Type": "application/json"},body: JSON.stringify(json_doc)});
+            const API_reply = await response.json();
+            console.log("Result: " + JSON.stringify(API_reply.result));
+            return API_reply
+        } catch (error) {
+            console.error("Error:", error);
+            this.message.error = "An API error occurred. Please try again later.";
+        }
+      },
     next_page(page) {
-      console.log("Moving on to the " + page + " page!");
+      console.log("/" + page);
       this.$router.push(`/${page}`);
     }
   }

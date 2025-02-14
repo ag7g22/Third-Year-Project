@@ -120,7 +120,7 @@ def user_search(req: func.HttpRequest) -> func.HttpResponse:
     logged_user = input['username']
 
     try:
-        query = 'SELECT * FROM users WHERE LOWER(users.username) LIKE LOWER("%{0}%") AND LOWER(users.username) != "{1}"'.format(search, logged_user)
+        query = 'SELECT * FROM users WHERE LOWER(users.username) LIKE LOWER("%{0}%") AND users.username != "{1}"'.format(search, logged_user)
         query_result = utility.query_items(proxy=users_proxy,query=query)
 
         if query_result:

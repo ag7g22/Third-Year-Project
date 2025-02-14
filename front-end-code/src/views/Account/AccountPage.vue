@@ -36,6 +36,10 @@ export default {
         this.username = this.$route.query.username || this.$store.state.currentUser;
         this.rank = this.$route.query.rank || this.$store.state.currentRank;
         this.stats = this.$route.query.stats || this.$store.state.currentStats;
+
+        // Saving state of friendsList:
+        this.current_list = this.$route.query.current_list || "friends";
+        this.search = this.$route.query.search || { query: "", users: [] };
     },
     data() {
         return {
@@ -43,7 +47,11 @@ export default {
             view: 'logged_user',
             username: this.$store.state.currentUser,
             rank: this.$store.state.currentRank,
-            stats: this.$store.state.currentStats
+            stats: this.$store.state.currentStats,
+
+            // State of friendsList page saved here.
+            current_list: "friends", 
+            search: { query: "", users: [] } 
         };
     },
     methods: {
@@ -54,7 +62,16 @@ export default {
             return value === "n/a" ? "Not Available" : value;
         },
         next_page(page) {
-            console.log("Moving on to the " + page + " page!");
+            console.log("/" + page);
+    
+            if (page === 'friends') {
+                this.$router.push({
+                    path: `/friends`,
+                    query: { current_list: this.current_list, search: this.search }
+                });
+                return;
+            }
+
             this.$router.push(`/${page}`);
         }
     },

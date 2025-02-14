@@ -40,7 +40,7 @@
                 <li v-for="user in search.users" :key="user.id">
                 {{ user.username }}
                 <button @click="view_user(user.username)"">View</button>
-                <button @click="send_friend_request(user.id)">Add Friend</button>
+                <button v-if="!social_lists.friends.some(friend => friend.username === user.username)" @click="send_friend_request(user.id)">Add Friend</button>
                 </li>
             </ul>
         </div>
@@ -54,9 +54,14 @@
 export default {
     // Page member variables and methods:
     name: "friends",
+    mounted() {
+        this.current_list = this.$route.query.current_list || "friends";
+        this.search = this.$route.query.search || { query: "", users: [] };
+    },
     data() {
         return {
-            current_list: "friends", // Default view
+            // Default view
+            current_list: "friends",
             search: { query: "", users: [] },
             logged_in_user: this.$store.state.currentUser,
             stats: this.$store.state.currentStats,
@@ -82,9 +87,11 @@ export default {
                 const rank = info.rank;
                 const stats = { id: info.id, streak: info.streak, daily_training_score: info.daily_training_score, training_completion_date: info.training_completion_date};
 
+                console.log("/account");
                 this.$router.push({
                     path: `/account`,
-                    query: { view: 'user', username: username, rank: rank, stats: stats }
+                    query: { view: 'user', username: username, rank: rank, stats: stats, 
+                    current_list: this.current_list, search: this.search  }
                 });
 
             } else {
@@ -203,22 +210,22 @@ export default {
             }
         },
         async azure_function(function_type, function_route, json_doc) {
-            console.log("Calling API request: " + function_route + ", params: " + JSON.stringify(json_doc));
-                // Call Azure function with POST request
+            console.log(function_route);
+            // Call Azure function with request
             try {
                 const url = process.env.VUE_APP_BACKEND_URL + function_route + '?code=' + process.env.VUE_APP_MASTER_KEY
                 const response = await fetch( url, { method: function_type, headers: { "Content-Type": "application/json"},body: JSON.stringify(json_doc)});
                 const API_reply = await response.json();
-                console.log("API Response: " + JSON.stringify(API_reply));
+                console.log("Result: " + JSON.stringify(API_reply.result));
                 return API_reply
             } catch (error) {
-                console.error("API error:", error);
+                console.error("Error:", error);
                 this.message.error = "An API error occurred. Please try again later.";
             }
         },
         next_page(page) {
             // Move onto either dashboard or friend account page:
-            console.log("Moving on to the " + page + " page!");
+            console.log("/" + page);
             this.$router.push(`/${page}`);
         }
     },

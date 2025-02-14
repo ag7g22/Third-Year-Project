@@ -127,21 +127,21 @@ export default {
             }
         },
         async azure_function(function_type, function_route, json_doc) {
-        console.log("Calling API request: " + function_route + ", params: " + JSON.stringify(json_doc));
-            // Call Azure function with POST request
+            console.log(function_route);
+            // Call Azure function with request
             try {
                 const url = process.env.VUE_APP_BACKEND_URL + function_route + '?code=' + process.env.VUE_APP_MASTER_KEY
                 const response = await fetch( url, { method: function_type, headers: { "Content-Type": "application/json"},body: JSON.stringify(json_doc)});
                 const API_reply = await response.json();
-                console.log("API Response: " + JSON.stringify(API_reply));
+                console.log("Result: " + JSON.stringify(API_reply.result));
                 return API_reply
             } catch (error) {
-                console.error("API error:", error);
+                console.error("Error:", error);
                 this.message.error = "An API error occurred. Please try again later.";
             }
         },
         next_page(page) {
-            console.log("Moving on to the " + page + " page!");
+            console.log("/" + page);
             this.$router.push(`/${page}`);
         }
     },

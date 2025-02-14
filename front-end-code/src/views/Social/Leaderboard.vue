@@ -18,7 +18,7 @@ export default {
     },
     methods: {
         next_page(page) {
-            console.log("Moving on to the " + page + " page!");
+            console.log("/" + page);
             this.$router.push(`/${page}`);
         }
     },

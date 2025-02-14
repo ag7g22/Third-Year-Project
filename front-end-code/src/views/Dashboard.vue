@@ -36,13 +36,6 @@ export default {
             console.log("Current User and Password:", this.$store.state.currentUser, this.$store.state.currentPassword);
             this.next_page('authentication')
         },
-        async load_account_page() {
-            this.$router.push({
-                path: `/account`,
-                query: { view: 'logged_user', username: this.logged_in_user, 
-                rank: this.$store.state.currentRank, stats: this.$store.state.currentStats }
-            });
-        },
         async load_friends_list() {
             // Get API update of latest status of friends
             const friends_response = await this.azure_function("POST", "/user/friend/all", {"username": this.logged_in_user})
@@ -59,21 +52,21 @@ export default {
             }
         },
         async azure_function(function_type, function_route, json_doc) {
-        console.log("Calling API request: " + function_route + ", params: " + JSON.stringify(json_doc));
-            // Call Azure function with POST request
+            console.log(function_route);
+            // Call Azure function with request
             try {
                 const url = process.env.VUE_APP_BACKEND_URL + function_route + '?code=' + process.env.VUE_APP_MASTER_KEY
                 const response = await fetch( url, { method: function_type, headers: { "Content-Type": "application/json"},body: JSON.stringify(json_doc)});
                 const API_reply = await response.json();
-                console.log("API Response: " + JSON.stringify(API_reply));
+                console.log("Result: " + JSON.stringify(API_reply.result));
                 return API_reply
             } catch (error) {
-                console.error("API error:", error);
+                console.error("Error:", error);
                 this.message.error = "An API error occurred. Please try again later.";
             }
         },
         next_page(page) {
-            console.log("Moving on to the " + page + " page!");
+            console.log("/" + page);
             this.$router.push(`/${page}`);
         }
     },
