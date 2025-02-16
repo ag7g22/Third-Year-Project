@@ -7,7 +7,7 @@
             <button>Daily Training</button>
             <button>Category Practice</button>
             <button>Road Sign Practice</button>
-            <button @click="next_page('leaderboard')">Leaderboard</button>
+            <button @click="load_leaderboards()">Leaderboard</button>
             <button @click="logout()">Log out</button>   
         </div>
         <p v-if="message.error" class="error-message">{{ message.error }}</p>
@@ -53,8 +53,31 @@ export default {
                 this.next_page('friends');
 
             } else {
-                this.message.error = friends_response.msg | "Unable to find user."
+                this.message.error = friends_response.msg || "Unable to find user."
             }
+        },
+        async load_leaderboards() {
+            // Get API update of the daily leaderboard
+            const leaderboard_public = await this.azure_function("GET", "/user/leaderboard", {})
+            const leaderboard_friends = await this.azure_function("POST", "/user/leaderboard/friend", { "id": this.$store.state.currentStats.id })
+
+            let public_list = [];
+            let friends_list = [];
+
+            // Update state for the current leaderboards, otherwise leave them empty.
+            if (leaderboard_public.result) {
+                public_list = leaderboard_public.msg; 
+            }
+
+            if (leaderboard_friends.result) {
+                friends_list = leaderboard_friends.msg;
+            }
+
+            this.$store.commit("setCurrentLeaderboards", {
+                public: public_list, friends: friends_list
+            });
+            this.next_page("leaderboard");
+
         },
         async add_achievement(name) {
             // Add achievement to user's achievements and notify on the UI.
@@ -80,10 +103,19 @@ export default {
             // Call Azure function with request
             try {
                 const url = process.env.VUE_APP_BACKEND_URL + function_route + '?code=' + process.env.VUE_APP_MASTER_KEY
-                const response = await fetch( url, { method: function_type, headers: { "Content-Type": "application/json"},body: JSON.stringify(json_doc)});
-                const API_reply = await response.json();
-                console.log("Result: " + JSON.stringify(API_reply.result));
-                return API_reply
+                
+                if (function_type === "GET") {
+                    const response = await fetch( url, { method: function_type, headers: { "Content-Type": "application/json"} });
+                    const API_reply = await response.json();
+                    console.log("Result: " + JSON.stringify(API_reply.result));
+                    return API_reply
+                } else {
+                    const response = await fetch( url, { method: function_type, headers: { "Content-Type": "application/json"},body: JSON.stringify(json_doc)});
+                    const API_reply = await response.json();
+                    console.log("Result: " + JSON.stringify(API_reply.result));
+                    return API_reply
+                }
+
             } catch (error) {
                 console.error("Error:", error);
                 this.message.error = "An API error occurred. Please try again later.";

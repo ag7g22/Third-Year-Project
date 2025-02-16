@@ -30,9 +30,14 @@
             <button @click="next_page('update')">Update details</button> 
         </div>
 
-        <!-- If the view is for viewing another user -->
-        <div v-else class="buttons"> 
+        <!-- If the view is for viewing another user from friends_list page -->
+        <div v-else-if="view === 'friends_list'" class="buttons"> 
             <button @click="next_page('friends')">Back</button>
+        </div>
+
+        <!-- If the view is for viewing another user from leaderboard page -->
+        <div v-else-if="view === 'leaderboard'" class="buttons"> 
+            <button @click="next_page('leaderboard')">Back</button>
         </div>
         
     </div>
@@ -66,7 +71,7 @@ export default {
             // All of the achievements:
             achievementsWithDescriptions: [
                 { name: 'Hello World!', description: 'Unlocked after logging in for the first time.' },
-                { name: 'Start of a Journey', description: 'Won a daily quiz.' },
+                { name: 'Start of a Journey', description: 'Done a daily quiz for the first time.' },
                 { name: 'Levelin up', description: 'Reached level 10 for the first time.' },
                 { name: 'Gear 2nd', description: 'Reached a streak of 10' },
                 { name: 'Gear 3rd', description: 'Reached a streak of 50' },

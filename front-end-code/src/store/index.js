@@ -10,6 +10,7 @@ const state = {
     currentStats: { id: 'n/a', streak: 0, daily_training_score: 0, training_completion_date: 'n/a'}, // Current stats of the logged in user
     currentAchievements: [], // The achievements of the logged in user.
     currentSocialLists: {friends: [], friend_requests: []}, // Friends and friend requests of the current user
+    currentLeaderboards: {public: [], friends: []} // Public and friend leaderbaords
 }
 
 export default new Vuex.Store({
@@ -17,27 +18,31 @@ export default new Vuex.Store({
     state,
     mutations: {
         setCurrentUser(state, user) {
-            state.currentUser = user
+            state.currentUser = user;
         },
 
         setCurrentPassword(state, password) {
-            state.currentPassword = password
+            state.currentPassword = password;
         },
 
         setCurrentRank(state, rank) {
-            state.currentRank = rank
+            state.currentRank = rank;
         },
 
         setCurrentStats(state, stats) {
-            state.currentStats = stats
+            state.currentStats = stats;
         },
 
         setCurrentAchievements(state, achievements) {
-            state.currentAchievements = achievements
+            state.currentAchievements = achievements;
         },
 
         setCurrentSocialLists(state, lists) {
-            state.currentSocialLists = lists
+            state.currentSocialLists = lists;
+        },
+
+        setCurrentLeaderboards(state, leaderboards) {
+            state.currentLeaderboards = leaderboards;
         }
     },
 })

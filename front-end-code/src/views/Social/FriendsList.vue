@@ -91,7 +91,7 @@ export default {
                 console.log("/account");
                 this.$router.push({
                     path: `/account`,
-                    query: { view: 'user', username: username, rank: rank, stats: stats, achievements: achievements,
+                    query: { view: 'friends_list', username: username, rank: rank, stats: stats, achievements: achievements,
                     current_list: this.current_list, search: this.search  }
                 });
 
