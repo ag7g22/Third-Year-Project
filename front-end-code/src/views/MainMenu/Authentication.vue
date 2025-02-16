@@ -25,6 +25,7 @@
 </template>
 
 <script>
+import toastr from 'toastr';
 export default {
   name: "authentication",
   data() {
@@ -68,6 +69,7 @@ export default {
       }
       
       this.message.success = "Logging in ...";
+
       const response = await this.azure_function('POST', '/user/login', {"username": this.loginUsername , "password" : this.loginPassword})
 
       if (response.msg == "OK" && response.result) {
@@ -76,7 +78,7 @@ export default {
           this.$store.commit("setCurrentPassword", this.loginPassword);
 
           // GET USER STATS:
-          await this.retrieve_stats_and_rank(this.$store.state.currentUser);
+          await this.retrieve_user_info(this.$store.state.currentUser);
 
           console.log("Logged in as Current User and Password:", this.$store.state.currentUser, this.$store.state.currentPassword);
 
@@ -122,25 +124,53 @@ export default {
       this.registerPassword = "";
 
     },
-    async retrieve_stats_and_rank(username) {
+    async retrieve_user_info(username) {
       // This retrieves the current stats of the logged in user:
-      const user_stats = this.$store.state.currentStats;
+      const response = await this.azure_function('POST', '/user/get/info', {"username": username});
+      if (response.result) { 
+        const info = response.msg;
 
-      if (JSON.stringify(user_stats) === JSON.stringify({ id: 'n/a', streak: 0, daily_training_score: 0, training_completion_date: 'n/a' })) {
-        const response = await this.azure_function('POST', '/user/get/info', {"username": username});
-        if (response.result) { 
-          const info = response.msg;
+        // Update the rank in the state:
+        this.$store.commit("setCurrentRank", info.rank);
 
-          // Update the rank in the state:
-          this.$store.commit("setCurrentRank", info.rank);
+        // Update the stats in the state:
+        const stats = { id: info.id, streak: info.streak, daily_training_score: info.daily_training_score, training_completion_date: info.training_completion_date};
+        this.$store.commit("setCurrentStats", stats);
 
-          // Update the stats in the state:
-          const stats = { id: info.id, streak: info.streak, daily_training_score: info.daily_training_score, training_completion_date: info.training_completion_date}
-          this.$store.commit("setCurrentStats", stats);
+        // Update the Achievements in the state:
+        this.$store.commit("setCurrentAchievements", info.achievements);
 
-        } else {
-          this.message.error = response.msg || "Loading failed.";
+        // *************** ACHIEVEMENT ***************
+        if (info.achievements.length === 0) {
+          this.add_achievement('Hello World!');
         }
+
+      } else {
+        this.message.error = response.msg || "Loading failed.";
+      }
+      
+    },
+    async add_achievement(name) {
+      // Add achievement to user's achievements and notify on the UI.
+      console.log('Adding achievement: ' + '"' + name + '"' )
+
+      let user_stats = this.$store.state.currentStats;
+      let achievements = this.$store.state.currentAchievements;
+      achievements.push(name)
+
+      // Update database
+      const input = { 'id': user_stats.id, 'updates': { 'achievements': achievements } }
+      const update = await this.azure_function("PUT", "/user/update/info", input)
+      if (update) {
+          this.$store.commit("setCurrentAchievements", achievements);
+          this.message.success = 'Achievements update Successful!'
+
+          const options = { "closeButton": true, "debug": false, "newestOnTop": true, "progressBar": true,
+          "positionClass": "toast-top-right", "preventDuplicates": true, "onclick": null, "showDuration": "300",
+          "hideDuration": "1000", "timeOut": "5000", "extendedTimeOut": "1000", "showEasing": "swing",
+          "hideEasing": "linear", "showMethod": "fadeIn","hideMethod": "fadeOut"}
+
+          toastr.success('"' + `${name}` + '""',"Achievement Unlocked:", options)
       }
     },
     async azure_function(function_type, function_route, json_doc) {

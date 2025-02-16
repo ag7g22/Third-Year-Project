@@ -86,11 +86,12 @@ export default {
                 const info = response.msg;
                 const rank = info.rank;
                 const stats = { id: info.id, streak: info.streak, daily_training_score: info.daily_training_score, training_completion_date: info.training_completion_date};
+                const achievements = info.achievements;
 
                 console.log("/account");
                 this.$router.push({
                     path: `/account`,
-                    query: { view: 'user', username: username, rank: rank, stats: stats, 
+                    query: { view: 'user', username: username, rank: rank, stats: stats, achievements: achievements,
                     current_list: this.current_list, search: this.search  }
                 });
 

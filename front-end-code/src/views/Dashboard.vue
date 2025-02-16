@@ -16,17 +16,22 @@
 </template>
   
 <script>
+import toastr from 'toastr';
 export default {
     // Page member variables and methods:
     name: "dashboard",
     data() {
         return {
             logged_in_user: this.$store.state.currentUser,
-            message: { error: "", success: "" }
+            message: { error: "", success: "" },
         };
     },
     methods: {
         logout() {
+            // Reset messages
+            this.message.error = "";
+            this.message.success = "";
+
             // Reset State
             this.$store.commit("setCurrentUser", "");
             this.$store.commit("setCurrentPassword", "");
@@ -49,6 +54,25 @@ export default {
 
             } else {
                 this.message.error = friends_response.msg | "Unable to find user."
+            }
+        },
+        async add_achievement(name) {
+            // Add achievement to user's achievements and notify on the UI.
+            this.achievements.push(name)
+
+            // Update database
+            const input = { 'id': user_stats.id, 'updates': { 'achievements': this.achievements } }
+            const update = await this.azure_function("PUT", "/user/update/info", input)
+            if (update) {
+                this.$store.commit("setCurrentAchievements", this.achievements);
+                this.message.success = 'Achievements update Successful!'
+
+                const options = { "closeButton": true, "debug": false, "newestOnTop": true, "progressBar": true,
+                "positionClass": "toast-top-right", "preventDuplicates": true, "onclick": null, "showDuration": "300",
+                "hideDuration": "1000", "timeOut": "5000", "extendedTimeOut": "1000", "showEasing": "swing",
+                "hideEasing": "linear", "showMethod": "fadeIn","hideMethod": "fadeOut"}
+
+                toastr.success('"' + `/${name}` + '""',"Achievement Unlocked:", options)
             }
         },
         async azure_function(function_type, function_route, json_doc) {

@@ -8,7 +8,8 @@ const state = {
     currentPassword: '', // Current password of the logged in user
     currentRank: { level: 'n/a', exp: 0, exp_threshold: 0 }, // Current rank of the logged user
     currentStats: { id: 'n/a', streak: 0, daily_training_score: 0, training_completion_date: 'n/a'}, // Current stats of the logged in user
-    currentSocialLists: {friends: [], friend_requests: []}
+    currentAchievements: [], // The achievements of the logged in user.
+    currentSocialLists: {friends: [], friend_requests: []}, // Friends and friend requests of the current user
 }
 
 export default new Vuex.Store({
@@ -29,6 +30,10 @@ export default new Vuex.Store({
 
         setCurrentStats(state, stats) {
             state.currentStats = stats
+        },
+
+        setCurrentAchievements(state, achievements) {
+            state.currentAchievements = achievements
         },
 
         setCurrentSocialLists(state, lists) {
