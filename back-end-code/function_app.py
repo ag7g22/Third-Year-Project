@@ -599,7 +599,7 @@ def question_get_category(req: func.HttpRequest) -> func.HttpResponse:
         quiz_Qs = []
         
         for q in random_Qs:
-            quiz_Q = question(q['questions'], q['topic'], q['image'], q['correct_answers'], q['incorrect_answers'], q['sign_question'])
+            quiz_Q = question(q['questions'], q['topic'], q['image'], q['correct_answers'], q['incorrect_answers'], q['sign_question'], q['explanation'])
             quiz_Qs.append(quiz_Q.to_dict())
 
         logging.info("'{0}' topic quiz Bank of {1} questions created! First Question: {2}".format(topic, len(quiz_Qs), quiz_Qs[0]))
@@ -652,7 +652,7 @@ def question_get_quiz(req: func.HttpRequest) -> func.HttpResponse:
 
             quiz_Qs = []
             for q in random_Qs:
-                quiz_Q = question(q['questions'], q['topic'], q['image'], q['correct_answers'], q['incorrect_answers'], q['sign_question'])
+                quiz_Q = question(q['questions'], q['topic'], q['image'], q['correct_answers'], q['incorrect_answers'], q['sign_question'], q['explanation'])
                 quiz_Qs.append(quiz_Q.to_dict())
 
             logging.info("Quiz Bank of {} questions created! First Question: {}".format(len(quiz_Qs), quiz_Qs[0]))
@@ -676,7 +676,7 @@ def question_get_quiz(req: func.HttpRequest) -> func.HttpResponse:
             random_Qs = utility.select_random(Qs, len(Qs))
             quiz_Qs = []
             for q in random_Qs:
-                quiz_Q = question(q['questions'], q['topic'], q['image'], q['correct_answers'], q['incorrect_answers'], q['sign_question'])
+                quiz_Q = question(q['questions'], q['topic'], q['image'], q['correct_answers'], q['incorrect_answers'], q['sign_question'], q['explanation'])
                 quiz_Qs.append(quiz_Q.to_dict())
 
             logging.info("Quiz Bank of {} questions created! First Question: {}".format(len(quiz_Qs), quiz_Qs[0]))

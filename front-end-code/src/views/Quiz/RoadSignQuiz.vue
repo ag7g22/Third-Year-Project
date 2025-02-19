@@ -1,15 +1,23 @@
 <template>
     <div class="container">
-        <h1 class="title">DASHBOARD | {{ logged_in_user }}</h1>
-        <div class="buttons">
-            <button @click="next_page('account')">Account</button>
-            <button @click="load_friends_list()">Friends</button>
-            <button>Daily Training</button>
-            <button @click="next_page('categoryquiz')">Category Practice</button>
-            <button @click="next_page('roadsignquiz')">Road Sign Practice</button>
-            <button @click="load_leaderboards()">Leaderboard</button>
-            <button @click="logout()">Log out</button>   
+        <h1 class="title">ROAD SIGN QUIZ | {{ logged_in_user }}</h1>
+
+        <div v-if="current_view === 'instructions'" class="instruction-box">
+            <p>This is a quick flashcard quiz designed to </p>
+            <p>help you memorise the important road signs.</p>
+            <p> </p>
+            <p> You have 20 questions to answer. </p>
         </div>
+
+        <div v-if="current_view === 'quiz'">
+            
+        </div>
+
+        <!-- Buttons -->
+         <div class="buttons">
+            <button @click="next_page('dashboard')">Back</button>
+         </div>
+
         <p v-if="message.error" class="error-message">{{ message.error }}</p>
         <p v-if="message.success" class="success-message">{{ message.success }}</p>
     </div>
@@ -19,65 +27,21 @@
 import toastr from 'toastr';
 export default {
     // Page member variables and methods:
-    name: "dashboard",
+    name: "roadsignquiz",
     data() {
         return {
+            current_view: 'instructions',
             logged_in_user: this.$store.state.currentUser,
             message: { error: "", success: "" },
         };
     },
     methods: {
-        logout() {
-            // Reset messages
+        toggle_view(view) {
+            // Reset state
             this.message.error = "";
             this.message.success = "";
 
-            // Reset State
-            this.$store.commit("setCurrentUser", "");
-            this.$store.commit("setCurrentPassword", "");
-            this.$store.commit("setCurrentRank", { level: 'n/a', exp: 0, exp_threshold: 0 });
-            this.$store.commit("setCurrentStats", { id: 'n/a', streak: 0, daily_training_score: 0, training_completion_date: 'n/a'});
-            this.$store.commit("setCurrentSocialLists", {friends: [], friend_requests: []})
-            console.log("Current User and Password:", this.$store.state.currentUser, this.$store.state.currentPassword);
-            this.next_page('authentication')
-        },
-        async load_friends_list() {
-            // Get API update of latest status of friends
-            const friends_response = await this.azure_function("POST", "/user/friend/all", {"username": this.logged_in_user})
-            if (friends_response.result) {
-                this.message.success = "Retrieved Friends List! Loading Socials Page ..."
-
-                // Update state for current friends & load next page:
-                const social_lists = {friends: friends_response.msg.friends, friend_requests: friends_response.msg.friend_requests}
-                this.$store.commit("setCurrentSocialLists", social_lists);
-                this.next_page('friends');
-
-            } else {
-                this.message.error = friends_response.msg || "Unable to find user."
-            }
-        },
-        async load_leaderboards() {
-            // Get API update of the daily leaderboard
-            const leaderboard_public = await this.azure_function("GET", "/user/leaderboard", {})
-            const leaderboard_friends = await this.azure_function("POST", "/user/leaderboard/friend", { "id": this.$store.state.currentStats.id })
-
-            let public_list = [];
-            let friends_list = [];
-
-            // Update state for the current leaderboards, otherwise leave them empty.
-            if (leaderboard_public.result) {
-                public_list = leaderboard_public.msg; 
-            }
-
-            if (leaderboard_friends.result) {
-                friends_list = leaderboard_friends.msg;
-            }
-
-            this.$store.commit("setCurrentLeaderboards", {
-                public: public_list, friends: friends_list
-            });
-            this.next_page("leaderboard");
-
+            this.current_view = view;
         },
         async add_achievement(name) {
             // Add achievement to user's achievements and notify on the UI.
@@ -130,4 +94,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.instruction-box {
+  background-color: #f9f9f9;
+  border-left: 5px solid #007bff;
+  padding: 10px;
+  margin: 10px 0;
+  font-size: 14px;
+  color: #333;
+  border-radius: 5px;
+}
 </style>

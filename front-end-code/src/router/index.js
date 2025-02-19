@@ -4,8 +4,6 @@ import Router from 'vue-router'
 // Main Menu
 import MainPage from '@/views/MainMenu/MainPage.vue'
 import Authentication from '@/views/MainMenu/Authentication.vue'
-
-// Quiz Pages
 import Dashboard from '@/views/Dashboard.vue'
 
 // Account Pages
@@ -15,6 +13,11 @@ import AccountUpdate from '@/views/Account/AccountUpdate.vue'
 // Social-related pages
 import FriendsList from '@/views/Social/FriendsList.vue'
 import Leaderboard from '@/views/Social/Leaderboard.vue'
+
+// Quiz Pages
+import CategoryQuiz from '@/views/Quiz/CategoryQuiz.vue'
+import RoadSignQuiz from '@/views/Quiz/RoadSignQuiz.vue'
+import Feedback from '@/views/Quiz/Feedback.vue'
 
 Vue.use(Router)
 
@@ -56,6 +59,21 @@ export default new Router({
       path: '/leaderboard',
       name: 'leaderboard',
       component: Leaderboard
+    },
+    {
+      path: '/categoryquiz',
+      name: 'categoryquiz',
+      component: CategoryQuiz
+    },
+    {
+      path: '/roadsignquiz',
+      name: 'roadsignquiz',
+      component: RoadSignQuiz
+    },
+    {
+      path: '/feedback',
+      name: 'feedback',
+      component: Feedback
     }
 
   ]

@@ -27,7 +27,7 @@ class test_question_get_category(unittest.TestCase):
         # Dummy questions
         for i in range(1,8):
             self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Driving Off",
-                                                    "image": "n/a", "sign_question": False,
+                                                    "image": "n/a", "sign_question": False, "explanation": "This is the explanation.",
                                                     "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
                                                     "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
                                                                           "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
@@ -35,7 +35,7 @@ class test_question_get_category(unittest.TestCase):
             
         for i in range(8,11):
             self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Driving Off",
-                                                    "image": "image.jpg", "sign_question": True,
+                                                    "image": "image.jpg", "sign_question": True, "explanation": "This is the explanation.",
                                                     "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
                                                     "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
                                                                             "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
@@ -43,7 +43,7 @@ class test_question_get_category(unittest.TestCase):
 
         for i in range(1,8):
             self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Urban Driving",
-                                                    "image": "n/a", "sign_question": False,
+                                                    "image": "n/a", "sign_question": False, "explanation": "This is the explanation.",
                                                     "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
                                                     "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
                                                                           "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
@@ -51,7 +51,7 @@ class test_question_get_category(unittest.TestCase):
             
         for i in range(8,11):
             self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Urban Driving",
-                                                    "image": "image.jpg", "sign_question": True,
+                                                    "image": "image.jpg", "sign_question": True, "explanation": "This is the explanation.",
                                                     "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
                                                     "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
                                                                             "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
@@ -59,7 +59,7 @@ class test_question_get_category(unittest.TestCase):
 
         for i in range(1,8):
             self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Rural Driving",
-                                                    "image": "n/a", "sign_question": False,
+                                                    "image": "n/a", "sign_question": False, "explanation": "This is the explanation.",
                                                     "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
                                                     "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
                                                                           "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
@@ -67,7 +67,7 @@ class test_question_get_category(unittest.TestCase):
             
         for i in range(8,11):
             self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Rural Driving",
-                                                    "image": "image.jpg", "sign_question": True,
+                                                    "image": "image.jpg", "sign_question": True, "explanation": "This is the explanation.",
                                                     "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
                                                     "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
                                                                             "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
@@ -75,7 +75,7 @@ class test_question_get_category(unittest.TestCase):
 
         for i in range(1,8):
             self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Bigger Roads",
-                                                    "image": "n/a", "sign_question": False,
+                                                    "image": "n/a", "sign_question": False, "explanation": "This is the explanation.",
                                                     "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
                                                     "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
                                                                           "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
@@ -83,7 +83,7 @@ class test_question_get_category(unittest.TestCase):
             
         for i in range(8,11):
             self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Bigger Roads",
-                                                    "image": "image.jpg", "sign_question": True,
+                                                    "image": "image.jpg", "sign_question": True, "explanation": "This is the explanation.",
                                                     "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
                                                     "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
                                                                             "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
@@ -91,7 +91,7 @@ class test_question_get_category(unittest.TestCase):
 
         for i in range(1,8):
             self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Motorways",
-                                                    "image": "n/a", "sign_question": False,
+                                                    "image": "n/a", "sign_question": False, "explanation": "This is the explanation.",
                                                     "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
                                                     "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
                                                                           "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
@@ -99,7 +99,7 @@ class test_question_get_category(unittest.TestCase):
             
         for i in range(8,11):
             self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Motorways",
-                                                    "image": "image.jpg", "sign_question": True,
+                                                    "image": "image.jpg", "sign_question": True, "explanation": "This is the explanation.",
                                                     "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
                                                     "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
                                                                             "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
@@ -107,7 +107,7 @@ class test_question_get_category(unittest.TestCase):
 
         for i in range(1,8):
             self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Tricky Conditions",
-                                                    "image": "n/a", "sign_question": False,
+                                                    "image": "n/a", "sign_question": False, "explanation": "This is the explanation.",
                                                     "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
                                                     "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
                                                                           "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
@@ -115,7 +115,7 @@ class test_question_get_category(unittest.TestCase):
             
         for i in range(8,11):
             self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Tricky Conditions",
-                                                    "image": "image.jpg", "sign_question": True,
+                                                    "image": "image.jpg", "sign_question": True, "explanation": "This is the explanation.",
                                                     "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
                                                     "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
                                                                             "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
@@ -123,7 +123,7 @@ class test_question_get_category(unittest.TestCase):
 
         for i in range(1,8):
             self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Breakdowns",
-                                                    "image": "n/a", "sign_question": False,
+                                                    "image": "n/a", "sign_question": False, "explanation": "This is the explanation.",
                                                     "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
                                                     "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
                                                                           "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
@@ -131,7 +131,7 @@ class test_question_get_category(unittest.TestCase):
             
         for i in range(8,11):
             self.questions_proxy.create_item({"id": str(uuid.uuid4()), "questions": ["SOq{}a".format(i), "SOq{}b".format(i), "SOq{}c".format(i), "SOq{}d".format(i)], "topic": "Breakdowns",
-                                                    "image": "image.jpg", "sign_question": True,
+                                                    "image": "image.jpg", "sign_question": True, "explanation": "This is the explanation.",
                                                     "correct_answers": ["CORRECT{}a".format(i), "CORRECT{}b".format(i), "CORRECT{}c".format(i), "CORRECT{}d".format(i)],
                                                     "incorrect_answers": ["WRONG{}a".format(i), "WRONG{}b".format(i), "WRONG{}c".format(i), "WRONG{}d".format(i),
                                                                             "WRONG{}e".format(i), "WRONG{}f".format(i), "WRONG{}g".format(i), "WRONG{}h".format(i)]
@@ -173,7 +173,7 @@ class test_question_get_category(unittest.TestCase):
         print(dict_response['msg'])
         self.assertTrue(dict_response['result'])
 
-    # @unittest.skip
+    @unittest.skip
     def test_questions_get_sign_questions(self):
         # Send a request to register same user. (Input is a dictionary)
         request = {"No_of_Qs": 6, "topic": "sign_question"}
@@ -186,3 +186,7 @@ class test_question_get_category(unittest.TestCase):
         # Check if you actually got randomised questions.
         print(dict_response['msg'])
         self.assertTrue(dict_response['result'])
+
+    #@unittest.skip
+    def test(self):
+        pass
