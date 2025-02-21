@@ -48,6 +48,13 @@
         <div v-if="state.current_view === 'quiz'">
             <div class="questionnaire">
                 <div v-if="currentQuestion < questions.length">
+                    <p>Question {{ currentQuestion + 1 }} of {{ questions.length }}</p>
+
+                    <!-- Progress Bar -->
+                    <div class="progress-container">
+                    <div class="progress-bar" :style="{ width: progressBarWidth + '%' }"></div>
+                    </div>
+
                     <h2>{{ questions[currentQuestion].question }}</h2>
 
                     <div v-if="questions[currentQuestion].image !== 'n/a'">
@@ -55,15 +62,15 @@
                     </div>
 
                     <button @click="toggleExplanation" class="explanation-button">
-                        {{ showExplanation ? "Hide Explanation" : "Show Explanation" }}
+                        {{ explanation.showExplanation ? "Hide Explanation" : "Show Explanation" }}
                     </button>
                     <button class="stop-button" @click="terminate_quiz()">Stop Quiz</button>
 
-                    <div v-if="showExplanation" class="overlay" @click="toggleExplanation">
+                    <div v-if="explanation.showExplanation" class="overlay" @click="toggleExplanation">
                         <div class="overlay-content" @click.stop>
                             <h2>Explanation</h2>
                             <p>{{ questions[currentQuestion].explanation }}</p>
-                            <button @click="showExplanation = false">Close</button>
+                            <button @click="explanation.showExplanation = false">Close</button>
                         </div>
                     </div>
 
@@ -85,7 +92,10 @@
                 </div>
                 <div v-else>
                     <h2>You've completed the questionnaire! 🎉</h2>
-                    <button class="stop-button" @click="terminate_quiz()">Stop Quiz</button>
+                    <h3> Score: {{ percentage }}% </h3>
+                    <p> {{ quiz_message }} </p>
+                    <button v-if="updateFinished" class="stop-button" @click="terminate_quiz()">Back</button>
+                    <button>Feedback</button>
                 </div>
             </div>
 
@@ -111,13 +121,31 @@ export default {
             currentQuestion: 0, // Question pointer
             selectedAnswer: null, // This is the selected question
             isCorrect: false, // boolean if the question is actually correct
-            showExplanation: false, // Explanation of the question
+            explanation: { showExplanation: false, wasClicked: false }, // Explanation of the question, flag if it got clicked on
+
+            // Timer
+            answer_time: { elapsedTime: 0, stopwatch: null, stopwatchRunning: false },
+
+            // Feedback
+            feedback: [],
+            // {question, correct_ans, selected_ans }
+
+            // Score, averaged out by number of questions.
+            total_score: 0,
+            percentage: null,
+            final_score: null,
+            exp_gain: null,
+            quiz_message: "",
 
             // Images
             images: images.keys().map(image => images(image)),
             image: "",
 
+            // Flag for updating database scores.
+            updateFinished: false,
+
             logged_in_user: this.$store.state.currentUser,
+            currentRank: this.$store.state.currentRank,
             message: { error: "", success: "" },
         };
     },
@@ -178,32 +206,72 @@ export default {
                 this.message.success = 'Loading quiz successful!';
                 this.questions = quiz.msg;
 
-                this.add_image()
+                this.add_image();
 
-                // Switch to the quiz section
-                this.toggle_view('quiz')
+                // Switch to the quiz section, start timer for question.
+                this.toggle_view('quiz');
+                this.startStopwatch();
             } else {
                 this.message.error = response.msg || "Loading quiz failed.";
             }
         },
         selectAnswer(option) {
+            // When you select an answer it locks in, and calculate score and add it to total.
             if (!this.selectedAnswer) {
+                this.stopStopwatch();
                 this.selectedAnswer = option;
                 this.isCorrect = option === this.questions[this.currentQuestion].correct_answer;
+                this.add_score();
             }
         },
-        toggleExplanation() {
-            this.showExplanation = !this.showExplanation;
-        },
-        nextQuestion() {
+        async nextQuestion() {
+            // Moving to next question, reset question state and stopwatch and time again.
+            this.resetStopwatch();
             this.selectedAnswer = null;
-            this.showExplanation = false;
+            this.explanation = { showExplanation: false, clickedOn: false };
             this.isCorrect = false;
             this.currentQuestion++;
             if (this.currentQuestion < this.questions.length) {
                this.add_image();
+               this.startStopwatch();
+            } else {
+                await this.get_stats();
+                // Update score if quiz completed:
+                console.log("FINAL SCORE:", this.final_score);
+                await this.update_user_topic_score();
+                await this.update_user_exp();
+                this.updateFinished = true;
             }
             
+        },
+        toggleExplanation() {
+            // Toggle flag id the explanation was toggled at least once.
+            if (!this.explanation.showExplanation && !this.explanation.wasClicked) {
+                this.explanation.wasClicked = true;
+            }
+            // Toggle explanation
+            this.explanation.showExplanation = !this.explanation.showExplanation;
+        },
+        add_score() {
+            let score = 0;
+            if (this.isCorrect) { // If answered correct, calculate score based on how long was spent on that question.
+                score = parseFloat(((60-this.answer_time.elapsedTime) / 60).toPrecision(2))
+            }
+            if (this.explanation.wasClicked) { // If the explanation was toggled, cap the score to 0.1.
+                score = 0.1;
+            } 
+            if (!this.isCorrect) { // If not answered correct, add nothing to the score.
+                score = 0;
+                this.add_feedback();
+            }
+            this.total_score += score;
+            console.log(`Time taken: ${this.answer_time.elapsedTime}, Added score: ${score}, Total Score: ${this.total_score}`)
+        },
+        add_feedback() {
+            // Add to feedback list to send to API later
+            let q_obj = this.questions[this.currentQuestion]
+            console.log(JSON.stringify({question: q_obj.question, selected: this.selectedAnswer, correct: q_obj.correct_answer}))
+            this.feedback.push({question: q_obj.question, selected: this.selectedAnswer, correct: q_obj.correct_answer})
         },
         add_image() {
             // Library of images
@@ -212,15 +280,130 @@ export default {
                 this.image = this.images.filter((image, index) => images.keys()[index].includes(question_image))[0];
             }
         },
+        startStopwatch() {
+            if (!this.answer_time.stopwatchRunning) {
+                this.answer_time.stopwatchRunning = true;
+                this.answer_time.stopwatch = setInterval(() => {
+                this.answer_time.elapsedTime++; // Increment time
+                }, 1000);
+            }
+        },
+        stopStopwatch() {
+            clearInterval(this.answer_time.stopwatch);
+            this.answer_time.stopwatchRunning = false;
+        },
+        resetStopwatch() {
+            this.stopStopwatch();
+            this.answer_time.elapsedTime = 0; // Reset back to 0
+        },
+        get_stats() {
+            this.percentage = parseFloat((this.total_score / this.num_questions.selected) * 100).toPrecision(2);
+            this.final_score = parseFloat((this.total_score / this.num_questions.selected)).toPrecision(2);
+            this.exp_gain = Math.round(((this.total_score / this.num_questions.selected) * 500) / 100) * 100; 
+            console.log(this.exp_gain)
+            
+            if (this.final_score >= 0.9 && this.final_score < 1.0) {
+                this.quiz_message = "Amazing job! You crushed it! Your hard work really paid off!"
+            }
+            if (this.final_score >= 0.8 && this.final_score < 0.9) {
+                this.quiz_message = "Great work! You’re so close to perfection—keep it up!"
+            }
+            if (this.final_score >= 0.7 && this.final_score < 0.8) {
+                this.quiz_message = "Nice effort! You’ve got a solid understanding. A little more practice, and you’ll master it!"
+            }
+            if (this.final_score >= 0.6 && this.final_score < 0.7) {
+                this.quiz_message = "You're doing well! Keep going, and you’ll improve even more!"
+            }
+            if (this.final_score >= 0.5 && this.final_score < 0.6) {
+                this.quiz_message = "Good attempt! Every step is progress—keep practicing, and you’ll get there!"
+            }
+            if (this.final_score >= 0.4 && this.final_score < 0.5) {
+                this.quiz_message = "You’re learning, and that’s what matters! Keep challenging yourself!"
+            }
+            if (this.final_score >= 0.3 && this.final_score < 0.4) {
+                this.quiz_message = "Not bad! Mistakes help us grow—review what you missed and try again!"
+            }
+            if (this.final_score < 0.3) {
+                this.quiz_message = "Don't give up! Every attempt makes you better. Keep pushing forward!"
+            }
+        },
+        async update_user_topic_score() {
+            // Add changes to database
+            const user_stats = this.$store.state.currentStats;
+            const topicMap = {
+                'Driving Off': 'Driving Off',
+                'Urban Driving': 'Urban Driving',
+                'Rural Driving': 'Rural Driving',
+                'Bigger Roads': 'Bigger Roads',
+                'Motorways': 'Motorways',
+                'Tricky Conditions': 'Tricky Conditions',
+                'Breakdowns': 'Breakdowns'
+            };
+
+            const input = { id: user_stats.id, updates: { [topicMap[this.state.current_topic]]: parseFloat(this.final_score)} };
+            console.log(input)
+
+            const update_response = await this.azure_function("PUT", "/user/update/scores", input)
+            // Show message incase the API response fails, otherwise update state.
+            if (update_response.result) {
+                this.message.success = 'Score update Successful!'
+            } else {
+                this.message.error = update_response.msg || "Score update Failed."
+            }
+        },
+        async update_user_exp() {
+            // Add changes to database
+            const user_stats = this.$store.state.currentStats;
+            const prev_level = this.currentRank.level;
+
+            // Increment level if exp exceeds threshold:
+            if (this.currentRank.exp + this.exp_gain >= this.currentRank.exp_threshold) {
+                // Reset exp progress but add leftover exp and update exp threshold
+                this.currentRank.exp = (this.currentRank.exp + this.exp_gain) - this.currentRank.exp_threshold;
+                this.currentRank.level += 1;
+                this.currentRank.exp_threshold += 500;
+            } else {
+                this.currentRank.exp += this.exp_gain;
+            }
+
+            const input = { id: user_stats.id, updates: { "rank": this.currentRank } };
+            console.log(input);
+
+            const update_response = await this.azure_function("PUT", "/user/update/info", input)
+            // Show message incase the API response fails, otherwise update state.
+            if (update_response.result) {
+                // Update rank in UI too.
+                this.$store.commit("setCurrentRank", this.currentRank);
+                this.currentRank = this.$store.state.currentRank;
+            
+                if (prev_level < this.currentRank.level) {
+                    this.message.success = `LEVELED UP TO LEVEL ${this.currentRank.level}!` 
+                } else {
+                    this.message.success = `Gained ${this.exp_gain} exp!`
+                }
+
+            } else {
+                this.message.error = update_response.msg || "Score update Failed."
+            }
+        },
         terminate_quiz() {
-            // Reset state
-            this.state = { current_view: 'categories', current_topic: '', current_description: '' }
-            this.num_questions = { options: [8, 10, 12], selected: 8 }
-            this.questions = []
-            this.currentQuestion = 0,
-            this.selectedAnswer = null,
-            this.isCorrect = false,
-            this.showExplanation = false,
+            // Reset everything
+            this.state = { current_view: 'categories', current_topic: '', current_description: '' } // State of quiz page
+            this.num_questions = { options: [8, 10, 12], selected: 8 } // Dropdown menu
+            this.questions = [] // Quiz questions by API
+            this.currentQuestion = 0 // Question pointer
+            this.selectedAnswer = null // This is the selected question
+            this.isCorrect = false, // boolean if the question is actually correct
+            this.explanation = { showExplanation: false, wasClicked: false }, // Explanation of the question, flag if it got clicked on
+            this.answer_time = { elapsedTime: 0, stopwatch: null, stopwatchRunning: false }
+            this.feedback = []
+            this.total_score = 0
+            this.percentage = null
+            this.final_score = null
+            this.exp_gain = null
+            this.quiz_message = ""
+            this.scoreWasAdded = false;
+            this.message = { error: "", success: "" }
 
             this.toggle_view('categories')
         },
@@ -272,6 +455,11 @@ export default {
             this.$router.push(`/${page}`);
         }
     },
+    computed: {
+    progressBarWidth() {
+      return (this.currentQuestion / (this.questions.length - 1)) * 100;
+    }
+  },
 };
 </script>
 
@@ -398,6 +586,20 @@ h2 {
   border: none;
   cursor: pointer;
   border-radius: 5px;
+}
+
+.progress-container {
+  width: 100%;
+  height: 20px;
+  background-color: #f3f3f3;
+  border-radius: 2px;
+  margin-bottom: 2px;
+}
+
+.progress-bar {
+  height: 100%;
+  background-color: #4caf50;
+  border-radius: 10px;
 }
 
 </style>

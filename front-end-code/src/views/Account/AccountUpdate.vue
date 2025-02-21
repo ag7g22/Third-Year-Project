@@ -83,7 +83,7 @@ export default {
             const update_response = await this.azure_function("PUT", "/user/update/info", input)
 
             // Show message incase the API response fails, otherwise update state.
-            if (update_response) {
+            if (update_response.result) {
                 this.$store.commit("setCurrentUser", this.form.new_username);
                 this.message.success = 'Username update Successful!'
             } else {
@@ -119,7 +119,7 @@ export default {
             const update_response = await this.azure_function("PUT", "/user/update/info", input)
 
             // Show message incase the API response fails, otherwise update state.
-            if (update_response) {
+            if (update_response.result) {
                 this.$store.commit("setCurrentPassword", this.form.new_password);
                 this.message.success = 'Password update Successful!'
             } else {
