@@ -114,7 +114,7 @@ export default {
     data() {
         return {
             state: { current_view: 'categories', current_topic: '', current_description: '' }, // State of quiz page
-            num_questions: { options: [8, 10, 12], selected: 8 }, // Dropdown menu
+            num_questions: { options: [5, 10, 15, 20], selected: 10 }, // Dropdown menu
 
             // Quiz variables
             questions: [], // Quiz questions by API

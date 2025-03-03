@@ -25,5 +25,538 @@ questions = [
         "incorrect_answers": [
             
         ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
+        "explanation": "This is the explanation.",
+        "questions": [
+
+        ], 
+        "correct_answers": [
+
+        ],
+        "incorrect_answers": [
+            
+        ]
     }
 ]
+
+def count_unwritten_questions():
+    count = 0
+    for d in questions:
+        if d.get("explanation") == "This is the explanation.":
+            count += 1
+    return count
+
+def main():
+    print("Compiling {} questions ...".format(len(questions)))
+
+    unwritten_count = count_unwritten_questions()
+    written_count = len(questions) - unwritten_count
+
+    print("Written questions: {}, Unwritten questions: {}".format(written_count, unwritten_count))
+
+    if unwritten_count == 0:
+        for question in questions:
+            questions_proxy.create_item(question)
+
+        print("Questions upload completed.")
+    else: 
+        print("Questions upload failed.")
+
+if __name__ == "__main__":
+    main()
