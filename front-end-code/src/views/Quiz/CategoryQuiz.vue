@@ -306,19 +306,19 @@ export default {
                 this.quiz_message = "Amazing job! You crushed it! Your hard work really paid off!"
             }
             if (this.final_score >= 0.8 && this.final_score < 0.9) {
-                this.quiz_message = "Great work! You’re so close to perfection—keep it up!"
+                this.quiz_message = "Great work! You're so close to perfection—keep it up!"
             }
             if (this.final_score >= 0.7 && this.final_score < 0.8) {
-                this.quiz_message = "Nice effort! You’ve got a solid understanding. A little more practice, and you’ll master it!"
+                this.quiz_message = "Nice effort! You've got a solid understanding. A little more practice, and you'll master it!"
             }
             if (this.final_score >= 0.6 && this.final_score < 0.7) {
-                this.quiz_message = "You're doing well! Keep going, and you’ll improve even more!"
+                this.quiz_message = "You're doing well! Keep going, and you'll improve even more!"
             }
             if (this.final_score >= 0.5 && this.final_score < 0.6) {
-                this.quiz_message = "Good attempt! Every step is progress—keep practicing, and you’ll get there!"
+                this.quiz_message = "Good attempt! Every step is progress—keep practicing, and you'll get there!"
             }
             if (this.final_score >= 0.4 && this.final_score < 0.5) {
-                this.quiz_message = "You’re learning, and that’s what matters! Keep challenging yourself!"
+                this.quiz_message = "You're learning, and that's what matters! Keep challenging yourself!"
             }
             if (this.final_score >= 0.3 && this.final_score < 0.4) {
                 this.quiz_message = "Not bad! Mistakes help us grow—review what you missed and try again!"

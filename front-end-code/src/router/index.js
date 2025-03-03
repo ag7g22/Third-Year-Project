@@ -19,6 +19,10 @@ import CategoryQuiz from '@/views/Quiz/CategoryQuiz.vue'
 import RoadSignQuiz from '@/views/Quiz/RoadSignQuiz.vue'
 import Feedback from '@/views/Quiz/Feedback.vue'
 
+// Hazard Perception
+import HazardPerception from '@/views/Quiz/HazardPerception.vue'
+import HPVideo from '@/views/Quiz/HPVideo.vue'
+
 Vue.use(Router)
 
 export default new Router({
@@ -74,6 +78,16 @@ export default new Router({
       path: '/feedback',
       name: 'feedback',
       component: Feedback
+    },
+    {
+      path: '/hazard',
+      name: 'hazard',
+      component: HazardPerception
+    },
+    {
+      path: '/HPvideo',
+      name: 'HPvideo',
+      component: HPVideo
     }
 
   ]

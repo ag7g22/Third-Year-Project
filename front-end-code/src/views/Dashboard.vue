@@ -7,6 +7,7 @@
             <button>Daily Training</button>
             <button @click="next_page('categoryquiz')">Category Practice</button>
             <button @click="next_page('roadsignquiz')">Road Sign Practice</button>
+            <button @click="next_page('hazard')">Hazard Perception</button>
             <button @click="load_leaderboards()">Leaderboard</button>
             <button @click="logout()">Log out</button>   
         </div>
