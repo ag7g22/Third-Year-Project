@@ -13,9 +13,32 @@
 
 <script>
 // Vue Component, to be referenced in other parts of the app:
+import io from 'socket.io-client';
+
 export default {
-    name: 'Header'
+    name: 'Header',
+    mounted: function() {
+        this.connect(); 
+    },
+    data() {
+      return {
+        appName: "Vroom Vroom Quiz"
+      };
+    },
+    methods: {
+        // Connect the client to the server
+        connect() {
+            var socket = io();
+            this.$store.commit("setCurrentClientSocket", socket);
+            console.log("Client-Socket JOINED: ", this.$store.state.currentClientSocket);
+        },
+        next_page(page) {
+            console.log("/" + page);
+            this.$router.push(`/${page}`);
+        }
+    },
 }
+
 </script>
 
 <style lang="scss" scoped>

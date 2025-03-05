@@ -5,6 +5,7 @@
             <button @click="next_page('account')">Account</button>
             <button @click="load_friends_list()">Friends</button>
             <button>Daily Training</button>
+            <button @click="next_page('lobby')">Versus</button>
             <button @click="next_page('categoryquiz')">Category Practice</button>
             <button @click="next_page('roadsignquiz')">Road Sign Practice</button>
             <button @click="next_page('hazard')">Hazard Perception</button>

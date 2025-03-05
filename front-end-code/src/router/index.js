@@ -13,6 +13,7 @@ import AccountUpdate from '@/views/Account/AccountUpdate.vue'
 // Social-related pages
 import FriendsList from '@/views/Social/FriendsList.vue'
 import Leaderboard from '@/views/Social/Leaderboard.vue'
+import Lobby from '@/views/Social/Lobby.vue'
 
 // Quiz Pages
 import CategoryQuiz from '@/views/Quiz/CategoryQuiz.vue'
@@ -63,6 +64,11 @@ export default new Router({
       path: '/leaderboard',
       name: 'leaderboard',
       component: Leaderboard
+    },
+    {
+      path: '/lobby',
+      name: 'lobby',
+      component: Lobby
     },
     {
       path: '/categoryquiz',
