@@ -40,7 +40,7 @@
                 <li v-for="user in search.users" :key="user.id">
                 {{ user.username }}
                 <button @click="view_user(user.username)"">View</button>
-                <button v-if="!social_lists.friends.some(friend => friend.username === user.username)" @click="send_friend_request(user.id)">Add Friend</button>
+                <button v-if="!social_lists.friends.some(friend => friend.username === user.username)" @click="send_friend_request(user.id, user.username)">Add Friend</button>
                 </li>
             </ul>
         </div>
@@ -51,6 +51,8 @@
 </template>
   
 <script>
+import toastr from 'toastr';
+import 'toastr/build/toastr.min.css';
 export default {
     // Page member variables and methods:
     name: "friends",
@@ -175,7 +177,7 @@ export default {
                 this.message.error = reject.msg || "Friend reject Failed."
             }
         },
-        async send_friend_request(recipient_id) {
+        async send_friend_request(recipient_id, recipient_username) {
             // Reset messages
             this.message.error = "";
             this.message.success = "";
@@ -185,6 +187,15 @@ export default {
             const search = await this.azure_function("POST", "/user/friend/request", input)
             if (search.result) {
                 this.message.success = 'Sent request!';
+
+                // NOTIFICATION
+                const options = { "closeButton": true, "debug": false, "newestOnTop": true, "progressBar": true,
+                "positionClass": "toast-top-right", "preventDuplicates": true, "onclick": null, "showDuration": "300",
+                "hideDuration": "1000", "timeOut": "5000", "extendedTimeOut": "1000", "showEasing": "swing",
+                "hideEasing": "linear", "showMethod": "fadeIn","hideMethod": "fadeOut"}
+
+                toastr.success("Sent friend request to " + '"' + recipient_username + '"', options)
+
             } else {
                 this.message.error = search.msg || "Friend request Failed."
             }

@@ -26,6 +26,7 @@
 
 <script>
 import toastr from 'toastr';
+import 'toastr/build/toastr.min.css';
 export default {
   name: "authentication",
   data() {
@@ -165,6 +166,7 @@ export default {
           this.$store.commit("setCurrentAchievements", achievements);
           this.message.success = 'Achievements update Successful!'
 
+          // NOTIFICATION
           const options = { "closeButton": true, "debug": false, "newestOnTop": true, "progressBar": true,
           "positionClass": "toast-top-right", "preventDuplicates": true, "onclick": null, "showDuration": "300",
           "hideDuration": "1000", "timeOut": "5000", "extendedTimeOut": "1000", "showEasing": "swing",

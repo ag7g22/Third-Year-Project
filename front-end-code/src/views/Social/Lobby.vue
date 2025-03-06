@@ -3,9 +3,8 @@
         <h1 class="title">CRASH QUIZ | {{ state.current_view }} | {{ logged_in_user }}</h1>
 
         <!-- Toogle Buttons -->
-        <div class="buttons">
+        <div v-if="state.current_view !== 'LOBBY'" class="buttons">
             <button @click="next_page('dashboard')">Back</button>
-            <button @click="send_ACK()">Test Server Comms</button>
             <button @click="toggle_view('RULES')">Rules</button>
             <button @click="toggle_view('HOST')">Host Game</button>
             <button @click="toggle_view('JOIN')">Join Game</button>
@@ -32,16 +31,23 @@
         <div v-if="state.current_view === 'JOIN'">
             <h2> Enter a HOST password </h2>
             <input type="text" placeholder="password" v-model="host_password" />
-            <button>Join Game</button>
+            <button @click="join_game()">Join Game</button>
         </div>
 
         <div v-if="state.current_view === 'LOBBY'">
 
             <div v-if="state.role === 'HOST'">
+                <button>Start Game</button>
                 <button @click="delete_game()">Delete Lobby</button>
             </div>
             <div v-else>
-                <button>Leave Game</button>
+                <button @click="leave_game()">Leave Game</button>
+            </div>
+
+            <h2>HOST: {{ game_state.host }}</h2>
+            <h2>PLAYERS:</h2>
+            <div v-for="player in game_state.players">
+                <p>{{ player }}</p>
             </div>
             
         </div>
@@ -69,25 +75,49 @@ export default {
             host_password: '', 
             
             // States updated by server:
-            game_state: null,
-            user_state: null,
+            game_state: {host: '', password: '', players: []},
+            user_state: {username: '', host: '', role: ''},
 
             logged_in_user: this.$store.state.currentUser,
             message: { error: "", success: "" },
         };
     },
     methods: {
-        // Testing client-server communication
-        send_ACK() {
-            this.client_socket.emit('ACK');
+        reset_states() {
+            // Run this when leaving a lobby
+            this.state = { current_view: "RULES", role: '' };
+            this.host_password = '';
+            this.game_state = {host: '', password: '', players: []};
+            this.user_state = {username: '', host: '', role: ''};
+
         },
         create_game() {
             // Send to server to register game.
-            this.client_socket.emit('create-game', this.logged_in_user, this.host_password);
+            this.message.error = "";
+            this.message.success = "";
+            this.host_password = '';
+            this.client_socket.emit('create-lobby', this.logged_in_user, this.host_password);
         },
         delete_game() {
             // Send to server to remove game.
-            this.client_socket.emit('delete-game', this.logged_in_user);
+            this.message.error = "";
+            this.message.success = "";
+            this.client_socket.emit('delete-lobby', this.logged_in_user);
+            this.reset_states();
+        },
+        join_game() {
+            // Send to server to join game.
+            this.message.error = "";
+            this.message.success = "";
+            this.host_password = '';
+            this.client_socket.emit('join-lobby', this.logged_in_user, this.host_password);
+        },
+        leave_game() {
+            // Send to server to leave game.
+            this.message.error = "";
+            this.message.success = "";
+            this.client_socket.emit('leave-lobby', this.logged_in_user, this.user_state.host);
+            this.reset_states();
         },
         toggle_view(view) {
             // Reset state
@@ -157,26 +187,35 @@ export default {
 function listen(vue, client_socket) {
     console.log("Current Client: ", client_socket);
 
-    client_socket.on('server_ACK', function() {
-        console.log("Server sent ACK")
+    client_socket.on('update-user', function(data) {
+        vue.game_state = data.game_state;
+        vue.user_state = data.user_state; 
     });
 
-    client_socket.on('create-game-success', function() {
-        vue.toggle_view('LOBBY');
-    });
-
-    client_socket.on('create-game-fail', function() {
+    client_socket.on('create-lobby-fail', function() {
         vue.message.error = "Password already being used."
+    });
+
+    client_socket.on('create-lobby-success', function() {
+        vue.toggle_view('LOBBY');
     });
 
     client_socket.on('remove-player', function() {
         vue.toggle_view('RULES');
         vue.message.success = "Lobby was terminated."
-    })
+    });
 
-    client_socket.on('update-user', function(data) {
-        vue.game_state = data.game_state;
-        vue.user_state = data.user_state; 
+    client_socket.on('join-lobby-success', function() {
+        vue.toggle_view('LOBBY');
+        vue.message.success = 'Joined Lobby.';
+    });
+
+    client_socket.on('lobby-full', function() {
+        vue.message.error = 'Lobby is currently full.';
+    });
+
+    client_socket.on('join-lobby-fail', function() {
+        vue.message.error = "Lobby doesn't exist.";
     });
 }
 
