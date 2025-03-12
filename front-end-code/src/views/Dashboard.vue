@@ -24,12 +24,16 @@ export default {
     name: "dashboard",
     data() {
         return {
+            client_socket: this.$store.state.currentClientSocket,
             logged_in_user: this.$store.state.currentUser,
             message: { error: "", success: "" },
         };
     },
     methods: {
         logout() {
+            // Let server know user has logged out.
+            this.client_socket.emit('logout', this.logged_in_user);
+
             // Reset messages
             this.message.error = "";
             this.message.success = "";
@@ -39,9 +43,10 @@ export default {
             this.$store.commit("setCurrentPassword", "");
             this.$store.commit("setCurrentRank", { level: 'n/a', exp: 0, exp_threshold: 0 });
             this.$store.commit("setCurrentStats", { id: 'n/a', streak: 0, daily_training_score: 0, training_completion_date: 'n/a'});
-            this.$store.commit("setCurrentSocialLists", {friends: [], friend_requests: []})
+            this.$store.commit("setCurrentSocialLists", {friends: [], friend_requests: []});
             console.log("Current User and Password:", this.$store.state.currentUser, this.$store.state.currentPassword);
-            this.next_page('authentication')
+
+            this.next_page('authentication');
         },
         async load_friends_list() {
             // Get API update of latest status of friends

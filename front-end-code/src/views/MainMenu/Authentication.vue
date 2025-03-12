@@ -7,7 +7,7 @@
         <button @click="next_page('main')">Back</button>
         <input type="text" placeholder="Username" v-model="loginUsername" />
         <input type="text" placeholder="Password" v-model="loginPassword" />
-        <button class="btn login" @click="login">Login</button>
+        <button class="btn login" @click="check_login()">Login</button>
         <p>Don't have an account? <span @click="toggleForm">Register here</span></p>
       </div>
       <div class="form-box" v-else>
@@ -29,6 +29,16 @@ import toastr from 'toastr';
 import 'toastr/build/toastr.min.css';
 export default {
   name: "authentication",
+  mounted: function() {
+    listen(this, this.client_socket); 
+  },
+  unmounted: function() {
+        // Remove socket listeners
+        if (this.client_socket) {
+          client_socket.off('check-login-successful');
+          client_socket.off('check-login-fail');
+        }
+    },
   data() {
     return {
       showLogin: true,
@@ -36,6 +46,8 @@ export default {
       loginPassword: '',
       registerUsername: '',
       registerPassword: '',
+
+      client_socket: this.$store.state.currentClientSocket,
       message: { error: "", success: "" }
     };
   },
@@ -52,6 +64,10 @@ export default {
       this.registerPassword = "";
 
       this.showLogin = !this.showLogin;
+    },
+    check_login() {
+      // Check if this user logged in already
+      this.client_socket.emit('check-login', this.loginUsername);
     },
     async login() {
       // Reset messages
@@ -80,6 +96,9 @@ export default {
 
           // GET USER STATS:
           await this.retrieve_user_info(this.$store.state.currentUser);
+
+          // Add to logged in server:
+          this.client_socket.emit('login', this.$store.state.currentUser);
 
           console.log("Logged in as Current User and Password:", this.$store.state.currentUser, this.$store.state.currentPassword);
 
@@ -195,6 +214,19 @@ export default {
     }
   }
 };
+
+function listen(vue, client_socket) {
+    console.log("Current Client: ", client_socket);
+
+    client_socket.on('check-login-successful', function() {
+        vue.login()
+    });
+
+    client_socket.on('check-login-fail', function() {
+      vue.message.error = "User is already logged in"
+    });
+}
+
 </script>
 
   <style lang="scss" scoped>
