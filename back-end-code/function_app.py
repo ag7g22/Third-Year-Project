@@ -636,17 +636,7 @@ def question_get_quiz(req: func.HttpRequest) -> func.HttpResponse:
     username = input['username']
 
     try:
-        # Get the user based on the username
-        query = 'SELECT * FROM users WHERE users.username = "{}"'.format(username)
-        query_result = utility.query_items(proxy=users_proxy,query=query)
-
-        user = query_result[0]
-        recent_category_scores = {'recent_category_scores': user['recent_category_scores'] }
-        logging.info(recent_category_scores)
-        result = not utility.check_score_lists(user['recent_category_scores'])
-        logging.info(result)
-
-        if username == "n/a" or not utility.check_score_lists(user['recent_category_scores']):
+        if username == "n/a":
             # Create the question bank, with randomised questions.
             random_Qs = utility.get_random_questions(proxy=questions_proxy,No_of_Qs=No_of_Qs)
 
@@ -659,31 +649,57 @@ def question_get_quiz(req: func.HttpRequest) -> func.HttpResponse:
             # Send Response
             response_body = json.dumps({"result": True, "msg": quiz_Qs})
             return func.HttpResponse(body=response_body,mimetype="application/json")
+
         else:
-            # Run the ml model to get the suggested distribution of topics in this quiz.
-            topics = ml_model.get_predicted_scores(recent_category_scores=recent_category_scores)
-            logging.info('Ratios of topics: {}'.format(topics))
+            # Get the user based on the username
+            query = 'SELECT * FROM users WHERE users.username = "{}"'.format(username)
+            query_result = utility.query_items(proxy=users_proxy,query=query)
 
-            Qs = []
-            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Driving Off",No_of_Qs=math.floor(No_of_Qs * topics['Driving Off'])))
-            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Urban Driving",No_of_Qs=math.floor(No_of_Qs * topics['Urban Driving'])))
-            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Rural Driving",No_of_Qs=math.floor(No_of_Qs * topics['Rural Driving'])))
-            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Bigger Roads",No_of_Qs=math.floor(No_of_Qs * topics['Bigger Roads'])))
-            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Motorways",No_of_Qs=math.floor(No_of_Qs * topics['Motorways'])))
-            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Tricky Conditions",No_of_Qs=math.floor(No_of_Qs * topics['Tricky Conditions'])))
-            Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Breakdowns",No_of_Qs=math.floor(No_of_Qs * topics['Breakdowns'])))
+            user = query_result[0]
+            recent_category_scores = {'recent_category_scores': user['recent_category_scores'] }
+            logging.info(recent_category_scores)
+            result = not utility.check_score_lists(user['recent_category_scores'])
+            logging.info(result)
 
-            random_Qs = utility.select_random(Qs, len(Qs))
-            quiz_Qs = []
-            for q in random_Qs:
-                quiz_Q = question(q['questions'], q['topic'], q['image'], q['correct_answers'], q['incorrect_answers'], q['sign_question'], q['explanation'])
-                quiz_Qs.append(quiz_Q.to_dict())
+            if not utility.check_score_lists(user['recent_category_scores']):
+                # Create the question bank, with randomised questions.
+                random_Qs = utility.get_random_questions(proxy=questions_proxy,No_of_Qs=No_of_Qs)
 
-            logging.info("Quiz Bank of {} questions created! First Question: {}".format(len(quiz_Qs), quiz_Qs[0]))
+                quiz_Qs = []
+                for q in random_Qs:
+                    quiz_Q = question(q['questions'], q['topic'], q['image'], q['correct_answers'], q['incorrect_answers'], q['sign_question'], q['explanation'])
+                    quiz_Qs.append(quiz_Q.to_dict())
 
-            # Send Response
-            response_body = json.dumps({"result": True, "msg": quiz_Qs})
-            return func.HttpResponse(body=response_body,mimetype="application/json")
+                logging.info("Quiz Bank of {} questions created! First Question: {}".format(len(quiz_Qs), quiz_Qs[0]))
+                # Send Response
+                response_body = json.dumps({"result": True, "msg": quiz_Qs})
+                return func.HttpResponse(body=response_body,mimetype="application/json")
+            
+            else:
+                # Run the ml model to get the suggested distribution of topics in this quiz.
+                topics = ml_model.get_predicted_scores(recent_category_scores=recent_category_scores)
+                logging.info('Ratios of topics: {}'.format(topics))
+
+                Qs = []
+                Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Driving Off",No_of_Qs=math.floor(No_of_Qs * topics['Driving Off'])))
+                Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Urban Driving",No_of_Qs=math.floor(No_of_Qs * topics['Urban Driving'])))
+                Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Rural Driving",No_of_Qs=math.floor(No_of_Qs * topics['Rural Driving'])))
+                Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Bigger Roads",No_of_Qs=math.floor(No_of_Qs * topics['Bigger Roads'])))
+                Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Motorways",No_of_Qs=math.floor(No_of_Qs * topics['Motorways'])))
+                Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Tricky Conditions",No_of_Qs=math.floor(No_of_Qs * topics['Tricky Conditions'])))
+                Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Breakdowns",No_of_Qs=math.floor(No_of_Qs * topics['Breakdowns'])))
+
+                random_Qs = utility.select_random(Qs, len(Qs))
+                quiz_Qs = []
+                for q in random_Qs:
+                    quiz_Q = question(q['questions'], q['topic'], q['image'], q['correct_answers'], q['incorrect_answers'], q['sign_question'], q['explanation'])
+                    quiz_Qs.append(quiz_Q.to_dict())
+
+                logging.info("Quiz Bank of {} questions created! First Question: {}".format(len(quiz_Qs), quiz_Qs[0]))
+
+                # Send Response
+                response_body = json.dumps({"result": True, "msg": quiz_Qs})
+                return func.HttpResponse(body=response_body,mimetype="application/json")
         
     except NoQueryError:
         # If the query result gives nothing

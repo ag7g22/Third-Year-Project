@@ -2,7 +2,6 @@
 
 // Express and socket.io setup for client-server communication
 const express = require('express');
-const { hostname } = require('os');
 const path = require('path');
 const app = express();
 const server = require('http').Server(app);
@@ -35,14 +34,18 @@ function handle_check_login(socket, username) {
     }
 }
 
-function handle_login(username) {
+function handle_login(socket, username) {
     // Add logged in user
+    usersToSockets.set(username, socket);
+    socketsToUsers.set(socket, username);
     logged_users.push(username);
     console.log(username + " has logged in");
 }
 
-function handle_logout(username) {
+function handle_logout(socket, username) {
     // Remove logged out user
+    usersToSockets.delete(username);
+    socketsToUsers.delete(socket);
     logged_users = logged_users.filter(item => item !== username)
     console.log(username + " has logged out");
 }
@@ -82,7 +85,10 @@ function handle_disconnect(socket) {
             }
         }
     }
-
+    // Log the user out
+    if (logged_users.includes(theUsername)) {
+      handle_logout(socket, theUsername);  
+    }
     console.log('User Disconnected');
 }
 
@@ -98,13 +104,13 @@ function handle_create_lobby(socket, host_username, host_password) {
     }
 
     // Initalise states
-    let user_state = {username: host_username, host: host_username, role: "HOST", isWinner: false};
-    let game_state = {host: host_username, password: host_password, players: [host_username], state: 0};
+    let user_state = {username: host_username, host: host_username, role: "HOST", isWinner: false, isCorrect: false, isWaiting: false};
+    let game_state = {host: host_username, password: host_password, players: [host_username], state: 0, questions: [], currentQuestion: 0, q_counter: 1, 
+        home: { username: host_username, chances: 3, elapsedTime: 0, selected_answer: null }, 
+        away: { username: '', chances: 3, elapsedTime: 0, selected_answer: null }};
 
     // Add to the Maps:
     users.set(host_username, user_state);
-    usersToSockets.set(host_username, socket);
-    socketsToUsers.set(socket, host_username);
     games.set(host_username, game_state);
 
     // Notify successful game creation
@@ -125,8 +131,6 @@ function handle_delete_lobby(host_username) {
 
         // Remove from the Maps:
         users.delete(username);
-        usersToSockets.delete(username);
-        socketsToUsers.delete(theSocket);
 
         theSocket.emit('remove-player');
     }
@@ -146,13 +150,12 @@ function handle_join_lobby(socket, username, host_password) {
                 // Add player to the maps if theres space:
 
                 // Initalise states
-                let user_state = {username: username, host: host, role: "PLAYER", isWinner: false};
+                let user_state = {username: username, host: host, role: "PLAYER", isWinner: false, isCorrect: false, isWaiting: false};
                 game_state.players.push(username);
+                game_state.away = { username: username, chances: 3, elapsedTime: 0, selected_answer: null }
 
                 // Add to the Maps:
                 users.set(username, user_state);
-                usersToSockets.set(username, socket);
-                socketsToUsers.set(socket, username);
 
                 // Notify successful game creation
                 socket.emit('join-lobby-success');
@@ -181,9 +184,8 @@ function handle_leave_lobby(socket, username, host_username) {
     // Only remove user from the lobby and the maps
     const theGame = games.get(host_username);
     users.delete(username);
-    usersToSockets.delete(username);
-    socketsToUsers.delete(socket);
     theGame.players = theGame.players.filter(playername => playername !== username);
+    theGame.away = { username: '', chances: 3, elapsedTime: 0, selected_answer: null };
 
     // Notify successful leave
     socket.emit('leave-lobby-success');
@@ -196,24 +198,189 @@ function handle_leave_lobby(socket, username, host_username) {
 }
 
 // GAME HANDLERS
-function handle_start_game(host_username) {
-    // Set game state to 1 in that GAME:
-    let theGame = games.get(host_username);
-    theGame.state = 1;
+async function handle_start_game(host_username) {
+    // Get first few questions:
+    const input = {"No_of_Qs": 30, "username": "n/a"}
+    const quiz = await azure_function('POST', '/question/get/quiz', input)
+    if (quiz.result) {
+        // Set game state to 1 and set the questions.
+        const theGame = games.get(host_username);
+        theGame.questions = quiz.msg;
+        theGame.state = 1;
+        updateAllInServer(host_username);
 
-    // Put all players to game.
-    for (const username of theGame.players) {
-        // console.log(username);
-        const theSocket = usersToSockets.get(username);
-        theSocket.emit('start-game-success');
+        // Put all players to game.
+        for (const username of theGame.players) {
+            const theSocket = usersToSockets.get(username);
+            theSocket.emit('start-game-success');
+        }
+
+        console.log([...users]);
+        console.log([...games]);
+        console.log(host_username + "'s game started");
+
+    } else {
+        // Notify host that questions failed to load.
+        const theSocket = usersToSockets.get(host_username);
+        theSocket.emit('start-game-fail');
+        console.log(host_username + "'s game failed to start");
+        console.log(quiz.msg);
+    }
+}
+
+function handle_selected_answer(socket, selected_answer, elapsedTime, host_username) {
+    // Update the user's state and game state after one user selecting the answer.
+    let theGame = games.get(host_username);
+    let theUsername = socketsToUsers.get(socket);
+    let theUser = users.get(theUsername);
+
+    console.log(theUsername + " answered question " + theGame.q_counter + " in " + host_username + "'s game " );
+
+    theUser.selected_answer = selected_answer;
+    theUser.elapsedTime = elapsedTime;
+
+    // Update the game state from either the home/away user
+    if (theUsername == host_username) {
+        theGame.home.elapsedTime = elapsedTime;
+        theGame.home.selected_answer = selected_answer;
+    } else {
+        theGame.away.elapsedTime = elapsedTime;
+        theGame.away.selected_answer = selected_answer;   
     }
 
-    console.log([...users]);
-    console.log([...games]);
-
-    console.log(host_username + "'s game started");
-    updateAllInServer(host_username);
+    // If both users answered, compare answers
+    if (theGame.home.selected_answer !== null && theGame.away.selected_answer !== null) {
+        compare_answers(theGame);
+    } else {
+        theUser.isWaiting = true;
+        socket.emit('selected-answer-waiting');
+        updateAllInServer(host_username);
+    }
+    
 }
+
+function compare_answers(theGame) {
+    // Whoever answered the quickest
+    let correct_answer = theGame.questions[theGame.currentQuestion].correct_answer;
+    let home = theGame.home
+    let away = theGame.away
+
+    if (home.selected_answer === correct_answer && away.selected_answer !== correct_answer) {
+        end_round(home, away, theGame.host);
+    } else if (home.selected_answer !== correct_answer && away.selected_answer === correct_answer) {
+        end_round(away, home, theGame.host);
+    } else if (home.selected_answer === away.selected_answer) {
+        tie_round(home, away, home.selected_answer, correct_answer, theGame.host);
+    }
+}
+
+async function handle_next_question(host_username) {
+    // Update to the next question
+    let theGame = games.get(host_username);
+    console.log(host_username);
+    console.log(theGame);
+    theGame.currentQuestion++;
+    theGame.q_counter++;
+
+    // Refresh bank if it's the last question on the questions list.
+    if (theGame.currentQuestion >= theGame.questions.length) {
+        // Get first few questions:
+        const input = {"No_of_Qs": 30, "username": "n/a"}
+        const quiz = await azure_function('POST', '/question/get/quiz', input)
+        if (quiz.result) {
+            // Set game state to 1 and set the questions.
+            theGame.currentQuestion = 0;
+            theGame.questions = quiz.msg;
+        } else {
+            // End game if questions fail to load.
+            const host_username = theGame.host;
+            console.log("Terminating " + host_username + "'s game");
+
+            for (const username of theGame.players) {
+                let theSocket = usersToSockets.get(username);
+                let theUser = users.get(username);
+                theUser.isWinner = null;
+
+                update_user(theSocket, host_username);
+        
+                // Remove from the Maps:
+                users.delete(username);
+        
+                theSocket.emit('leave-game-success');
+            }
+        
+            games.delete(host_username);
+            console.log(host_username + "'s game has been terminated");
+        
+            console.log([...users]);
+            console.log([...games]);
+        }
+        return;
+    }
+
+    updateAllInServer(host_username);
+    
+}
+
+function end_round(winner, loser, host_username) {
+    // Winner is correct and gets an extra chance.
+    let winner_user = users.get(winner.username);
+    winner_user.isCorrect = true;
+    winner_user.isWaiting = false;
+    winner.chances += 1;
+
+    // Loser is incorect and loses a chance.
+    let loser_user = users.get(loser.username);
+    loser_user.isCorrect = false;
+    loser_user.isWaiting = false;
+    loser.chances -= 1;
+
+    // Send the users results
+    console.log(winner.username + " WON the round in " + host_username + "'s game");
+    updateAllInServer(host_username);
+    let theGame = games.get(host_username);
+    for (const username of theGame.players) {
+        const theSocket = usersToSockets.get(username);
+       theSocket.emit('end-of-round', winner.username); 
+    }
+
+    if (loser.chances === 0) {
+        // End game if loser has no more chances.
+        handle_leave_game(loser.username, host_username, false);
+    }
+}
+
+function tie_round(home, away, selected_answer, correct_answer, host_username) {
+    // If both players are correct the one who answered the quickest wins the round.
+    const usersAreCorrect = selected_answer === correct_answer;
+
+    if (home.elapsedTime < away.elapsedTime && usersAreCorrect) {
+        // If home player was quicker than away player, home wins
+        end_round(home, away, host_username);
+    } else if (away.elapsedTime < home.elapsedTime && usersAreCorrect) {
+        // If away player was quicker than home player, away wins
+        end_round(away, home, host_username);
+    } else {
+        // If both have the same answer and same answering time, they tie.
+        let home_user = users.get(home.username);
+        home_user.isCorrect = usersAreCorrect;
+        home_user.isWaiting = false;
+
+        let away_user = users.get(away.username);
+        away_user.isCorrect = usersAreCorrect;
+        away_user.isWaiting = false;
+
+        console.log(home.username + " and " + away.username + " TIED in " + host_username + "'s game");
+        updateAllInServer(host_username);
+
+        let theGame = games.get(host_username);
+        for (const username of theGame.players) {
+            const theSocket = usersToSockets.get(username);
+            theSocket.emit('end-of-round', "tie"); 
+        }
+    }
+}
+
 
 function handle_leave_game(playername, host_username, isWinner) {
     // Terminate game and send users to game over screen.
@@ -233,8 +400,6 @@ function handle_leave_game(playername, host_username, isWinner) {
 
         // Remove from the Maps:
         users.delete(username);
-        usersToSockets.delete(username);
-        socketsToUsers.delete(theSocket);
 
         theSocket.emit('leave-game-success');
     }
@@ -243,8 +408,6 @@ function handle_leave_game(playername, host_username, isWinner) {
     console.log(host_username + "'s game has been terminated");
 
     console.log([...users]);
-    console.log([...usersToSockets]);
-    console.log([...socketsToUsers]);
     console.log([...games]);
 }
 
@@ -262,11 +425,11 @@ io.on('connection', socket => {
     });
 
     socket.on('login', (username) => {
-        handle_login(username);
+        handle_login(socket, username);
     });
 
     socket.on('logout', (username) => {
-        handle_logout(username);
+        handle_logout(socket, username);
     })
 
     // LOBBY
@@ -291,11 +454,44 @@ io.on('connection', socket => {
         handle_start_game(host_username);
     });
 
+    socket.on('selected-answer', (selected_answer, elapsedTime, host_username) => {
+        handle_selected_answer(socket, selected_answer, elapsedTime, host_username);
+    })
+
+    socket.on('next-question', (host_username) => {
+        handle_next_question(socket, host_username);
+    })
+
     socket.on('leave-game', (username, host_username, isWinner) => {
         handle_leave_game(username, host_username, isWinner);
     });
 
 });
+
+// API Requests are handled here
+async function azure_function(function_type, function_route, json_doc) {
+    console.log(function_route);
+    // Call Azure function with request
+    try {
+        const url = "https://driving-theory.azurewebsites.net" + function_route + '?code=' + "p8l8U5CrimGa5Z35x5bq3Tf2X1KiVJKsYY7yyGL8OQOeAzFuEHeOLA=="
+        
+        if (function_type === "GET") {
+            const response = await fetch( url, { method: function_type, headers: { "Content-Type": "application/json"} });
+            const API_reply = await response.json();
+            console.log("Result: " + JSON.stringify(API_reply.result));
+            return API_reply
+        } else {
+            const response = await fetch( url, { method: function_type, headers: { "Content-Type": "application/json"},body: JSON.stringify(json_doc)});
+            const API_reply = await response.json();
+            console.log("Result: " + JSON.stringify(API_reply.result));
+            return API_reply
+        }
+
+    } catch (error) {
+        console.error("Error:", error);
+        this.message.error = "An API error occurred. Please try again later.";
+    }
+}
 
 // Start the server
 function startServer() {

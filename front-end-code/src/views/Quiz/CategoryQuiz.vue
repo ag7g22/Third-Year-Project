@@ -119,7 +119,7 @@ export default {
             // Quiz variables
             questions: [], // Quiz questions by API
             currentQuestion: 0, // Question pointer
-            selectedAnswer: null, // This is the selected question
+            selectedAnswer: null, // This is the selected answer
             isCorrect: false, // boolean if the question is actually correct
             explanation: { showExplanation: false, wasClicked: false }, // Explanation of the question, flag if it got clicked on
 

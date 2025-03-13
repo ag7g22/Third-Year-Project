@@ -70,19 +70,74 @@
         </div>
 
         <div v-if="state.current_view === 'GAME'">
-            <!-- Buttons -->
-            <div class="buttons">
-                <button @click="leave_game(false)">Leave Game</button>
+            <!-- Count down for game -->
+            <div v-if="game_timer !== null">
+                <h1> GAME STARTS IN: </h1>
+                <h1>{{ countdown }}</h1>
+            </div>
+
+            <div v-else>
+                <!-- Buttons -->
+                <div class="buttons">
+                    <button @click="leave_game(false)">Leave Game</button>
+                </div>
+
+                <div class="questionnaire">
+
+                    <div class="progress-container">
+                        <!-- Player 1 (Left Side) -->
+                        <div class="player player-left">{{ game_state.home.username }}</div>
+
+                        <!-- Progress Bar -->
+                        <div class="progress-bar">
+                            <div class="progress-fill" :style="{ width: progressPercentage + '%' }"></div>
+                        </div>
+
+                        <!-- Player 2 (Right Side) -->
+                        <div class="player player-right">{{ game_state.away.username }}</div>
+                    </div>
+
+                    <p> Question {{ game_state.q_counter }} </p>
+                    <h2>{{ game_state.questions[game_state.currentQuestion].question }}</h2>
+
+                    <!-- Count down for question -->
+                    <div v-if="question_timer !== null">
+                        <h2>{{ countdown }}</h2>
+                    </div>
+                    <div v-else>
+                        <div class="options">
+                            <button 
+                            v-for="(option, index) in game_state.questions[game_state.currentQuestion].options"
+                            :key="index"
+                            :class="{
+                                selected: user_state.selected_answer === option && user_state.isWaiting,
+                                correct: user_state.selected_answer === option && user_state.isCorrect && !user_state.isWaiting,
+                                incorrect: user_state.selected_answer === option && !user_state.isCorrect && !user_state.isWaiting
+                            }"
+                            @click="select_answer(option)"
+                            >
+                            {{ option }}
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Show results for a few seconds -->
+                    <div v-if="end_of_round_timer !== null">
+                        <p>{{ game_state.questions[game_state.currentQuestion].explanation }}</p>
+                    </div>
+                </div>
             </div>
 
         </div>
 
         <div v-if="state.current_view === 'GAMEOVER'">
             <div v-if="user_state.isWinner === true">
-                <h2> VICTORY! </h2>
+                <h2> VICTORY! 🎉</h2>
             </div>
-            <div v-else>
-                <h2> DEFEATED! </h2>
+            <div v-else-if="user_state.isWinner === false">
+                <h2> DEFEATED! ⚰️</h2>
+            </div>
+            <div v-else-if="user_state.isWinner === null">
+                <h2> TIE! ¯\_(ツ)_/¯ </h2>
             </div>
 
             <button @click="return_lobby()">Return to lobby</button>
@@ -110,8 +165,19 @@ export default {
             host_password: '', 
             
             // States updated by server:
-            game_state: {host: '', password: '', players: [], state: 0},
-            user_state: {username: '', host: '', role: '', isWinner: false},
+            game_state: {host: '', password: '', players: [], state: 0, questions: [], currentQuestion: 0, q_counter: 1, 
+            home: { username: '', chances: 3, elapsedTime: 0, selected_answer: null }, 
+            away: { username: '', chances: 3, elapsedTime: 0, selected_answer: null }},
+
+            user_state: {username: '', host: '', role: '', isWinner: false, isCorrect: false, isWaiting: false},
+
+            // Timer for user answering question
+            answer_time: { elapsedTime: 0, stopwatch: null, stopwatchRunning: false },
+
+            countdown: null, // Number of seconds in timer
+            question_timer: null, // Timer before the answers show up.
+            game_timer: null, // Timer before the game starts.
+            end_of_round_timer: null, // Timer after the round finishes.
 
             client_socket: this.$store.state.currentClientSocket,
             logged_in_user: this.$store.state.currentUser,
@@ -119,12 +185,25 @@ export default {
         };
     },
     methods: {
+        toggle_view(view) {
+            // Reset state
+            this.message = { error: "", success: "" };
+            this.state.current_view = view;
+            if (view === "HOST") {
+                this.state.role = "HOST"
+            } else if (view === "JOIN") {
+                this.state.role = "PLAYER"
+            }
+        },
+        // LOBBY METHODS
         reset_states() {
             // Run this when leaving a lobby
             this.state = { current_view: "RULES", role: '' };
             this.host_password = '';
-            this.game_state = {host: '', password: '', players: [], state: 0};
-            this.user_state = {username: '', host: '', role: '', isWinner: false};
+            this.game_state = {host: '', password: '', players: [], state: 0, questions: [], currentQuestion: 0, q_counter: 1, 
+            home: { username: '', chances: 3, elapsedTime: 0, selected_answer: null }, 
+            away: { username: '', chances: 3, elapsedTime: 0, selected_answer: null }};
+            this.user_state = {username: '', host: '', role: '', isWinner: false, isCorrect: false, isWaiting: false};
 
         },
         start_game() {
@@ -166,21 +245,110 @@ export default {
         return_lobby() {
             // RESET STATES
             this.message = { error: "", success: "" }
-            this.game_state = {host: '', password: '', players: []}
-            this.user_state = {username: '', host: '', role: '', isWinner: false}
+            this.game_state = {host: '', password: '', players: [], state: 0, questions: [], currentQuestion: 0, q_counter: 1, 
+            home: { username: '', chances: 3, elapsedTime: 0, selected_answer: null }, 
+            away: { username: '', chances: 3, elapsedTime: 0, selected_answer: null }}
+            this.user_state = {username: '', host: '', role: '', isWinner: false, isCorrect: false, isWaiting: false}
             this.state = { current_view: "RULES", role: '', gamemodes: ['quiz', 'hazard perception', 'road sign'], selected_gamemode: 'quiz' }
         },
-        toggle_view(view) {
-            // Reset state
-            this.message.error = "";
-            this.message.success = "";
-            this.state.current_view = view;
-
-            if (view === "HOST") {
-                this.state.role = "HOST"
-            } else if (view === "JOIN") {
-                this.state.role = "PLAYER"
+        // GAME METHODS
+        async load_quiz() {
+            // Load the quiz for both users
+            this.opponent_user = this.game_state.players.find(player => player !== this.logged_in_user);
+            this.toggle_view('GAME');
+            await this.start_game_countdown(5);
+        },
+        select_answer(option) {
+            // Selecting an answer and locking it in, send to server.
+            if (!this.user_state.selected_answer) {
+                this.stopStopwatch();
+                this.user_state.selected_answer = option;
+                this.client_socket.emit('selected-answer', this.user_state.selected_answer, this.user_state.elapsedTime, this.game_state.host)
             }
+        },
+        async end_of_round(winner) {
+            // Show both users the results
+            this.message = { error: "", success: "" }
+            if (winner === this.logged_in_user) {
+                this.message.success = " You WON the round!"
+            } else if (winner === "tie") {
+                this.message.success = "Round Tie!"
+            } else {
+                this.message.success = winner + " WON the round!" 
+            }
+            await this.start_end_round_countdown(7);
+        },
+        async next_question() {
+            // Transition client to next question.
+            this.client_socket.emit('next-question', this.user_state.host);
+            await this.start_question_countdown(5);
+        },
+        async start_game_countdown(countdown) {
+            // Pick the timer and countdown setting
+            this.countdown = countdown;
+            this.game_timer = setInterval(async () => {
+                if (this.countdown > 0) {
+                    this.countdown--;
+                } else {
+                    if (this.game_timer) {
+                        clearInterval(this.game_timer);
+                        this.game_timer = null;
+                        this.countdown = null;
+                        console.log("Starting game ... ");
+                        await this.start_question_countdown(5);
+                    }
+                }
+            }, 1000);
+        },
+        async start_question_countdown(countdown) {
+            // Pick the timer and countdown setting
+            this.countdown = countdown;
+            this.question_timer = setInterval(() => {
+                if (this.countdown > 0) {
+                    this.countdown--;
+                } else {
+                    if (this.question_timer) {
+                        clearInterval(this.question_timer);
+                        this.question_timer = null;
+                        this.countdown = null;
+                        console.log("Showing answers ... ");
+                        this.startStopwatch();
+                    }
+                }
+            }, 1000);
+        },
+        async start_end_round_countdown(countdown) {
+            // Pick the timer and countdown setting
+            this.countdown = countdown;
+            this.end_of_round_timer = setInterval(async () => {
+                if (this.countdown > 0) {
+                    this.countdown--;
+                } else {
+                    if (this.end_of_round_timer) {
+                        clearInterval(this.end_of_round_timer);
+                        this.end_of_round_timer = null;
+                        this.countdown = null;
+                        console.log("Showing next question ... ");
+                        this.next_question();
+                    }
+                }
+            }, 1000);
+        },
+        startStopwatch() {
+            if (!this.answer_time.stopwatchRunning) {
+                this.answer_time.stopwatchRunning = true;
+                this.answer_time.stopwatch = setInterval(() => {
+                this.answer_time.elapsedTime++; // Increment time
+                }, 1000);
+            }
+        },
+        stopStopwatch() {
+            clearInterval(this.answer_time.stopwatch);
+            this.answer_time.stopwatchRunning = false;
+        },
+        resetStopwatch() {
+            this.stopStopwatch();
+            this.answer_time.elapsedTime = 0; // Reset back to 0
         },
         async add_achievement(name) {
             // Add achievement to user's achievements and notify on the UI.
@@ -224,15 +392,16 @@ export default {
                 this.message.error = "An API error occurred. Please try again later.";
             }
         },
-        leave_server() {
-            socket.emit('disconnect');
-            this.replace('dashboard');
-        },
         next_page(page) {
             console.log("/" + page);
             this.$router.replace(`/${page}`);
         }
     },
+    computed: {
+        progressPercentage() {
+        return (this.game_state.home.chances / 6) * 100;
+    }
+  }
 };
 
 function listen(vue, client_socket) {
@@ -270,7 +439,23 @@ function listen(vue, client_socket) {
     });
 
     client_socket.on('start-game-success', function() {
-        vue.toggle_view('GAME');
+        vue.load_quiz();
+    });
+
+    client_socket.on('start-game-fail', function() {
+        vue.message.error = 'Failed to load questions. Try again.'
+    });
+    
+    client_socket.on('selected-answer-waiting', function() {
+        vue.message.success = "Waiting for other player to answer ..."
+    });
+
+    client_socket.on('end-of-round', function(winner) {
+        vue.end_of_round(winner);
+    });
+
+    client_socket.on('next-question', function() {
+        vue.next_question();
     });
 
     client_socket.on('leave-game-success', function() {
@@ -295,4 +480,100 @@ function listen(vue, client_socket) {
   text-align: center;
   padding: 10px;
 }
+
+.questionnaire {
+  text-align: center;
+  max-width: 500px;
+  margin: auto;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: #f9f9f9;
+}
+
+h2 {
+  margin-bottom: 15px;
+}
+
+.options button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  border: none;
+  background-color: #969faa;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.options button.selected {
+  background-color: #595f66;
+}
+
+/* Flash green for correct answers */
+.options button.correct {
+    background-color: #5bd45f;
+}
+
+/* Flash red for incorrect answers */
+.options button.incorrect {
+    background-color: #e34242;
+}
+
+.next-button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  border: none;
+  background-color: green;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.next-button:hover {
+  background-color: darkgreen;
+}
+
+.progress-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 80%;
+  margin: 20px auto;
+  position: relative;
+}
+
+/* Player Containers */
+.player-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 50%;
+}
+
+/* Player Names on Top */
+.player-name {
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+/* Progress Bar */
+.progress-bar {
+  width: 100%;
+  height: 20px;
+  background-color: #d53333;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Progress Fill */
+.progress-fill {
+  height: 100%;
+  background-color: #2d94e3;
+  transition: width 0.3s ease-in-out;
+}
+
 </style>
