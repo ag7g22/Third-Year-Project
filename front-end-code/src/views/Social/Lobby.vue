@@ -84,6 +84,8 @@
 
                 <div class="questionnaire">
 
+                    <p> Question {{ game_state.q_counter }} </p>
+
                     <div class="progress-container">
                         <!-- Player 1 (Left Side) -->
                         <div class="player player-left">{{ game_state.home.username }}</div>
@@ -97,8 +99,7 @@
                         <div class="player player-right">{{ game_state.away.username }}</div>
                     </div>
 
-                    <p> Question {{ game_state.q_counter }} </p>
-                    <h2>{{ game_state.questions[game_state.currentQuestion].question }}</h2>
+                    <p>{{ game_state.questions[game_state.currentQuestion].question }}</p>
 
                     <!-- Count down for question -->
                     <div v-if="question_timer !== null">
@@ -133,11 +134,8 @@
             <div v-if="user_state.isWinner === true">
                 <h2> VICTORY! 🎉</h2>
             </div>
-            <div v-else-if="user_state.isWinner === false">
+            <div v-else>
                 <h2> DEFEATED! ⚰️</h2>
-            </div>
-            <div v-else-if="user_state.isWinner === null">
-                <h2> TIE! ¯\_(ツ)_/¯ </h2>
             </div>
 
             <button @click="return_lobby()">Return to lobby</button>
@@ -169,7 +167,7 @@ export default {
             home: { username: '', chances: 3, elapsedTime: 0, selected_answer: null }, 
             away: { username: '', chances: 3, elapsedTime: 0, selected_answer: null }},
 
-            user_state: {username: '', host: '', role: '', isWinner: false, isCorrect: false, isWaiting: false},
+            user_state: {username: '', host: '', role: '', isWinner: false, isCorrect: false, isWaiting: false, selected_answer: null},
 
             // Timer for user answering question
             answer_time: { elapsedTime: 0, stopwatch: null, stopwatchRunning: false },
@@ -181,6 +179,7 @@ export default {
 
             client_socket: this.$store.state.currentClientSocket,
             logged_in_user: this.$store.state.currentUser,
+            currentRank: this.$store.state.currentRank,
             message: { error: "", success: "" },
         };
     },
@@ -203,7 +202,7 @@ export default {
             this.game_state = {host: '', password: '', players: [], state: 0, questions: [], currentQuestion: 0, q_counter: 1, 
             home: { username: '', chances: 3, elapsedTime: 0, selected_answer: null }, 
             away: { username: '', chances: 3, elapsedTime: 0, selected_answer: null }};
-            this.user_state = {username: '', host: '', role: '', isWinner: false, isCorrect: false, isWaiting: false};
+            this.user_state = {username: '', host: '', role: '', isWinner: false, isCorrect: false, isWaiting: false, selected_answer: null};
 
         },
         start_game() {
@@ -248,7 +247,7 @@ export default {
             this.game_state = {host: '', password: '', players: [], state: 0, questions: [], currentQuestion: 0, q_counter: 1, 
             home: { username: '', chances: 3, elapsedTime: 0, selected_answer: null }, 
             away: { username: '', chances: 3, elapsedTime: 0, selected_answer: null }}
-            this.user_state = {username: '', host: '', role: '', isWinner: false, isCorrect: false, isWaiting: false}
+            this.user_state = {username: '', host: '', role: '', isWinner: false, isCorrect: null, isWaiting: false, selected_answer: null};
             this.state = { current_view: "RULES", role: '', gamemodes: ['quiz', 'hazard perception', 'road sign'], selected_gamemode: 'quiz' }
         },
         // GAME METHODS
@@ -263,7 +262,8 @@ export default {
             if (!this.user_state.selected_answer) {
                 this.stopStopwatch();
                 this.user_state.selected_answer = option;
-                this.client_socket.emit('selected-answer', this.user_state.selected_answer, this.user_state.elapsedTime, this.game_state.host)
+                this.client_socket.emit('selected-answer', this.user_state.selected_answer, this.answer_time.elapsedTime, this.game_state.host);
+                this.resetStopwatch();
             }
         },
         async end_of_round(winner) {
@@ -278,8 +278,21 @@ export default {
             }
             await this.start_end_round_countdown(7);
         },
+        async end_of_game(winner) {
+            // Show both users the results
+            this.message = { error: "", success: "" }
+            if (winner === this.logged_in_user) {
+                this.user_state.isWinner = true;
+                this.message.success = " You WON the game!"
+            } else {
+                this.user_state.isWinner = false;
+                this.message.success = winner + " WON the game!" 
+            }
+            await this.start_end_game_countdown(7);
+        },
         async next_question() {
             // Transition client to next question.
+            this.message = { error: "", success: "" }
             this.client_socket.emit('next-question', this.user_state.host);
             await this.start_question_countdown(5);
         },
@@ -334,6 +347,28 @@ export default {
                 }
             }, 1000);
         },
+        async start_end_game_countdown(countdown) {
+            // Pick the timer and countdown setting
+            this.countdown = countdown;
+            this.end_of_round_timer = setInterval(async () => {
+                if (this.countdown > 0) {
+                    this.countdown--;
+                } else {
+                    if (this.end_of_round_timer) {
+                        clearInterval(this.end_of_round_timer);
+                        this.end_of_round_timer = null;
+                        this.countdown = null;
+                        console.log("Ending game ... ");
+                        this.client_socket.emit('leave-game', this.logged_in_user, this.game_state.host, this.user_state.isWinner);
+                        if (this.user_state.isWinner) {
+                            this.update_user_exp(500);
+                        } else {
+                            this.update_user_exp(100);
+                        }
+                    }
+                }
+            }, 1000);
+        },
         startStopwatch() {
             if (!this.answer_time.stopwatchRunning) {
                 this.answer_time.stopwatchRunning = true;
@@ -367,6 +402,41 @@ export default {
                 "hideEasing": "linear", "showMethod": "fadeIn","hideMethod": "fadeOut"}
 
                 toastr.success('"' + `/${name}` + '""',"Achievement Unlocked:", options)
+            }
+        },
+        async update_user_exp(exp_gain) {
+            // Add changes to database
+            const user_stats = this.$store.state.currentStats;
+            const prev_level = this.currentRank.level;
+
+            // Increment level if exp exceeds threshold:
+            if (this.currentRank.exp + exp_gain >= this.currentRank.exp_threshold) {
+                // Reset exp progress but add leftover exp and update exp threshold
+                this.currentRank.exp = (this.currentRank.exp + exp_gain) - this.currentRank.exp_threshold;
+                this.currentRank.level += 1;
+                this.currentRank.exp_threshold += 500;
+            } else {
+                this.currentRank.exp += exp_gain;
+            }
+
+            const input = { id: user_stats.id, updates: { "rank": this.currentRank } };
+            console.log(input);
+
+            const update_response = await this.azure_function("PUT", "/user/update/info", input)
+            // Show message incase the API response fails, otherwise update state.
+            if (update_response.result) {
+                // Update rank in UI too.
+                this.$store.commit("setCurrentRank", this.currentRank);
+                this.currentRank = this.$store.state.currentRank;
+            
+                if (prev_level < this.currentRank.level) {
+                    this.message.success = `LEVELED UP TO LEVEL ${this.currentRank.level}!` 
+                } else {
+                    this.message.success = `Gained ${exp_gain} exp!`
+                }
+
+            } else {
+                this.message.error = update_response.msg || "Score update Failed."
             }
         },
         async azure_function(function_type, function_route, json_doc) {
@@ -452,6 +522,10 @@ function listen(vue, client_socket) {
 
     client_socket.on('end-of-round', function(winner) {
         vue.end_of_round(winner);
+    });
+
+    client_socket.on('end-of-game', function(winner) {
+        vue.end_of_game(winner);
     });
 
     client_socket.on('next-question', function() {

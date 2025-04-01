@@ -577,184 +577,355 @@ questions = [
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "It can be frustrating and worrying to find that your planned route is blocked by roadworks or diversions. If you've planned an alternative, you'll feel less stressed and more able to concentrate fully on your driving. If your original route is mostly on motorways, it's a good idea to plan an alternative using non-motorway roads. Always carry a map with you in case you're lost.",
         "questions": [
-
+            "You plan your route before starting a journey. Why should you also plan an alternative route?",
+            "Why is it important to plan an alternative route when mapping out your journey?",
+            "What are the benefits of having a backup route before starting your trip?",
+            "Why shouldn't you rely solely on one route when traveling?",
+            "What might happen if you don't have an alternative route prepared?"
         ], 
         "correct_answers": [
-
+            "Your original route may be blocked.",
+            "Your original route may have road blocks.",
+            "There may be road blocks on your original route.",
+            "Your original route may have blocked roads.",
+            "Your original route may have roads under construction."
         ],
         "incorrect_answers": [
-            
+            "You may get held up by a tractor.",
+            "Your maps may have different scales.",
+            "You may find you have to pay a congestion charge."
+            "You may need to pay at toll gates in your route.",
+            "There may be heavy traffic in your original route.",
+            "Your original route may be slower than your alternative route.",
+            "Your may get held up by ticket inspectors."
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "Batteries contain hazardous acid, and they must be disposed of safely. This means taking them to an appropriate disposal site.",
         "questions": [
-
+            "How should you dispose of a used vehicle battery?",
+            "How do you properly dispose of a used vehicle battery?",
+            "What is the correct way to get rid of an old vehicle battery?",
+            "Where should you take a used car battery for safe disposal?",
+            "What should you do with an old vehicle battery to ensure environmental safety?"
         ], 
         "correct_answers": [
-
+            "Take it to a local-authority disposal site.",
+            "Dispose of it at an authorized recycling or disposal facility.",
+            "Take it to a designated hazardous waste collection center.",
+            "Return it to a car battery retailer that accepts old batteries for disposal."
         ],
         "incorrect_answers": [
-            
+            "Leave it on waste land.",
+            "Put it in the dustbin.",
+            "Bury it in your garden.",
+            "Throw it in a river or lake.",
+            "Dump it in a regular landfill.",
+            "Leave it by the roadside.",
+            "Burn it to get rid of it."
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": True,
+        "explanation": "Traffic signs that are circular with a red border are the type of signs that NEED to be followed by drivers on the road. This is a key feature that drivers must remember especially in heavy traffic.",
+        "questions": [
+            "How can you identify traffic signs that give orders?",
+            "What shape traffic signs tell that they give orders?",
+            "How can you tell a traffic sign is meant to give orders?",
+            "How can you identify that a traffic sign gives orders?"
+        ], 
+        "correct_answers": [
+            "They're circular with a red border.",
+            "They're circle with a red border.",
+            "They're circular with a red border."
+        ],
+        "incorrect_answers": [
+            "They're triangular with a blue border.",
+            "They're rectangular with a yellow border.",
+            "They're square with a brown border.",
+            "They're circular with a blue border.",
+            "They're circle with a blue border.",
+            "They're triangular with a red border."
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "If your vehicle bounces as you drive around a corner or bend in the road, the shock absorbers might be worn. To test your shock absorbers, sharply press down and release above each wheel. If the vehicle continues to bounce, take it to be checked by a qualified mechanic.",
         "questions": [
-
+            "What does it mean if your vehicle keeps bouncing after you sharply press down and release on the bodywork over a wheel?",
+            "Why might your vehicle continue bouncing after being pressed down and released above a wheel?",
+            "What could be the cause if your car bounces excessively when driving over bumps?",
+            "If your car bounces repeatedly after being pushed down, what might be the issue?",
+            "What problem could worn shock absorbers cause when driving around corners or over bumps?"
         ], 
         "correct_answers": [
-
+            "The shock absorbers are worn.",
+            "The shock absorbers may be faulty.",
+            "The suspension system may be compromised due to worn shock absorbers.",
+            "The shock absorbers are not functioning properly.",
+            "The shock absorbers are worn."
         ],
         "incorrect_answers": [
-            
+            "The tyres are under-inflated.",
+            "The tyres are worn.",
+            "The vehicle is on soft ground.",
+            "The brakes are faulty.",
+            "The steering system is malfunctioning.",
+            "The vehicle's weight distribution is uneven.",
+            "The wheels are misaligned.",
+            "The power steering fluid is low."
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "When you pass your standard car driving test, you are permitted to tow a trailer, but there is a limit to how heavy that trailer can be. The maximum authorised mass (MAM) of a trailer that you can legally tow is 3,500kg. This is the combined weight of the trailer and its contents. If the trailer exceeds this weight, you would need to pass a further driving test or meet additional requirements to tow a heavier trailer. It's important to know and adhere to this limit for safety and legal reasons.",
         "questions": [
-
+            "You've just passed your driving test. What's the maximum authorised mass (MAM) of any trailer that you can tow?",
+            "After passing your driving test, what is the maximum authorised mass (MAM) of a trailer you are allowed to tow?",
+            "Now that you've passed your driving test, what is the heaviest trailer you can legally tow?",
+            "Following your successful driving test, what is the highest authorised mass (MAM) for a trailer you can tow?",
+            "Once you've passed your driving test, what is the legal MAM limit for a trailer you can tow?"
         ], 
         "correct_answers": [
-
+            "3,500kg",
+            "3,500kg",
+            "3,500kg",
         ],
         "incorrect_answers": [
-            
+            "4,500kg",
+            "5,500kg",
+            "6,500kg",
+            "4,000kg",
+            "3,000kg",
+            "5,000kg",
+            "7,000kg"
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "All vehicles need to be serviced to keep working efficiently. An efficient engine uses less fuel and produces fewer harmful emissions than an engine that's running inefficiently. Keeping the vehicle serviced to the manufacturer's schedule should also keep it reliable and reduce the chance of it breaking down.",
         "questions": [
-
+            "How will you benefit from following the manufacturer's service schedule for your vehicle?",
+            "Why is it important to follow the service schedule set by the manufacturer?",
+            "What are the advantages of keeping your vehicle maintained according to the manufacturer's recommendations?",
+            "How does servicing your vehicle regularly help in the long run?",
+            "What could be the result of keeping up with your vehicle's scheduled maintenance?"
         ], 
         "correct_answers": [
-
+            "Your vehicle will remain reliable.",
+            "Your car will stay dependable.",
+            "Your car will be less likely to breakdown.",
+            "Your vehicle will be more reliable and efficient.",
+            "Your car will continue to run efficiently."
         ],
         "incorrect_answers": [
-            
+            "Your vehicle tax will be lower.",
+            "Your vehicle will be cheaper to insure.",
+            "Your journey times will be reduced.",
+            "Your car will become faster.",
+            "Your car will never need repairs.",
+            "Your fuel costs will automatically drop to zero.",
+            "Your vehicle will require no further maintenance in the future."
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "Modern vehicles provide the driver with a good view of both the road ahead and behind using well-positioned mirrors. However, the mirrors can't see every angle of the scene behind and to the sides of the vehicle. It's essential that you know when and how to check the vehicle's blind spots so that you're aware of any hidden hazards.",
         "questions": [
-
+            "What does the term 'blind spot' mean?",
+            "What is a blind spot when driving?",
+            "What area around your vehicle are considered blind spots?",
+            "What is a 'blind spot'?",
+            "What does 'blind spot' mean?"
         ], 
         "correct_answers": [
-
+            "An area not visible to the driver.",
+            "An area of the road that cannot be seen using mirrors alone.",
+            "An area around a vehicle that the driver cannot see directly.",
+            "An area of the road that is outside the driver's field of vision.",
+            "An area that requires a shoulder check because mirrors do not cover it."
         ],
         "incorrect_answers": [
-            
+            "An area covered by your right-hand mirror.",
+            "An area not covered by your headlights.",
+            "An area covered by your left-hand mirror.",
+            "A place where only pedestrians can walk.",
+            "A spot on the road that is always safe from other traffic.",
+            "A section of the road that does not require checking before turning or changing lanes.",
+            "A part of the car that always remains clean and visible."
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "If you see that parts of the tread on your tyres are wearing before others, it may indicate a brake, suspension or wheel-alignment fault. Regular servicing will help to detect faults at an early stage and this will avoid the risk of minor faults becoming serious or even dangerous.",
         "questions": [
-
+            "What can cause excessive or uneven tyre wear?"
         ], 
         "correct_answers": [
-
+            "A faulty braking system.",
+            "A faulty suspension system.",
+            "A faulty wheel-alignment."
         ],
         "incorrect_answers": [
-            
+            "A faulty gearbox.",
+            "A faulty exhaust system.",
+            "A faulty electrical system.",
+            "A faulty set of shock absorbers.",
+            "A faulty set of window wipers.",
+            "A faulty steering wheel.",
+            "A faulty gear stick."   
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "In the event that the trailer becomes detached from the towing vehicle, the breakaway cable activates the trailer brakes before snapping. This allows the towing vehicle to get free of the trailer and out of danger.",
         "questions": [
-
+            "What safety device must be fitted to a trailer braking system?",
+            "Which device is used to engage a trailer's brakes if it becomes detached?",
+            "What safety mechanism is required for trailers with braking systems?"
         ], 
         "correct_answers": [
-
+            "Breakaway cable.",
+            "Breakaway cable.",
+            "Breakaway cable."
         ],
         "incorrect_answers": [
-            
+            "Corner steadies.",
+            "Jockey wheel.",
+            "Stabiliser.",
+            "Towbar extension.",
+            "Brake fluid reservoir.",
+            "Handbrake lever.",
+            "Wheel chocks."
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "Your tyres may be of different treads and makes. They can even be second-hand, as long as they're in good condition. They must, however, be intact, without cuts or tears. When checking the side walls for cuts and bulges, don't forget to check the side of the tyre that's hidden from view, under the car.",
         "questions": [
-
+            "What makes your tyres illegal?",
+            "When are tyres considered illegal?",
+            "Under what circumstances would your tyres be illegal?",
+            "How can a tyre be deemed illegal for road use?"
         ], 
         "correct_answers": [
-
+            "If they have large, deep cuts in the side wall.",
+            "If they have deep cuts or damage to the sidewall.",
+            "If they have visible bulges or tears in the sidewall.",
+            "If the sidewall is damaged or has deep cuts."
         ],
         "incorrect_answers": [
-            
+            "If they're different makes.",
+            "If they were bought second-hand.",
+            "If they have different tread patterns.",
+            "If they have a little bit of dirt on them.",
+            "If the brand is not the same as the other tyres.",
+            "If they are slightly worn but still have tread left.",
+            "If they have minor cosmetic scratches."
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "If possible, avoid the early morning, late afternoon, and early evening 'rush hour'. Doing this should allow you to have a better journey, with fewer delays. This should help you to arrive at your destination feeling less stressed.",
         "questions": [
-
+            "How will your journey be affected by travelling outside the busy times of day?",
+            "What are the benefits of avoiding peak traffic hours when travelling?",
+            "Why might it be better to drive outside of rush hour?",
+            "How can travelling at off-peak times improve your journey?",
+            "What advantage does travelling during quieter times provide?"
         ], 
         "correct_answers": [
-
+            "Your journey will have fewer delays.",
+            "Your journey will have less congestion and delays.",
+            "Your journey will be smoother and quicker.",
+            "Your journey more efficient and quicker.",
+            "Your journey will have less traffic and fewer hold-ups."
         ],
         "incorrect_answers": [
-            
+            "Your journey will take longer.",
+            "Your journey will use more fuel.",
+            "Your journey will be more hazardous.",
+            "Your journey will encounter more roadblocks and diversions.",
+            "Your journey will have greater traffic.",
+            "Your journey will be more stressful than usual."
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "You may remove your seat belt while you're carrying out a manoeuvre that includes reversing. However, you must remember to put it back on again before you resume driving.",
         "questions": [
-
+            "When may you drive without wearing your seat belt?",
+            "Under what circumstances is it allowed to drive without a seat belt?",
+            "When can you remove your seat belt while driving?",
+            "Is it ever acceptable to drive without a seat belt?",
+            "When is it okay to unbuckle your seat belt while driving?"
         ], 
         "correct_answers": [
-
+            "When you're carrying out a manoeuvre that includes reversing.",
+            "When you're performing a reversing manoeuvre.",
+            "When you're reversing as part of a manoeuvre.",
+            "When you're reversing, as long as it's on again before moving forward.",
         ],
         "incorrect_answers": [
-            
+            "When you're driving slowly in queueing traffic.",
+            "When you're testing your brakes.",
+            "When you're moving off on a hill.",
+            "When you're parking in a space.",
+            "When you're driving at low speed in a car park.",
+            "When you're on a private road.",
+            "When you're driving on an empty road late at night."
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "'Kick down' selects a lower gear, enabling the vehicle to accelerate faster.",
         "questions": [
-
+            "You're driving a car fitted with automatic transmission. When would you use 'kick down'?",
+            "What is the purpose of using the 'kick down' feature in an automatic transmission car?",
+            "When should you activate the 'kick down' in an automatic vehicle?",
+            "In what situation would you use the 'kick down' function in an automatic car?",
+            "What happens when you use 'kick down' in a car with automatic transmission?"
         ], 
         "correct_answers": [
-
+            "To accelerate quickly.",
+            "To achieve faster acceleration.",
+            "To increase your speed quickly.",
+            "To shift to a lower gear for more power."
         ],
         "incorrect_answers": [
-            
+            "To engage cruise control.",
+            "To brake progressively.",
+            "To improve fuel economy.",
+            "To activate the car's air conditioning.",
+            "To slow down the vehicle gradually.",
+            "To shift the car into neutral."
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "Having tyres correctly inflated and in good condition will ensure they have maximum grip on the road; how well your tyres grip the road has a significant effect on your car's stopping distance.",
         "questions": [
-
+            "What will affect your vehicle's stopping distance?",
+            "Which factor influences how quickly your vehicle can stop?",
+            "What condition of your vehicle impacts its stopping distance?",
+            "How do tyres affect the stopping distance of your car?",
+            "What plays a key role in determining your car's stopping distance?"
         ], 
         "correct_answers": [
-
+            "The condition of the tyres.",
+            "The tyres grip on the road.",
+            "The condition and inflation of your tyres.",
         ],
         "incorrect_answers": [
-            
-        ]
-    },
-    {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
-        "questions": [
-
-        ], 
-        "correct_answers": [
-
-        ],
-        "incorrect_answers": [
-            
+            "The speed limit.",
+            "The time of day.",
+            "The street lighting.",
+            "The type of road surface.",
+            "The weather conditions.",
+            "The weight of the driver."
         ]
     }
 
@@ -781,7 +952,7 @@ def main():
 
         print("Questions upload completed.")
     else: 
-        print("Questions upload failed.")
+        print("Questions upload failed, not enough questions.")
 
 if __name__ == "__main__":
     main()

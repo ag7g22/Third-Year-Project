@@ -104,7 +104,7 @@ function handle_create_lobby(socket, host_username, host_password) {
     }
 
     // Initalise states
-    let user_state = {username: host_username, host: host_username, role: "HOST", isWinner: false, isCorrect: false, isWaiting: false};
+    let user_state = {username: host_username, host: host_username, role: "HOST", isWinner: false, isCorrect: null, isWaiting: false, selected_answer: null};
     let game_state = {host: host_username, password: host_password, players: [host_username], state: 0, questions: [], currentQuestion: 0, q_counter: 1, 
         home: { username: host_username, chances: 3, elapsedTime: 0, selected_answer: null }, 
         away: { username: '', chances: 3, elapsedTime: 0, selected_answer: null }};
@@ -150,7 +150,7 @@ function handle_join_lobby(socket, username, host_password) {
                 // Add player to the maps if theres space:
 
                 // Initalise states
-                let user_state = {username: username, host: host, role: "PLAYER", isWinner: false, isCorrect: false, isWaiting: false};
+                let user_state = {username: username, host: host, role: "PLAYER", isWinner: false, isCorrect: null, isWaiting: false, selected_answer: null};
                 game_state.players.push(username);
                 game_state.away = { username: username, chances: 3, elapsedTime: 0, selected_answer: null }
 
@@ -233,17 +233,15 @@ function handle_selected_answer(socket, selected_answer, elapsedTime, host_usern
     let theGame = games.get(host_username);
     let theUsername = socketsToUsers.get(socket);
     let theUser = users.get(theUsername);
-
-    console.log(theUsername + " answered question " + theGame.q_counter + " in " + host_username + "'s game " );
-
-    theUser.selected_answer = selected_answer;
-    theUser.elapsedTime = elapsedTime;
+    console.log(theUsername + " answered question " + theGame.q_counter + " in " + elapsedTime + " seconds in " + host_username + "'s game " );
 
     // Update the game state from either the home/away user
     if (theUsername == host_username) {
+        users.get(theUsername).selected_answer = selected_answer;
         theGame.home.elapsedTime = elapsedTime;
         theGame.home.selected_answer = selected_answer;
     } else {
+        users.get(theUsername).selected_answer = selected_answer;
         theGame.away.elapsedTime = elapsedTime;
         theGame.away.selected_answer = selected_answer;   
     }
@@ -251,6 +249,10 @@ function handle_selected_answer(socket, selected_answer, elapsedTime, host_usern
     // If both users answered, compare answers
     if (theGame.home.selected_answer !== null && theGame.away.selected_answer !== null) {
         compare_answers(theGame);
+
+        // Setup next question
+        load_next_question(theGame);
+
     } else {
         theUser.isWaiting = true;
         socket.emit('selected-answer-waiting');
@@ -274,13 +276,17 @@ function compare_answers(theGame) {
     }
 }
 
-async function handle_next_question(host_username) {
+async function load_next_question(theGame) {
     // Update to the next question
-    let theGame = games.get(host_username);
-    console.log(host_username);
-    console.log(theGame);
+    console.log("Setting up next round in " + theGame.host + "'s game");
     theGame.currentQuestion++;
     theGame.q_counter++;
+
+    // Reset state of home and away
+    theGame.home.elapsedTime = 0;
+    theGame.home.selected_answer = null;
+    theGame.away.elapsedTime = 0;
+    theGame.away.selected_answer = null;
 
     // Refresh bank if it's the last question on the questions list.
     if (theGame.currentQuestion >= theGame.questions.length) {
@@ -315,11 +321,9 @@ async function handle_next_question(host_username) {
             console.log([...users]);
             console.log([...games]);
         }
-        return;
     }
-
-    updateAllInServer(host_username);
-    
+    console.log(theGame.home);
+    console.log(theGame.away);
 }
 
 function end_round(winner, loser, host_username) {
@@ -341,12 +345,11 @@ function end_round(winner, loser, host_username) {
     let theGame = games.get(host_username);
     for (const username of theGame.players) {
         const theSocket = usersToSockets.get(username);
-       theSocket.emit('end-of-round', winner.username); 
-    }
-
-    if (loser.chances === 0) {
-        // End game if loser has no more chances.
-        handle_leave_game(loser.username, host_username, false);
+        if (loser.chances === 0) {
+            theSocket.emit('end-of-game', winner.username);
+        } else {
+            theSocket.emit('end-of-round', winner.username);    
+        }
     }
 }
 
@@ -360,8 +363,8 @@ function tie_round(home, away, selected_answer, correct_answer, host_username) {
     } else if (away.elapsedTime < home.elapsedTime && usersAreCorrect) {
         // If away player was quicker than home player, away wins
         end_round(away, home, host_username);
-    } else {
-        // If both have the same answer and same answering time, they tie.
+    } else if ((home.elapsedTime === away.elapsedTime && usersAreCorrect) || !usersAreCorrect) {
+        // If both have the same answer and same answering time, OR both are wrong, they tie.
         let home_user = users.get(home.username);
         home_user.isCorrect = usersAreCorrect;
         home_user.isWaiting = false;
@@ -381,8 +384,23 @@ function tie_round(home, away, selected_answer, correct_answer, host_username) {
     }
 }
 
+async function handle_next_question(socket, host_username) {
+    // Update all users after calling for next question.
+    const theUsername = socketsToUsers.get(socket);
+    let theUser = users.get(theUsername);
+    theUser.isCorrect = false;
+    theUser.selected_answer = null;
+    update_user(socket, host_username);
+}
+
 
 function handle_leave_game(playername, host_username, isWinner) {
+
+    // If game already terminated, don't run!
+    if (!games.has(host_username)) {
+        return;
+    }
+
     // Terminate game and send users to game over screen.
     console.log("Terminating " + host_username + "'s game");
     const theGame = games.get(host_username);
