@@ -497,197 +497,102 @@ questions = [
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "A tyre bursting can lead to a loss of control, especially if you're travelling at high speed. Using the correct procedure should help you to stop the vehicle safely.",
         "questions": [
-
-        ], 
+            "What should you do if a tyre bursts while you're driving?",
+            "How should you respond to a tyre blowout on the road?",
+            "What's the safest action to take if your tyre suddenly bursts?",
+            "If a tyre bursts while driving, what is the correct procedure?"
+        ],
         "correct_answers": [
-
+            "Pull up slowly at the side of the road.",
+            "Slow down gently and pull over safely.",
+            "Carefully steer to the side and stop."
         ],
         "incorrect_answers": [
-            
+            "Brake as quickly as possible.",
+            "Pull on the parking brake.",
+            "Continue at a normal speed.",
+            "Accelerate to maintain control."
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "7_braking_fail.png", "sign_question": False,
+        "explanation": "If this light comes on, you should have the brake system checked immediately. A faulty braking system could have dangerous consequences.",
+        "questions": [
+            "What does it mean if this light comes on while you're driving?",
+            "What could this warning light indicate during your journey?",
+            "What should you check if this light appears on the dashboard?"
+        ],
+        "correct_answers": [
+            "A fault in the braking system.",
+            "Brake system issue detected.",
+            "Problem with the braking system.",
+            "Brake system warning."
+        ],
+        "incorrect_answers": [
+            "Your seat belt isn't fastened.",
+            "A rear light has failed.",
+            "The engine oil is low.",
+            "A door is open."
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "If you feel yourself becoming tense or upset, stop in a safe break. Tiredness can make things worse and may cause a different reaction to upsetting situations",
         "questions": [
-
-        ], 
+            "A driver's behaviour has upset you. How can you get over this incident safely?",
+            "If another driver's actions annoy you, what's the best way to calm down?",
+            "How should you handle feeling upset by another driver's behaviour?",
+            "What's the safest way to respond when another driver's actions frustrate you?"
+        ],
         "correct_answers": [
-
+            "Stop and take a break.",
+            "Find a safe place to stop and relax.",
+            "Take some time to calm down before continuing."
         ],
         "incorrect_answers": [
-            
+            "Gesture to them with your hand.",
+            "Follow them, flashing your headlights.",
+            "Shout abusive language.",
+            "Speed up to overtake them aggressively."
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "7_ESC.jpg", "sign_question": False,
+        "explanation": "ECS is a computer-controlled technology that detects reduced traction and automatically makes corrective adjustments to prevent loss of control. The ESC light comes on briefly to alert the driver that the system has activated and the car is approaching its handling limits. It's a powerful driver aid but it cannot save a car once its traction limits have been exceeded.",
+        "questions": [
+            "What does it mean if the Electronic Stability Control (ESC) indicator light comes on briefly while you're driving?"
+        ], 
+        "correct_answers": [
+            "The ESC system has activated."
+        ],
+        "incorrect_answers": [
+            "The ESC system has a fault.",
+            "The ESC system is switched off.",
+            "The ESC system is running a routine test."
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "The effects of shock may not be immediately obvious. Warning signs to look for include; A rapid pulse, sweating, pale grey skin and rapid shallow breathing.",
         "questions": [
-
-        ], 
+            "Following a collision, a person has been injured. What would be a warning sign for shock?",
+            "After a crash, how can you identify if someone is experiencing shock?",
+            "What symptom might indicate that an injured person is in shock after an accident?",
+            "What physical sign could suggest shock following a collision?"
+        ],
         "correct_answers": [
-
+            "Rapid shallow breathing.",
+            "Sweating.",
+            "Pale grey skin.",
+            "A rapid pulse."
         ],
         "incorrect_answers": [
-            
-        ]
-    },
-    {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
-        "questions": [
-
-        ], 
-        "correct_answers": [
-
-        ],
-        "incorrect_answers": [
-            
-        ]
-    },
-    {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
-        "questions": [
-
-        ], 
-        "correct_answers": [
-
-        ],
-        "incorrect_answers": [
-            
-        ]
-    },
-    {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
-        "questions": [
-
-        ], 
-        "correct_answers": [
-
-        ],
-        "incorrect_answers": [
-            
-        ]
-    },
-    {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
-        "questions": [
-
-        ], 
-        "correct_answers": [
-
-        ],
-        "incorrect_answers": [
-            
-        ]
-    },
-    {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
-        "questions": [
-
-        ], 
-        "correct_answers": [
-
-        ],
-        "incorrect_answers": [
-            
-        ]
-    },
-    {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
-        "questions": [
-
-        ], 
-        "correct_answers": [
-
-        ],
-        "incorrect_answers": [
-            
-        ]
-    },
-    {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
-        "questions": [
-
-        ], 
-        "correct_answers": [
-
-        ],
-        "incorrect_answers": [
-            
-        ]
-    },
-    {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
-        "questions": [
-
-        ], 
-        "correct_answers": [
-
-        ],
-        "incorrect_answers": [
-            
-        ]
-    },
-    {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
-        "questions": [
-
-        ], 
-        "correct_answers": [
-
-        ],
-        "incorrect_answers": [
-            
-        ]
-    },
-    {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
-        "questions": [
-
-        ], 
-        "correct_answers": [
-
-        ],
-        "incorrect_answers": [
-            
-        ]
-    },
-    {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
-        "questions": [
-
-        ], 
-        "correct_answers": [
-
-        ],
-        "incorrect_answers": [
-            
-        ]
-    },
-    {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
-        "questions": [
-
-        ], 
-        "correct_answers": [
-
-        ],
-        "incorrect_answers": [
-            
+            "Warm dry skin.",
+            "Flushed complexion.",
+            "Slow pulse.",
+            "Strong, steady breathing."
         ]
     }
 ]
