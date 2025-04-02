@@ -519,198 +519,354 @@ questions = [
         ]
     },
     {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "id": str(uuid.uuid4()), "topic": topic, "image": "5_contraflow.png", "sign_question": True,
+        "explanation": "At roadworks and especially where a contraflow system is operating, a speed restriction is likely to be in place. Keep to the lower speed limit and don't switch lanes or get too close to the vehicle in front of you. Be aware that there will be no barrier between you and the oncoming traffic.",
         "questions": [
-
-        ], 
+            "What should you do when going through a contraflow system on a motorway?",
+            "How should you drive through a contraflow system on the motorway?",
+            "What is the best practice when navigating a contraflow system on a motorway?",
+            "What precautions should you take when driving through a motorway contraflow system?"
+        ],
         "correct_answers": [
-
+            "Keep a good distance from the vehicle behind.",
+            "Maintain a safe gap from the vehicle behind.",
+            "Ensure there is enough space between you and the following vehicle.",
+            "Leave adequate space behind your vehicle to ensure safety."
         ],
         "incorrect_answers": [
-            
+            "Stay close to the vehicle ahead to reduce queues.",
+            "Use dipped headlights.",
+            "Switch lanes to keep the traffic flowing.",
+            "Speed up to clear the contraflow quickly.",
+            "Overtake slower vehicles to maintain traffic speed.",
+            "Follow the vehicle ahead closely to avoid gaps."
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "5_motorway_end.png", "sign_question": True,
+        "explanation": "When you leave the motorway, make sure that you check your speedometer. You may be going faster than you realise. Slow down and look for speed-limit signs.",
+        "questions": [
+            "What does this sign mean?",
+            "What is indicated by this road sign?",
+            "What does this sign signify?",
+            "What is the meaning of this road sign?"
+        ],
+        "correct_answers": [
+            "End of motorway.",
+            "Motorway ends here.",
+            "This marks the end of the motorway.",
+            "The motorway finishes at this point."
+        ],
+        "incorrect_answers": [
+            "No through road.",
+            "End of bus lane.",
+            "No motor vehicles.",
+            "End of dual carriageway.",
+            "Start of a restricted area.",
+            "Pedestrian zone ahead."
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "5_crawler_lane.png", "sign_question": True,
+        "explanation": "Large slow-moving vehicles can hinder the progress of other traffic. On a steep gradient, an extra crawler lane may be provided for slow-moving vehicles to allow faster-moving traffic to flow more easily.",
+        "questions": [
+            "You're travelling along a motorway. Where would you find a crawler or climbing lane?",
+            "On a motorway, where is a crawler or climbing lane typically located?",
+            "Where can you expect to see a crawler or climbing lane while driving on a motorway?",
+            "Where are crawler or climbing lanes usually positioned on motorways?"
+        ],
+        "correct_answers": [
+            "On a steep gradient.",
+            "On an uphill section of the road.",
+            "On a long, steep incline.",
+            "On a slope where slower vehicles need extra space."
+        ],
+        "incorrect_answers": [
+            "Before a service area.",
+            "Along the hard shoulder.",
+            "Before a junction.",
+            "In the middle lane.",
+            "Next to the central reservation.",
+            "Near an emergency refuge area."
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "5_next_exit.jpg", "sign_question": True,
+        "explanation": "You'll see this sign if there has been an accident ahead and the motorway is closed. You must obey the sign. Make sure that you prepare to leave in good time. Don't cause drivers to take avoiding action by cutting in at the last moment.",
+        "questions": [
+            "What does it mean if you see this signal on the motorway?",
+            "What should you do if this signal appears on the motorway?",
+            "What action is required when you see this signal on the motorway?",
+            "How should you respond to this motorway signal?"
+        ],
+        "correct_answers": [
+            "Leave the motorway at the next exit.",
+            "Exit the motorway at the upcoming junction.",
+            "Take the next available exit off the motorway.",
+            "Prepare to leave the motorway at the next exit."
+        ],
+        "incorrect_answers": [
+            "Sharp bend to the left ahead.",
+            "Stop: all lanes ahead closed.",
+            "All vehicles use the hard shoulder.",
+            "Prepare to change lanes immediately.",
+            "Reduce speed and stay in your lane.",
+            "Merge into the left lane."
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "5_right_closed.png", "sign_question": True,
+        "explanation": "You should change lanes as directed by the sign. Here, the right-hand lane is closed but the left-hand and centre lanes are available. Merging in turn is recommended when it's safe and traffic is going slowly; for example, at roadworks or a road traffic incident. When vehicles are travelling at speed, this isn't advisable and you should move into the appropriate lane in good time.",
+        "questions": [
+            "What does this sign mean?",
+            "What is the meaning of this road sign?",
+            "What does this traffic sign indicate?",
+            "What is signified by this road sign?"
+        ],
+        "correct_answers": [
+            "Right-hand lane closed ahead.",
+            "The right lane will be closed up ahead.",
+            "Closure of the right-hand lane ahead.",
+            "Right lane blocked further down the road."
+        ],
+        "incorrect_answers": [
+            "Right-hand lane T-junction only.",
+            "11 tonne weight limit.",
+            "Through traffic to use left lane.",
+            "Left-hand lane closed ahead.",
+            "Lane merging ahead.",
+            "No right turn."
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "5_stay_left.jpg", "sign_question": True,
+        "explanation": "On the motorway, signs sometimes show temporary warnings due to traffic or conditions. They may be used to indicate, lane closures, temporary speed limits and weather warnings.",
+        "questions": [
+            "What does this motorway sign mean?",
+            "What is indicated by this motorway sign?",
+            "How should you respond to this motorway sign?",
+            "What action does this motorway sign instruct?"
+        ],
+        "correct_answers": [
+            "Change to the lane on your left.",
+            "Move to the left lane.",
+            "Shift to the left-hand lane.",
+            "Switch to the next lane on your left."
+        ],
+        "incorrect_answers": [
+            "Change to the opposite carriageway.",
+            "Leave the motorway at the next exit.",
+            "Pull up on the hard shoulder.",
+            "Move to the right lane.",
+            "Continue straight without changing lanes.",
+            "Reduce speed and stay in your current lane."
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "5_50.png", "sign_question": True,
+        "explanation": "A mandatory speed-limit sign above the hard shoulder shows that this part of the road can be used as a running lane between junctions. You must stay within the speed limit. Look out for vehicles that may be broken down and could be blocking the hard shoulder.",
+        "questions": [
+            "You're on a motorway. What does it mean when a mandatory speed limit is displayed above the hard shoulder?",
+            "What does a speed limit above the hard shoulder on a motorway indicate?",
+            "What should you do if a mandatory speed limit appears above the hard shoulder?",
+            "When a speed limit is shown above the hard shoulder, what does it signify?"
+        ],
+        "correct_answers": [
+            "The hard shoulder can be used as a running lane.",
+            "The hard shoulder is open for traffic.",
+            "You may drive on the hard shoulder as a normal lane.",
+            "The hard shoulder is temporarily available for use."
+        ],
+        "incorrect_answers": [
+            "You can park on the hard shoulder if you feel tired.",
+            "You can pull up in this lane to answer a mobile phone.",
+            "You shouldn't travel in this lane.",
+            "The hard shoulder is closed to all vehicles.",
+            "You must stop if using the hard shoulder.",
+            "Emergency use only on the hard shoulder."
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "5_lanes_closed.jpg", "sign_question": True,
+        "explanation": "A reed cross signal above all lanes means you must stop and wait. Don't change lanes and don't try to continue any further along the motorway.",
+        "questions": [
+            "You're on a motorway. What must you do if there's a red cross showing above every lane?",
+            "What action should you take if a red cross appears above all lanes on a motorway?",
+            "If every lane on the motorway has a red cross signal, what must you do?",
+            "What does a red cross above each motorway lane indicate you must do?"
+        ],
+        "correct_answers": [
+            "Stop and wait.",
+            "Come to a complete stop and remain stationary.",
+            "Cease driving and wait for further instructions.",
+            "Bring your vehicle to a stop and hold your position."
+        ],
+        "incorrect_answers": [
+            "Pull onto the hard shoulder.",
+            "Slow down and watch for further signals.",
+            "Leave at the next exit.",
+            "Proceed with caution.",
+            "Move to the left lane.",
+            "Reduce speed but continue driving."
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "You should stay in the left-hand lane of the motorway unless you're overtaking another vehicle. The right-hand lane of a motorway is an overtaking lane; it isn't the 'fast lane'. After overtaking, move back to the left when it's safe to do so.",
         "questions": [
-
-        ], 
+            "How should the right-hand lane of a three-lane motorway be used?",
+            "What is the correct use of the right-hand lane on a three-lane motorway?",
+            "When driving on a three-lane motorway, what is the purpose of the right-hand lane?",
+            "What is the function of the right-hand lane on a three-lane motorway?"
+        ],
         "correct_answers": [
-
+            "As an overtaking lane.",
+            "For overtaking slower vehicles.",
+            "To pass vehicles in the left or middle lanes.",
+            "For overtaking only, not for continuous driving."
         ],
         "incorrect_answers": [
-            
+            "As a right-turn lane.",
+            "As an acceleration lane.",
+            "As a high-speed lane.",
+            "As a lane for faster traffic.",
+            "As a lane for emergency vehicles.",
+            "As a parking lane."
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "5_lanes_open.jpg", "sign_question": True,
+        "explanation": "You must obey mandatory speed-limit signs above motorway lanes, including the hard shoulder. In this case, you can use the hard shoulder as a running lane but should look for any vehicles that may be blocking the hard shoulder.",
+        "questions": [
+            "What does this motorway sign mean?",
+            "What is indicated by this motorway sign?",
+            "How should you interpret this motorway sign?",
+            "What action does this motorway sign instruct?"
+        ],
+        "correct_answers": [
+            "Use the lanes, including the hard shoulder.",
+            "All lanes, including the hard shoulder, are available for use.",
+            "You may drive in any lane, including the hard shoulder.",
+            "Hard shoulder is open as a running lane."
+        ],
+        "incorrect_answers": [
+            "Use the hard shoulder only.",
+            "Use the three right-hand lanes only.",
+            "Use any lane except the hard shoulder.",
+            "Hard shoulder closed to all traffic.",
+            "Left lane only for heavy vehicles.",
+            "Use the middle lane only."
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "5_2_left_lanes.png", "sign_question": True,
+        "explanation": "On some busy roads, lane control signals are used to vary the number of lanes available to give priority to the main traffic flow. A green arrow indicates that the lane is available to traffic facing the signal. A white diagonal arrow means that the lane is closed ahead and traffic should move to the next lane on the left. A red cross means the lane is closed to traffic facing the signal.",
+        "questions": [
+            "You're driving on a road with several lanes. What do these signs above the lanes mean?",
+            "What do the signs above the lanes indicate?",
+            "How should you interpret the overhead lane signs?",
+            "What lane availability is shown by these overhead signs?"
+        ],
+        "correct_answers": [
+            "The two left lanes are open.",
+            "Both left lanes are available for use.",
+            "Traffic can continue in the two left lanes.",
+            "Left lanes are currently open."
+        ],
+        "incorrect_answers": [
+            "Traffic in the left lanes should stop.",
+            "The two right lanes are open.",
+            "Traffic in the right lanes should stop.",
+            "All lanes are closed.",
+            "Only the rightmost lane is open.",
+            "Use the right lanes only."
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "You'll find traffic officers on motorways and some primary routes in England and Wales. They work in partnership with the police, helping to keep traffic moving and helping to make your journey as safe as possible. It's an offence not to comply with the directions given by a traffic officer.",
         "questions": [
-
-        ], 
+            "You're travelling on a motorway in England. When must you stop the vehicle?",
+            "While driving on an English motorway, when are you required to stop?",
+            "Under what circumstances must you stop your vehicle on a motorway in England?",
+            "When are you legally obligated to stop on an English motorway?"
+        ],
         "correct_answers": [
-
+            "When signalled to stop by a traffic officer.",
+            "If instructed to stop by a traffic officer.",
+            "When a traffic officer directs you to stop.",
+            "If a motorway traffic officer signals for you to stop."
         ],
         "incorrect_answers": [
-            
+            "When signalled to stop by a roadworks supervisor.",
+            "When signalled to stop by a driver who has broken down.",
+            "When signalled to stop by a pedestrian on the hard shoulder.",
+            "When asked to stop by a highway maintenance worker.",
+            "When flagged down by another motorist.",
+            "When waved at by someone on the hard shoulder."
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "5_cross.png", "sign_question": True,
+        "explanation": "At certain times, the hard shoulder will be open as a running lane. However, a red cross above the hard shoulder shows that it is not open as a running lane and should only be used for emergencies and breakdowns.",
+        "questions": [
+            "You're on a motorway. What does it mean when a red cross is displayed above the hard shoulder?"
+        ], 
+        "correct_answers": [
+            "You must not travel in this lane."
+        ],
+        "incorrect_answers": [
+            "This lane can be used if you need a rest.",
+            "Use this lane as a running lane.",
+            "Pull up in this lane to answer your mobile phone."
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "You should drive in the left-hand lane whenever possible. Only use other lanes for overtaking or when directed to do so by signals. Using other lanes when directed to do so by signals. Using other lanes when the left-hand lane is empty can frustrate drivers behind you.",
         "questions": [
-
-        ], 
+            "When should you use the left-hand lane of a motorway?",
+            "In what situation should you stay in the left-hand lane on a motorway?",
+            "When is it appropriate to drive in the left-hand lane on a motorway?",
+            "What is the correct use of the left-hand lane on a motorway?"
+        ],
         "correct_answers": [
-
+            "When the road ahead is clear.",
+            "If there are no obstructions ahead.",
+            "When traffic is flowing normally.",
+            "When not overtaking or passing slower vehicles."
         ],
         "incorrect_answers": [
-            
+            "When you're making a phone call.",
+            "When your vehicle breaks down.",
+            "When you're overtaking slower traffic.",
+            "When you want to reduce speed significantly.",
+            "When stopping to check your route.",
+            "When signaling to change lanes."
         ]
     },
     {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "id": str(uuid.uuid4()), "topic": topic, "image": "5_3_right_lanes.jpg", "sign_question": True,
+        "explanation": "A red cross above the hard shoulder shows that it's closed as a running lane and should only be used for emergencies or breakdowns. On some motorways, the hard shoulder may be used as a running lane at busy times. This will be shown by a mandatory speed limit on the gantry above the hard shoulder.",
         "questions": [
-
-        ], 
+            "You're on a motorway. What does it mean if a red cross is showing above the hard shoulder and mandatory speed limits above all other lanes?",
+            "On a motorway, what should you understand when a red cross appears above the hard shoulder and there are mandatory speed limits displayed over the lanes?",
+            "What does it mean when a red cross is shown above the hard shoulder and mandatory speed limits are displayed above the lanes on a motorway?",
+            "If a red cross is above the hard shoulder and mandatory speed limits are displayed over other lanes on a motorway, what does this mean?"
+        ],
         "correct_answers": [
-
+            "The hard shoulder is for emergency or breakdown use only.",
+            "The hard shoulder can only be used in emergencies or if your vehicle breaks down.",
+            "The hard shoulder is not for normal driving but for emergencies or breakdowns.",
+            "You can only use the hard shoulder in the event of an emergency."
         ],
         "incorrect_answers": [
-            
-        ]
-    },
-    {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
-        "questions": [
-
-        ], 
-        "correct_answers": [
-
-        ],
-        "incorrect_answers": [
-            
-        ]
-    },
-    {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
-        "questions": [
-
-        ], 
-        "correct_answers": [
-
-        ],
-        "incorrect_answers": [
-            
-        ]
-    },
-    {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
-        "questions": [
-
-        ], 
-        "correct_answers": [
-
-        ],
-        "incorrect_answers": [
-            
-        ]
-    },
-    {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
-        "questions": [
-
-        ], 
-        "correct_answers": [
-
-        ],
-        "incorrect_answers": [
-            
-        ]
-    },
-    {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
-        "questions": [
-
-        ], 
-        "correct_answers": [
-
-        ],
-        "incorrect_answers": [
-            
-        ]
-    },
-    {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
-        "questions": [
-
-        ], 
-        "correct_answers": [
-
-        ],
-        "incorrect_answers": [
-            
-        ]
-    },
-    {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
-        "questions": [
-
-        ], 
-        "correct_answers": [
-
-        ],
-        "incorrect_answers": [
-            
-        ]
-    },
-    {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
-        "questions": [
-
-        ], 
-        "correct_answers": [
-
-        ],
-        "incorrect_answers": [
-            
-        ]
-    },
-    {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
-        "questions": [
-
-        ], 
-        "correct_answers": [
-
-        ],
-        "incorrect_answers": [
-            
-        ]
-    },
-    {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
-        "questions": [
-
-        ], 
-        "correct_answers": [
-
-        ],
-        "incorrect_answers": [
-            
+            "The hard shoulder has a speed limit of 50 mph.",
+            "The hard shoulder can be used as a rest area if you feel tired.",
+            "The hard shoulder can be used as a normal running lane.",
+            "The hard shoulder is a lane for overtaking.",
+            "You can stop in the hard shoulder to answer calls.",
+            "The hard shoulder can be used to park temporarily."
         ]
     }
 ]
