@@ -489,198 +489,324 @@ questions = [
         ]
     },
     {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "id": str(uuid.uuid4()), "topic": topic, "image": "6_lorry_rain.jpg", "sign_question": False,
+        "explanation": "The usual two-second time gap increases to four seconds when the roads are wet. If you stay well back, you'll be able to see past the vehicle and increase your chances of being seen by the lorry driver.",
         "questions": [
-
-        ], 
+            "What should you do if it's raining and you're following this lorry on a motorway?",
+            "If it's raining and you're driving behind a lorry on a motorway, what should you be cautious of?",
+            "On a rainy motorway, what should you do when you're following a lorry?",
+            "When driving behind a lorry in the rain on a motorway, what should you be aware of?"
+        ],
         "correct_answers": [
-
+            "Be aware of spray reducing your vision.",
+            "Ensure you're prepared for reduced visibility due to spray.",
         ],
         "incorrect_answers": [
-            
+            "Switch to your headlights onto the main beam.",
+            "Move into a lane that has less spray.",
+            "Allow a two-second separation gap.",
+            "Increase your speed to reduce the spray.",
+            "Use fog lights to improve visibility.",
+            "Stay in the same lane regardless of spray."
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "If you have a garage, use it. Your vehicle is less likely to be a victim of car crime if it's in a garage. Also, in winter, the windows will be kept free from ice and snow.",
         "questions": [
-
-        ], 
+            "Where's the safest place to park your vehicle at night?",
+            "What is the safest place to park your car overnight?",
+            "Where should you park your vehicle at night for maximum security?",
+            "What is the safest parking option for your vehicle at night?"
+        ],
         "correct_answers": [
-
+            "In a garage.",
+            "In a locked garage.",
+            "Inside a secure garage.",
+            "In a private garage."
         ],
         "incorrect_answers": [
-            
+            "In a quiet car park.",
+            "Near a red route.",
+            "On a busy road.",
+            "In an open public space.",
+            "On a side street with little traffic.",
+            "In a residential area without security."
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "Don't travel in icy or snowy weather unless your journey is essential. Drive extremely carefully when roads are or may be icy. Stopping distances can be ten times greater than on dry roads.",
         "questions": [
-
-        ], 
+            "You're driving on an icy road. What distance from the car in front should you drive?",
+            "How far should you stay behind the vehicle in front when driving on an icy road?",
+            "On an icy road, what should the separation distance be between you and the car ahead?",
+            "When driving on an icy road, how much should you increase the following distance?"
+        ],
         "correct_answers": [
-
+            "Ten times the normal distance.",
+            "Ten times the normal distance.",
         ],
         "incorrect_answers": [
-            
+            "Eight times the normal distance.",
+            "Six times the normal distance.",
+            "Four times the normal distance.",
+            "Three times the normal distance.",
+            "Twice the normal distance.",
+            "Five times the normal distance."
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "Wet weather will affect the time it takes for you to stop and can affect your control. Your speed should allow you to stop safely and in good time. If another vehicle pulls into the gap you've allowed, ease back until you've regained your stopping distance.",
         "questions": [
-
-        ], 
+            "You're following a vehicle on a wet road. You stay a safe distance behind it. What should you do if a driver overtakes you and pulls into the gap you've left?",
+            "What should you do if you're following a vehicle on a wet road and another driver overtakes you, filling the gap you created?",
+            "On a wet road, you leave a safe distance behind a vehicle. What do you do if another driver overtakes and pulls into your gap?",
+            "If you're maintaining a safe following distance on a wet road and another vehicle overtakes you, what should you do?"
+        ],
         "correct_answers": [
-
+            "Drop back again to regain a safe distance.",
+            "Regain a safe following distance by dropping back further.",
         ],
         "incorrect_answers": [
-            
+            "Try to overtake safely as soon as you can.",
+            "Stay close to the other vehicle until it moves on.",
+            "Flash your headlights as a warning.",
+            "Stay in the same position and hope for more space.",
+            "Honk your horn to signal your frustration."
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "Chains can be fitted to your wheels in snowy conditions. They can help you to move off without wheelspin or to keep moving in deep snow. You'll still need to adjust your driving to suit these conditions.",
         "questions": [
-
-        ], 
+            "Why would you fit chains to your wheels?",
+            "What is the purpose of fitting chains to your wheels?",
+            "When would you need to fit chains to your vehicle's wheels?",
+            "Why might you put chains on your wheels?"
+        ],
         "correct_answers": [
-
+            "To help prevent skidding in deep snow.",
+            "To prevent your vehicle from skidding in deep snow."
         ],
         "incorrect_answers": [
-            
+            "To help prevent the brake locking.",
+            "To help prevent wear to the tyres.",
+            "To help prevent damage to the road surface.",
+            "To improve fuel efficiency on icy roads.",
+            "To increase the speed of your vehicle in snow.",
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "If you follow another vehicle with your headlights on full beam, they could dazzle the driver. Leave a safe distance and make sure that the light from your dipped beam falls short of the vehicle in front.",
         "questions": [
-
-        ], 
+            "You're driving at night on an unlit road. What should you do if you're following another vehicle?",
+            "When driving on an unlit road at night and following another vehicle, what should you do?",
+            "If you're driving behind another vehicle on an unlit road at night, what should you do?",
+            "On an unlit road at night, what is the correct headlight use when following another vehicle?"
+        ],
         "correct_answers": [
-
+            "Use dipped headlights.",
+            "Switch to dipped headlights.",
+            "Use low-beam headlights.",
+            "Turn on your dipped headlights."
         ],
         "incorrect_answers": [
-            
+            "Switch off your headlights.",
+            "Use full-beam headlights.",
+            "Flash your headlights.",
+            "Turn on high-beam headlights.",
+            "Use your fog lights."
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "The draught caused by other vehicles - particularly those with high sides - could be strong enough to push you out of your lane. Be prepared for a sudden gust of wind as you overtake large vehicles. Keep both hands on the steering wheel to help you keep full control.",
         "questions": [
-
-        ], 
+            "You're driving on the motorway in windy conditions. What should you do as you overtake a high-sided vehicle?",
+            "What should you be cautious of when overtaking a high-sided vehicle on a windy motorway?",
+            "When overtaking a high-sided vehicle on a windy motorway, what should you be aware of?",
+            "In windy conditions on the motorway, what should you do when passing a high-sided vehicle?"
+        ],
         "correct_answers": [
-
+            "Be wary of a sudden gust.",
+            "Be prepared for a sudden gust of wind.",
+            "Watch out for strong crosswinds.",
         ],
         "incorrect_answers": [
-            
+            "Increase your speed.",
+            "Expect normal conditions.",
+            "Drive alongside very closely.",
+            "Use the hard shoulder to overtake.",
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "If you have drive-in fog, switch your dipped headlights on and keep all your windows clear. You should always be able to pull up within the distance you can see ahead.",
         "questions": [
-
-        ], 
+            "What should you check before you start a journey in foggy weather?",
+            "Before driving in foggy conditions, what should you check?",
+            "In foggy weather, what should you ensure before beginning your journey?",
+            "What is important to check before driving in foggy weather?"
+        ],
         "correct_answers": [
-
+            "The windows and lights are clean and clear.",
+            "Ensure your windows and lights are clear.",
+            "Make sure your windows and lights are clear and clean."
         ],
         "incorrect_answers": [
-            
+            "You have a mobile phone with you.",
+            "You have a warning triangle in the vehicle.",
+            "The radiator has enough anti-freeze.",
+            "Your car is fully fueled.",
+            "The tire pressure is correct."
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "Although cars are least likely to be affected, side winds can take anyone by surprise. This is most likely to happen after overtaking a large vehicle when passing gaps between hedges or buildings, and on exposed sections of road.",
         "questions": [
-
-        ], 
+            "Which vehicles are least likely to be affected by side wind?",
+            "Which type of vehicles are less affected by crosswinds?",
+            "In windy conditions, which vehicles are least affected by side winds?",
+            "What kind of vehicles are less likely to be influenced by side winds?"
+        ],
         "correct_answers": [
-
+            "Cars",
+            "Cars.",
         ],
         "incorrect_answers": [
-            
+            "High-sided vehicles.",
+            "Motorcyclists.",
+            "Cyclists.",
+            "Lorries and vans.",
+            "Vehicles with a higher profile."
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "6_ice.png", "sign_question": True,
+        "explanation": "It will take up to 10 times longer to stop when it's icy. Where there's a risk of icy conditions, you need to be aware of this and take extra care. If you think the road may be icy, don't brake or steer harshly, as your tyres could lose their grip on the road.",
+        "questions": [
+            "What does this sign mean?",
+            "What is indicated by this road sign?",
+            "What is the meaning of this traffic sign?",
+        ],
+        "correct_answers": [
+            "Risk of ice.",
+            "Icy road warning.",
+        ],
+        "incorrect_answers": [
+            "Multi-exit roundabout.",
+            "Six roads converge.",
+            "Place of historical interest.",
+            "Danger of falling rocks."
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "6_lorry_spray.jpg", "sign_question": False,
+        "explanation": "Large vehicles can throw up a lot of spray when it's wet. This makes it difficult for drivers behind to see the road ahead. You'll be able to see more by dropping back further, out of the spray. This will also increase your separation distance, giving you more room to stop if you have to.",
+        "questions": [
+            "You're following a lorry on a wet road. What should you do when spray makes it difficult to see the road ahead?",
+            "What should you do if spray from a lorry reduces visibility on a wet road?",
+            "If spray from a lorry makes it hard to see the road ahead on a wet road, what should you do?",
+            "What action should you take when following a lorry on a wet road and spray makes it hard to see?"
+        ],
+        "correct_answers": [
+            "Drop back until you can see better.",
+            "Back off to improve your visibility.",
+            "Drop back and wait for the spray to clear."
+        ],
+        "incorrect_answers": [
+            "Speed up to overtake quickly.",
+            "Put your headlights on full beam.",
+            "Keep close to the lorry to avoid the spray.",
+            "Continue at the same speed."
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "Water on the brakes will act as a lubricant, causing them to work less efficiently. Using the brakes lightly as you go along will quickly dry them out.",
         "questions": [
-
-        ], 
+            "You're just gone through flood water. What should you do to make sure your brakes are working properly?",
+            "What should you do after driving through flood water to ensure your brakes are effective?",
+            "You've driven through flood water. How can you check that your brakes are working properly?",
+            "What action should you take to ensure the brakes are functioning after passing through flood water?"
+        ],
         "correct_answers": [
-
+            "Go slowly while gently applying the brakes.",
+            "Apply brakes gently while driving at a reduced speed.",
+            "Drive slowly and gently press the brakes to test them.",
+            "Gradually apply the brakes while maintaining a low speed."
         ],
         "incorrect_answers": [
-            
+            "Avoid using brakes at all for a few miles.",
+            "Stop for at least an hour to allow them time to dry.",
+            "Accelerate and keep to a high speed for a short time.",
+            "Continue driving as normal without checking the brakes."
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "If you attempt to move off in a low gear, there'll be more torque (turning force) at the driven wheels than if use a higher gear. More torque makes it easier for the tyres to lose grip and so spin the wheels.",
         "questions": [
-
-        ], 
+            "What will help you to move off on a snowy surface?",
+            "How can you gain traction when moving off on snow?",
+            "What technique will assist you in starting on a snowy road?",
+        ],
         "correct_answers": [
-
+            "Using a higher gear than normal.",
+            "Start in a higher gear to reduce wheel spin.",
+            "Select a higher gear to improve traction.",
         ],
         "incorrect_answers": [
-            
+            "Using the car's lowest gear.",
+            "Using the parking brake and footbrake together.",
+            "Using a high engine speed.",
+            "Accelerating quickly to gain momentum."
+        ]
+    },
+    {
+        "id": str(uuid.uuid4()), "topic": topic, "image": "6_stop_snow.png", "sign_question": False,
+        "explanation": "The 'stop' sign is the only road sign that's octagonal. This is so that it can be recognised and obeyed even if it's obscured.",
+        "questions": [
+            "In winter, road signs can be covered by snow. What does this sign mean?",
+            "What is the meaning of this sign if it's partially covered by snow?",
+            "During snowy conditions, what does this sign indicate?",
+            "If a sign is obscured by snow, what could this shape mean?"
+        ],
+        "correct_answers": [
+            "Stop.",
+            "Come to a complete stop.",
+            "Stop your vehicle."
+        ],
+        "incorrect_answers": [
+            "Crossroads.",
+            "Turn right.",
+            "Give way.",
+            "Proceed with caution."
         ]
     },
     {
         "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
+        "explanation": "If the road surface becomes very hot, it can soften. Tyres are unable to grip a soft surface as well as they can firm dry one. take care when cornering and braking.",
         "questions": [
-
-        ], 
+            "What will be affected if the road surface becomes soft in very hot weather?",
+            "How does very hot weather impact the road surface?",
+            "What driving aspect is affected by a soft road surface during hot weather?",
+            "During hot weather, what might be reduced if the road becomes soft?"
+        ],
         "correct_answers": [
-
+            "The tyre grip.",
+            "The tyre traction.",
+            "the grip on the road.",
         ],
         "incorrect_answers": [
-            
-        ]
-    },
-    {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
-        "questions": [
-
-        ], 
-        "correct_answers": [
-
-        ],
-        "incorrect_answers": [
-            
-        ]
-    },
-    {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
-        "questions": [
-
-        ], 
-        "correct_answers": [
-
-        ],
-        "incorrect_answers": [
-            
-        ]
-    },
-    {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": False,
-        "explanation": "This is the explanation.",
-        "questions": [
-
-        ], 
-        "correct_answers": [
-
-        ],
-        "incorrect_answers": [
-            
+            "The fuel consumption.",
+            "The exhaust emissions.",
+            "The suspension.",
+            "The brake efficiency."
         ]
     }
 ]
