@@ -132,17 +132,16 @@ class test_question_get_feedback(unittest.TestCase):
     }
     
     # SetUp method executed before each test
-    # @unittest.skip       
+    #@unittest.skip       
     def setUp(self):
         pass
 
     # tearDown method executed before each test
-    # @unittest.skip
+    #@unittest.skip
     def tearDown(self) -> None:
         pass
 
-
-    def test_questions_get_category_1(self):
+    def test_questions_get_feedback(self):
         # Send a request to register same user. (Input is a dictionary)
         request = self.input
         response = requests.post(self.TEST_URL,params={"code": self.FUNCTION_KEY},json=request)

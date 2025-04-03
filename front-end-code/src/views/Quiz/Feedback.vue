@@ -14,6 +14,9 @@ export default {
     name: "feedback",
     data() {
         return {
+            // The views and feedback:
+            
+
             logged_in_user: this.$store.state.currentUser,
             message: { error: "", success: "" },
         };

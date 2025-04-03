@@ -21,7 +21,7 @@ class open_ai():
                     "content": "Please return feedback from the following dictionary of incorrectly answered questions, and ONLY reply another list of dictionaries only including the question and it's informative feedback explaining WHY that is the answer. The dictionary schema form is {}, and the incorrect answers are the following: {}".format(self.schema, incorrect_answers)
                 }
             ],
-            model="gpt-3.5-turbo-0301"
+            model="gpt-4-32k"
         )
 
         reply = chat_completion.choices[0].message.content
