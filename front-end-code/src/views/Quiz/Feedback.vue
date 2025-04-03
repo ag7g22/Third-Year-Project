@@ -161,12 +161,11 @@ export default {
             }
         },
         next_page(page) {
-            input = [];
-            state = { current_view: 'loading', feedback: []};
-            current_Q = 0;
-            image = "";
-            message = { error: "", success: "" };
-            
+            this.input = [];
+            this.state = { current_view: 'loading', feedback: []};
+            this.current_Q = 0;
+            this.image = "";
+            this.message = { error: "", success: "" };
             console.log("/" + page);
             this.$router.push(`/${page}`);
         }

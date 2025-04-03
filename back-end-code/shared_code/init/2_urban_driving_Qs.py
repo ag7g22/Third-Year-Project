@@ -743,7 +743,7 @@ questions = [
         ]
     },
     {
-        "id": str(uuid.uuid4()), "topic": topic, "image": "n/a", "sign_question": True,
+        "id": str(uuid.uuid4()), "topic": topic, "image": "2_bus_lane.png", "sign_question": True,
         "explanation": "Bus-lane signs show the vehicles allowed to use the lane and its times of operation. Where no times are shown, the bus lane is in operation 24 hours a day.",
         "questions": [
             "What does it mean if the signs at a bus lane show no times of operation?",

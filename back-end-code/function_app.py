@@ -1,4 +1,3 @@
-import datetime
 import math
 import json
 import logging
@@ -16,6 +15,7 @@ import azure.functions as func
 from azure.cosmos import CosmosClient
 from azure.cosmos.exceptions import CosmosResourceNotFoundError
 from openai import AzureOpenAI
+from azure.storage.blob import BlobServiceClient
 
 app = func.FunctionApp()
 
@@ -27,6 +27,8 @@ openai_proxy = AzureOpenAI(api_key=os.environ['OAIKey'], api_version="2024-02-01
                         azure_endpoint=os.environ['OAIEndpoint'],
                         azure_deployment="gpt-35-turbo"
                         )
+blob_service_client = BlobServiceClient.from_connection_string(os.environ['AZURE_STORAGE_CONNECTION_STRING'])
+video_proxy = blob_service_client.get_container_client(os.environ['VideoContainerName'])
 
 utility = utility()
 oai = open_ai()
@@ -739,3 +741,36 @@ def question_get_feedback(req: func.HttpRequest) -> func.HttpResponse:
         logging.info("FAILURE: Cannot generate feedback.")
         response_body = json.dumps({"result": False, "msg": "Cannot generate feedback." })
         return func.HttpResponse(body=response_body,mimetype="application/json")
+    
+
+@app.route(route="question/get/video", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
+def question_video(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Returns the hazard perception video stored in blob storage to be displayed on screen.
+    {"filename": "filename"}
+    """
+    input = req.get_json()
+    logging.info('Python HTTP trigger function processed a QUESTION_GET_VIDEO request.')
+
+    # Get the filename
+    filename = input['filename']
+    
+    try:
+        # Check if the file is actually in the blob storage.
+        blob_client = video_proxy.get_blob_client(filename)
+        if not blob_client.exists():
+            response_body = json.dumps({"result": False, "msg": "Video not found." })
+            return func.HttpResponse(body=response_body,mimetype="application/json")
+        
+        # Generate a SAS url for streaming.
+        video_url = blob_client.url
+        response_body = json.dumps({"result": True, "msg": video_url })
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+
+    # Catch any exception errors:
+    except Exception:
+        logging.info('Error retrieving video.')
+        response_body = json.dumps({"result": False, "msg": 'Error retrieving video.' })
+        return func.HttpResponse(body=response_body,mimetype="application/json")
+
+

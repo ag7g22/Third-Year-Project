@@ -91,7 +91,7 @@
                     <button v-if="selectedAnswer" @click="nextQuestion">Next</button>
                 </div>
                 <div v-else>
-                    <h2>You've completed the questionnaire! 🎉</h2>
+                    <h2>You've completed the category quiz! 🎉</h2>
                     <h3> Score: {{ percentage }}% </h3>
                     <p> {{ quiz_message }} </p>
                     <button v-if="updateFinished" class="stop-button" @click="terminate_quiz()">Back</button>
@@ -155,7 +155,7 @@ export default {
             this.message.error = "";
             this.message.success = "";
             this.state.current_view = view;
-            this.num_questions = { options: [8, 10, 12], selected: 8 }
+            this.num_questions = { options: [5, 10, 15, 20], selected: 10 }
         },
         init_quiz_instructions(topic) {
             // Reset messages
@@ -390,7 +390,7 @@ export default {
         terminate_quiz() {
             // Reset everything
             this.state = { current_view: 'categories', current_topic: '', current_description: '' } // State of quiz page
-            this.num_questions = { options: [8, 10, 12], selected: 8 } // Dropdown menu
+            this.num_questions = { options: [5, 10, 15, 20], selected: 10 } // Dropdown menu
             this.questions = [] // Quiz questions by API
             this.currentQuestion = 0 // Question pointer
             this.selectedAnswer = null // This is the selected question
