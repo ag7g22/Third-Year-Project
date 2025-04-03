@@ -14,36 +14,42 @@
         </div>
 
         <div v-if="state.current_view === 'video'" class="video-container">
-            <div>
-                <video ref="hazard_perception"
-                    :src="playing_video[0]?.src"
-                    @click="handleClick"
-                    @ended="finish_video_clip"
-                    autoplay 
-                    muted 
-                    playsinline 
-                    width="800"
-                    height="500">
-                </video>
-
-                <!-- Click Effect -->
-                <div 
-                    v-for="(click, index) in clicks"
-                    :key="index"
-                    class="click-circle"
-                    :style="{ top: (click.y - 10) + 'px', left: (click.x - 15) + 'px' }"
-                ></div>
+            <div v-if="clip_url === ''">
+                <h2>LOADING VIDEO CLIP ...</h2>
             </div>
 
-            <div v-if="too_many_clicks" class="overlay">
-                <div class="overlay-content" @click.stop>
-                    <p>You've clicked too many times.</p>
-                    <button @click="toggle_view('score')">Next</button>
+            <div v-else>
+                <div>
+                    <video ref="hazard_perception"
+                        :src="clip_url"
+                        @click="handleClick"
+                        @ended="finish_video_clip"
+                        autoplay 
+                        muted 
+                        playsinline 
+                        width="800"
+                        height="500">
+                    </video>
+
+                    <!-- Click Effect -->
+                    <div 
+                        v-for="(click, index) in clicks"
+                        :key="index"
+                        class="click-circle"
+                        :style="{ top: (click.y - 10) + 'px', left: (click.x - 15) + 'px' }"
+                    ></div>
                 </div>
-            </div>
-            
-            <div class="horizontal-container">
-                <div v-for="clicks in click_history" class="item">🚩</div>
+
+                <div v-if="too_many_clicks" class="overlay">
+                    <div class="overlay-content" @click.stop>
+                        <p>You've clicked too many times.</p>
+                        <button @click="toggle_view('score')">Next</button>
+                    </div>
+                </div>
+                
+                <div class="horizontal-container">
+                    <div v-for="clicks in click_history" class="item">🚩</div>
+                </div>
             </div>
 
             <div class="buttons">
@@ -68,11 +74,11 @@
   
 <script>
 import toastr from 'toastr';
-const videoContext = require.context('@/assets/videos', false, /\.mp4$/);
-const videos = videoContext.keys().map(key => ({
-  src: videoContext(key),
-  title: key.replace('./', '').replace('.mp4', '') // Clean filename
-}));
+//const videoContext = require.context('@/assets/videos', false, /\.mp4$/);
+//const videos = videoContext.keys().map(key => ({
+//  src: videoContext(key),
+//  title: key.replace('./', '').replace('.mp4', '') // Clean filename
+//}));
 
 export default {
     // Page member variables and methods:
@@ -88,7 +94,7 @@ export default {
             // Clips
             clips: [],
             selected_clip: null,
-            playing_video: null,
+            clip_url: '',
 
             // Clicking the video
             click_x: 0,
@@ -151,12 +157,21 @@ export default {
             // Reset state
             this.state.current_view = view;
         },
-        load_video_clip(clip) {
+        async load_video_clip(clip) {
             // Load the corrosponding clip
-            console.log(clip.name)
+            console.log(clip.name);
             this.selected_clip = clip;
-            this.playing_video = videos.filter(video => video.title.includes(clip.name));
-            this.toggle_view('video');
+            const input = {'filename': clip.name + ".mp4"};
+
+            const video = await this.azure_function('POST', '/question/get/video', input);
+            if (video.result) {
+                // Set the playing video
+                this.clip_url = video.msg;
+                console.log(this.clip_url);
+                this.toggle_view('video');
+            } else {
+                this.message.error = video.msg || 'Loading video failed.'
+            }
         },
         click_fail() {
             // Run this method if the user clicks more than 10 times
@@ -221,7 +236,7 @@ export default {
         terminate_page() {
             // Reset variables
             this.selected_clip = null;
-            this.playing_video = null;
+            this.clip_url = '',
             this.toggle_view('selection');
             this.click_x = 0;
             this.click_y = 0;

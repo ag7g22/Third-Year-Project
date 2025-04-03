@@ -12,6 +12,7 @@
                 <button @click="init_quiz_instructions('Rural Driving')">Rural Driving</button>
                 <button @click="init_quiz_instructions('Bigger Roads')">Bigger Roads</button>
                 <button @click="init_quiz_instructions('Motorways')">Motorways</button>
+                <button @click="init_quiz_instructions('Tricky Conditions')">Tricky Conditions</button>
             </div>
 
             <div class="buttons">
@@ -79,6 +80,9 @@ export default {
                 case 'Motorways':
                     this.state.current_description = 'driving on the motorway.'
                     break;
+                case 'Tricky Conditions':
+                    this.state.current_description = 'driving at night and in bad weather.'
+                    break;
             }
             
             this.toggle_view('instructions')
@@ -132,16 +136,46 @@ export default {
             switch (this.state.current_topic) {
                 // Clips: (Video name, (x,y), time)
                 case 'Urban Driving':
-                    clips = [{name: 'Urban Driving 1', x: 370, y: 268, time: 15.25}];
+                    clips = [
+                        {name: 'Urban Driving 1', x: 370, y: 268, time: 15.25},
+                        {name: 'Urban Driving 2', x: 370, y: 268, time: 15.25},
+                        {name: 'Urban Driving 3', x: 370, y: 268, time: 15.25},
+                        {name: 'Urban Driving 4', x: 370, y: 268, time: 15.25},
+                        {name: 'Urban Driving 5', x: 370, y: 268, time: 15.25}
+                    ];
                     break;
                 case 'Rural Driving':
-                    this.state.current_description = 'driving in rural areas.'
+                    clips = [
+                        {name: 'Rural Driving 1', x: 370, y: 268, time: 15.25},
+                        {name: 'Rural Driving 2', x: 370, y: 268, time: 15.25},
+                        {name: 'Rural Driving 3', x: 370, y: 268, time: 15.25},
+                        {name: 'Rural Driving 4', x: 370, y: 268, time: 15.25},
+                        {name: 'Rural Driving 5', x: 370, y: 268, time: 15.25}
+                    ];
                     break;
                 case 'Bigger Roads':
-                    this.state.current_description = 'driving in A roads and dual carriageways.'
+                    clips = [
+                        {name: 'Bigger Roads 1', x: 370, y: 268, time: 15.25},
+                        {name: 'Bigger Roads 2', x: 370, y: 268, time: 15.25},
+                        {name: 'Bigger Roads 3', x: 370, y: 268, time: 15.25},
+                        {name: 'Bigger Roads 4', x: 370, y: 268, time: 15.25}
+                    ];
                     break;
                 case 'Motorways':
-                    this.state.current_description = 'driving on the motorway.'
+                    clips = [
+                        {name: 'Motorways 1', x: 370, y: 268, time: 15.25},
+                        {name: 'Motorways 2', x: 370, y: 268, time: 15.25},
+                        {name: 'Motorways 3', x: 370, y: 268, time: 15.25}
+                    ];
+                    break;
+                case 'Tricky Conditions':
+                    clips = [
+                        {name: 'Tricky Conditions 1', x: 370, y: 268, time: 15.25},
+                        {name: 'Tricky Conditions 2', x: 370, y: 268, time: 15.25},
+                        {name: 'Tricky Conditions 3', x: 370, y: 268, time: 15.25},
+                        {name: 'Tricky Conditions 4', x: 370, y: 268, time: 15.25},
+                        {name: 'Tricky Conditions 5', x: 370, y: 268, time: 15.25}
+                    ];
                     break;
             }
 
