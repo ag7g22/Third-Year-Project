@@ -7,7 +7,7 @@ class open_ai():
     Class to handle the open AI operations.
     """
 
-    schema = "{ 'question': '...', 'feedback', '...'}"
+    schema = '{ "question": "...", "feedback", "..."}'
     
     def evaluate_wrong_answers(self, ai_proxy: ContainerProxy, incorrect_answers):
         """
@@ -18,7 +18,7 @@ class open_ai():
             messages=[
                 {
                     "role": "user",
-                    "content": "Please return feedback from the following dictionary of incorrectly answered questions, and ONLY reply another list of dictionaries only including the question and it's informative feedback explaining WHY that is the answer. The dictionary schema form is {}, and the incorrect answers are the following: {}".format(self.schema, incorrect_answers)
+                    "content": "Please return feedback from the following dictionary of incorrectly answered questions, and ONLY reply another list of dictionaries only including the question and it's informative feedback explaining WHY that is the answer. The dictionary schema form is {} and make sure the strings inside are in speech marks (""), and the incorrect answers are the following: {}".format(self.schema, incorrect_answers)
                 }
             ],
             model="gpt-4-32k"

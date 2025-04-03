@@ -95,7 +95,7 @@
                     <h3> Score: {{ percentage }}% </h3>
                     <p> {{ quiz_message }} </p>
                     <button v-if="updateFinished" class="stop-button" @click="terminate_quiz()">Back</button>
-                    <button>Feedback</button>
+                    <button @click="init_feedback()">Feedback</button>
                 </div>
             </div>
 
@@ -128,7 +128,7 @@ export default {
 
             // Feedback
             feedback: [],
-            // {question, correct_ans, selected_ans }
+            // {question, correct_ans, selected_ans, image}
 
             // Score, averaged out by number of questions.
             total_score: 0,
@@ -212,7 +212,7 @@ export default {
                 this.toggle_view('quiz');
                 this.startStopwatch();
             } else {
-                this.message.error = response.msg || "Loading quiz failed.";
+                this.message.error = quiz.msg || "Loading quiz failed.";
             }
         },
         selectAnswer(option) {
@@ -269,9 +269,10 @@ export default {
         },
         add_feedback() {
             // Add to feedback list to send to API later
+            let question_image = this.questions[this.currentQuestion].image
             let q_obj = this.questions[this.currentQuestion]
-            console.log(JSON.stringify({question: q_obj.question, selected: this.selectedAnswer, correct: q_obj.correct_answer}))
-            this.feedback.push({question: q_obj.question, selected: this.selectedAnswer, correct: q_obj.correct_answer})
+            console.log(JSON.stringify({question: q_obj.question, selected: this.selectedAnswer, correct: q_obj.correct_answer, image: question_image}))
+            this.feedback.push({question: q_obj.question, selected: this.selectedAnswer, correct: q_obj.correct_answer, image: question_image})
         },
         add_image() {
             // Library of images
@@ -407,6 +408,14 @@ export default {
 
             this.toggle_view('categories')
         },
+        init_feedback() {
+            // Setup for the feedback page
+            console.log("/feedback");
+            this.$router.push({
+                path: `/feedback`,
+                query: { input: this.feedback }
+            })
+        },
         async add_achievement(name) {
             // Add achievement to user's achievements and notify on the UI.
             this.achievements.push(name)
@@ -465,8 +474,10 @@ export default {
 
 <style lang="scss" scoped>
 img {
-  width: 200px;
-  height: 100px;
+  max-width: 300px; /* Limits the width to 200px */
+  max-height: 200px; /* Limits the height to 100px */
+  width: auto; /* Maintain aspect ratio */
+  height: auto; /* Maintain aspect ratio */
 }
 
 .instruction-box {
