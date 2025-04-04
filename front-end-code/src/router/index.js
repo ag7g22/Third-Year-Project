@@ -19,6 +19,8 @@ import Lobby from '@/views/Social/Lobby.vue'
 import CategoryQuiz from '@/views/Quiz/CategoryQuiz.vue'
 import RoadSignQuiz from '@/views/Quiz/RoadSignQuiz.vue'
 import Feedback from '@/views/Quiz/Feedback.vue'
+import DailyQuiz from '@/views/Quiz/DailyQuiz.vue'
+import MockExam from '@/views/Quiz/MockExam.vue'
 
 // Hazard Perception
 import HazardPerception from '@/views/Quiz/HazardPerception.vue'
@@ -84,6 +86,16 @@ export default new Router({
       path: '/feedback',
       name: 'feedback',
       component: Feedback
+    },
+    {
+      path: '/dailyquiz',
+      name: 'dailyquiz',
+      component: DailyQuiz
+    },
+    {
+      path: '/mockexam',
+      name: 'mockexam',
+      component: MockExam
     },
     {
       path: '/hazard',

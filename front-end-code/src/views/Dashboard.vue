@@ -4,12 +4,13 @@
         <div class="buttons">
             <button @click="next_page('account')">Account</button>
             <button @click="load_friends_list()">Friends</button>
-            <button>Daily Training</button>
+            <button @click="next_page('dailyquiz')">Daily Training</button>
             <button @click="next_page('lobby')">Versus</button>
             <button @click="next_page('categoryquiz')">Category Practice</button>
             <button @click="next_page('roadsignquiz')">Road Sign Practice</button>
             <button @click="next_page('hazard')">Hazard Perception</button>
             <button @click="load_leaderboards()">Leaderboard</button>
+            <button @click="next_page('mockexam')">Mock Exam</button>
             <button @click="logout()">Log out</button>   
         </div>
         <p v-if="message.error" class="error-message">{{ message.error }}</p>
