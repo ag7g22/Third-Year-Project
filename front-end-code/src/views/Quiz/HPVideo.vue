@@ -17,7 +17,6 @@
             <div v-if="clip_url === ''">
                 <h2>LOADING VIDEO CLIP ...</h2>
             </div>
-
             <div v-else>
                 <div>
                     <video ref="hazard_perception"
@@ -74,12 +73,6 @@
   
 <script>
 import toastr from 'toastr';
-//const videoContext = require.context('@/assets/videos', false, /\.mp4$/);
-//const videos = videoContext.keys().map(key => ({
-//  src: videoContext(key),
-//  title: key.replace('./', '').replace('.mp4', '') // Clean filename
-//}));
-
 export default {
     // Page member variables and methods:
     name: "HPvideo",

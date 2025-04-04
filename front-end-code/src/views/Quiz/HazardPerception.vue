@@ -190,6 +190,7 @@ export default {
             this.$router.push(`/${page}`);
         }
     },
+    
 };
 </script>
 

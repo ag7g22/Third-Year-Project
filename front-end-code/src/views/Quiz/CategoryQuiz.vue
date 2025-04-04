@@ -193,10 +193,9 @@ export default {
         },
         async init_quiz() {
             // Reset messages
-            this.message.error = "";
-            this.message.success = "";
+            this.message = { error: "", success: "" };
 
-            this.message.success = 'Loading quiz ...'
+            this.message.success = 'Loading quiz ...';
 
             // Initalise the quiz
             const input = { "No_of_Qs": this.num_questions.selected, "topic": this.state.current_topic }
@@ -465,8 +464,8 @@ export default {
         }
     },
     computed: {
-    progressBarWidth() {
-      return (this.currentQuestion / (this.questions.length - 1)) * 100;
+        progressBarWidth() {
+        return (this.currentQuestion / (this.questions.length - 1)) * 100;
     }
   },
 };
