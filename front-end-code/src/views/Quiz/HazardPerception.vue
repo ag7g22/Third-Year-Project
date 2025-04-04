@@ -137,44 +137,44 @@ export default {
                 // Clips: (Video name, (x,y), time)
                 case 'Urban Driving':
                     clips = [
-                        {name: 'Urban Driving 1', x: 370, y: 268, time: 15.25},
-                        {name: 'Urban Driving 2', x: 370, y: 268, time: 15.25},
-                        {name: 'Urban Driving 3', x: 370, y: 268, time: 15.25},
-                        {name: 'Urban Driving 4', x: 370, y: 268, time: 15.25},
-                        {name: 'Urban Driving 5', x: 370, y: 268, time: 15.25}
+                        {name: 'Urban Driving 1', x: 370, y: 270, time: 15.25},
+                        {name: 'Urban Driving 2', x: 540, y: 270, time: 18.00},
+                        {name: 'Urban Driving 3', x: 410, y: 260, time: 29.00},
+                        {name: 'Urban Driving 4', x: 415, y: 260, time: 37.60},
+                        {name: 'Urban Driving 5', x: 350, y: 260, time: 29.00}
                     ];
                     break;
                 case 'Rural Driving':
                     clips = [
-                        {name: 'Rural Driving 1', x: 370, y: 268, time: 15.25},
-                        {name: 'Rural Driving 2', x: 370, y: 268, time: 15.25},
-                        {name: 'Rural Driving 3', x: 370, y: 268, time: 15.25},
-                        {name: 'Rural Driving 4', x: 370, y: 268, time: 15.25},
-                        {name: 'Rural Driving 5', x: 370, y: 268, time: 15.25}
+                        {name: 'Rural Driving 1', x: 490, y: 220, time: 47.00},
+                        {name: 'Rural Driving 2', x: 250, y: 250, time: 31.00},
+                        {name: 'Rural Driving 3', x: 395, y: 230, time: 17.50},
+                        {name: 'Rural Driving 4', x: 450, y: 290, time: 13.45},
+                        {name: 'Rural Driving 5', x: 295, y: 240, time: 37.85}
                     ];
                     break;
                 case 'Bigger Roads':
                     clips = [
-                        {name: 'Bigger Roads 1', x: 370, y: 268, time: 15.25},
-                        {name: 'Bigger Roads 2', x: 370, y: 268, time: 15.25},
-                        {name: 'Bigger Roads 3', x: 370, y: 268, time: 15.25},
-                        {name: 'Bigger Roads 4', x: 370, y: 268, time: 15.25}
+                        {name: 'Bigger Roads 1', x: 415, y: 250, time: 13.90},
+                        {name: 'Bigger Roads 2', x: 425, y: 240, time: 14.55},
+                        {name: 'Bigger Roads 3', x: 510, y: 260, time: 26.30},
+                        {name: 'Bigger Roads 4', x: 500, y: 245, time: 21.45}
                     ];
                     break;
                 case 'Motorways':
                     clips = [
-                        {name: 'Motorways 1', x: 370, y: 268, time: 15.25},
-                        {name: 'Motorways 2', x: 370, y: 268, time: 15.25},
-                        {name: 'Motorways 3', x: 370, y: 268, time: 15.25}
+                        {name: 'Motorways 1', x: 25, y: 190, time: 2.55},
+                        {name: 'Motorways 2', x: 320, y: 250, time: 25.45},
+                        {name: 'Motorways 3', x: 690, y: 290, time: 30.20}
                     ];
                     break;
                 case 'Tricky Conditions':
                     clips = [
-                        {name: 'Tricky Conditions 1', x: 370, y: 268, time: 15.25},
-                        {name: 'Tricky Conditions 2', x: 370, y: 268, time: 15.25},
-                        {name: 'Tricky Conditions 3', x: 370, y: 268, time: 15.25},
-                        {name: 'Tricky Conditions 4', x: 370, y: 268, time: 15.25},
-                        {name: 'Tricky Conditions 5', x: 370, y: 268, time: 15.25}
+                        {name: 'Tricky Conditions 1', x: 110, y: 250, time: 17.10},
+                        {name: 'Tricky Conditions 2', x: 515, y: 240, time: 31.80},
+                        {name: 'Tricky Conditions 3', x: 280, y: 254, time: 33.45},
+                        {name: 'Tricky Conditions 4', x: 325, y: 235, time: 22.70},
+                        {name: 'Tricky Conditions 5', x: 320, y: 255, time: 24.00}
                     ];
                     break;
             }
