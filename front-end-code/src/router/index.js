@@ -8,7 +8,6 @@ import Dashboard from '@/views/Dashboard.vue'
 
 // Account Pages
 import AccountPage from '@/views/Account/AccountPage.vue'
-import AccountUpdate from '@/views/Account/AccountUpdate.vue'
 
 // Social-related pages
 import FriendsList from '@/views/Social/FriendsList.vue'
@@ -51,11 +50,6 @@ export default new Router({
       path: '/account',
       name: 'account',
       component: AccountPage
-    },
-    {
-      path: '/update',
-      name: 'update',
-      component: AccountUpdate
     },
     {
       path: '/friends',

@@ -27,7 +27,6 @@
       <!-- Navigation Buttons -->
       <div class="buttons">
         <button @click="handleBack">Back</button>
-        <button v-if="view === 'logged_user'" @click="next_page('update')">Update details</button>
       </div>
     </div>
   </template>
