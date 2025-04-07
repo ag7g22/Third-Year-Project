@@ -18,32 +18,125 @@
         </div>
 
         <div v-if="current_view === 'multiple_choice'">
-            <h1 class="title">MOCK EXAM | {{ logged_in_user }}</h1>
+            <h1 class="title">MOCK EXAM | {{ formattedTime }}</h1>
+            <div class="questionnaire">
+                <p>Question {{ current_Q + 1 }} of {{ questions.length }}</p>
+
+                <!-- Progress Bar -->
+                <div class="progress-container">
+                <div class="progress-bar" :style="{ width: progressBarWidth + '%' }"></div>
+                </div>
+
+                <h2>{{ questions[current_Q].question }}</h2>
+
+                <div v-if="questions[current_Q].image !== 'n/a'">
+                    <img :src=image alt="Question Image">
+                </div>
+                
+                <button 
+                    @click="toggle_flag"
+                    :class="{ 'flagged': questions[current_Q].flagged }"
+                    >
+                    <span v-if="questions[current_Q].flagged">🚩 Unflag</span>
+                    <span v-else>Flag</span>
+                </button>
+
+                <div class="options">
+                    <button 
+                    v-for="(option, index) in questions[current_Q].options"
+                    :key="index"
+                    :class="{
+                        selected: questions[current_Q].selected_ans === option,
+                    }"
+                    @click="select_answer(option)"
+                    >
+                    {{ option }}
+                    </button>
+                </div>
+                <button @click="terminate_mock_exam()">End Exam</button>
+                <button v-if="current_Q !== 0" @click="prev_question()">Previous</button>
+                <button v-if="questions[current_Q].selected_ans !== null" @click="next_question() && current_Q !== questions.length - 1">Next</button>
+                <button v-if="current_Q === questions.length - 1 && questions[current_Q].selected_ans !== null" @click="start_hazard_perceptions()">Finish Section</button>
+            </div>
+
             <div v-if="timer_finished" class="overlay">
                 <div class="overlay-content" @click.stop>
                     <p>You've ran out of time.</p>
                     <button @click="terminate_mock_exam()">End Exam</button>
-                    <button @click="toggle_view('hazard_perception')">Next</button>
+                    <button @click="start_hazard_perceptions()">Next</button>
                 </div>
             </div>
 
-            <h2>{{ formattedTime }}</h2>
-            <button @click="terminate_mock_exam()">End Exam</button>
+            <!-- Floating Question Grid -->
+            <div class="floating-grid">
+                <div
+                    v-for="(q, index) in questions"
+                    :key="index"
+                    class="grid-item"
+                    :class="{
+                    flagged: q.flagged,
+                    answered: q.selected_ans !== null,
+                    current: index === current_Q,
+                    locked: index > current_Q && q.selected_ans === null
+                    }"
+                    @click="() => {
+                    if (index <= current_Q || q.selected_ans !== null) jump_to_question(index);
+                    }"
+                    :title="index <= current_Q || q.selected_ans !== null ? 'Question ' + (index + 1) : 'Locked'"
+                >
+                    {{ index + 1 }}
+                </div>
+            </div>
         </div>
 
-        <div v-if="current_view === 'hazard_perception'">
+        <div v-if="current_view === 'hazard_perception'" class="video-container">
+
+            <div v-if="clip_url === ''">
+                <h2>LOADING VIDEO CLIP ...</h2>
+            </div>
+            <div v-else>
+                <div>
+                    <video ref="hazard_perception"
+                        :src="clip_url"
+                        @click="handleClick"
+                        @ended="finish_video_clip"
+                        autoplay 
+                        muted 
+                        playsinline 
+                        width="800"
+                        height="500">
+                    </video>
+
+                    <!-- Click Effect -->
+                    <div 
+                        v-for="(click, index) in clicks"
+                        :key="index"
+                        class="click-circle"
+                        :style="{ top: (click.y - 10) + 'px', left: (click.x - 15) + 'px' }"
+                    ></div>
+                </div>
+            </div>
+
             <div v-if="too_many_clicks" class="overlay">
                 <div class="overlay-content" @click.stop>
                     <p>You've clicked too many times.</p>
-                    <button @click="toggle_view('score')">Next</button>
+                    <button @click="load_video_clip()">Next</button>
                 </div>
+            </div>
+
+            <div class="horizontal-container">
+                <div v-for="clicks in click_history" class="item">🚩</div>
             </div>
 
             <button @click="terminate_mock_exam()">End Exam</button>
         </div>
 
-        <div v-if="current_view === 'score'">
+        <div v-if="current_view === 'scores'">
+            <h1 class="title">MOCK EXAM SCORES | {{ logged_in_user }}</h1>
+            <h2>Multiple Choice Score: {{ this.scores_1 }} / 50</h2>
+            <h2>Hazard Perception Score: {{ this.scores_2 }} / 75</h2>
             <button @click="terminate_mock_exam()">End Exam</button>
+            <button @click="init_feedback()">Feedback</button>
         </div>
 
         <p v-if="message.error" class="error-message">{{ message.error }}</p>
@@ -65,6 +158,7 @@ export default {
             timeLeft: 60 * 60, // 60 minutes in seconds
             timer: null,
             timer_finished: false,
+            finished: false,
 
             // Multiple Choice Questions
             questions: [], // {question, topic, image, correct_answer, options, selected_ans, flagged}
@@ -77,7 +171,9 @@ export default {
 
             // Hazard Perception Clips
             clips: [], // {name, x, y, time}
+            selected_clip: null,
             current_C: 0, // Clip pointer
+            clip_url: '',
             scores_2: 0, // Scores for clips
 
             // Clicking the video
@@ -107,12 +203,13 @@ export default {
             this.message.success = 'LOADING QUESTIONS ...';
 
             // Fetch the multiple choice questions:
-            const input = { 'No_of_Qs': 50, 'username': this.logged_in_user };
+            const input = { 'No_of_Qs': 3, 'username': this.logged_in_user };
             const quiz = await this.azure_function('POST', '/question/get/quiz', input);
             if (quiz.result) {
                 // Populate the questions list, and add a flag to them and remove explanation attr.
                 this.questions = quiz.msg;
                 this.questions.forEach(item => {
+                    item.selected_ans = null;
                     item.flagged = false;
                     delete item.explanation;
                 });
@@ -136,7 +233,7 @@ export default {
             // Shuffle and select random clips
             this.clips = dictList
                 .sort(() => 0.5 - Math.random())  // Randomly shuffle
-                .slice(0, 14);           // Select the first 14 clips
+                .slice(0, 2);           // Select the first 14 clips
             
             this.message.success = 'LOADING HAZARD PERCEPTION CLIPS';
             this.clips.forEach(async item => {
@@ -149,6 +246,7 @@ export default {
                 }
             });
             this.message.success = 'LOADING SUCCESS';
+            this.add_image();
             this.toggle_view('multiple_choice');
             this.startTimer();
         },
@@ -162,12 +260,145 @@ export default {
                 }
             }, 1000);
         },
+        select_answer(option) {
+            this.$set(this.questions[this.current_Q], 'selected_ans', option);
+            console.log('Selected answer of question ' + (this.current_Q + 1) + ": " + this.questions[this.current_Q].selected_ans);
+        },
+        next_question() {
+            this.current_Q++;
+            this.add_image();
+        },
+        prev_question() {
+            this.current_Q--;
+            this.add_image();
+        },
+        toggle_flag() {
+            this.questions[this.current_Q].flagged = !this.questions[this.current_Q].flagged;
+            console.log('Flagged Question ' + (this.current_Q + 1) + " " + this.questions[this.current_Q].flagged);
+        },
+        jump_to_question(index) {
+            this.current_Q = index;
+            this.add_image();
+        },
         add_image() {
             // Library of images
-            let question_image = this.questions[this.currentQuestion].image
+            let question_image = this.questions[this.current_Q].image
             if (question_image !== 'n/a') {
                 this.image = this.images.filter((image, index) => images.keys()[index].includes(question_image))[0];
             }
+        },
+        handleClick(event) {
+            // This method records when and where in the video you clicked.
+            const video = this.$refs.hazard_perception;
+
+            if (this.click_history.length > 10) {
+                this.click_fail();
+            }
+
+            // Get click position relative to the video element
+            this.click_x = (event.offsetX).toFixed(2);
+            this.click_y = (event.offsetY).toFixed(2);
+
+            // Get the timestamp of the click
+            this.click_time = video.currentTime.toFixed(2);
+
+            // Store in history
+            this.click_history.push({
+                x: this.click_x,
+                y: this.click_y,
+                time: this.click_time,
+            });
+
+            console.log(
+                `Clicked at X: ${this.click_x}, Y: ${this.click_y}, Time: ${this.click_time}s`
+            );
+
+            // Add click animation
+            this.clicks.push({ x: this.click_x, y: this.click_y});
+
+            // Remove animation after 0.3s
+            setTimeout(() => {
+                this.clicks.shift();
+            }, 600);
+
+        },
+        click_fail() {
+            // Run this method if the user clicks more than 10 times
+            const video = this.$refs.hazard_perception;
+            video.pause();
+            this.too_many_clicks = true;
+            this.current_C++;
+        },
+        async finish_video_clip() {
+
+            // Check if the user clicked on the appropriate (x,y) range:
+            if ((this.click_x <= this.selected_clip.x + 50 && this.click_x >= this.selected_clip.x - 50) && 
+                (this.click_y <= this.selected_clip.y + 50 && this.click_y >= this.selected_clip.y - 50)) {
+
+                let interval = 1;
+
+                // Then check if the user clicked at the right time:
+                if (this.click_time >= this.selected_clip.time && this.click_time < this.selected_clip.time + interval) {
+                    this.scores_2+=5;
+                } else if (this.click_time >= this.selected_clip.time + interval && this.click_time < this.selected_clip.time + interval*2) {
+                    this.scores_2+=4;
+                } else if (this.click_time >= this.selected_clip.time + interval*2 && this.click_time < this.selected_clip.time + interval*3) {
+                    this.scores_2+=3;
+                } else if (this.click_time >= this.selected_clip.time + interval*3 && this.click_time < this.selected_clip.time + interval*4) {
+                    this.scores_2+=2;
+                } else if (this.click_time >= this.selected_clip.time + interval*4 && this.click_time < this.selected_clip.time + interval*5) {
+                    this.scores_2+=1;
+                }
+
+                if (this.scores_2 >= 1) {
+                    console.log('Got a score!')
+                } else {
+                    console.log('No score!')
+                }
+            }
+            // Clicking the video
+            this.click_x = 0;
+            this.click_y = 0;
+            this.click_time = 0;
+            this.click_history = [];
+            this.clicks = [];
+            this.too_many_clicks = false;
+            this.current_C++;
+            this.load_video_clip();
+        },
+        start_hazard_perceptions() {
+            // Start the hazard perception section
+            this.load_video_clip();
+            this.toggle_view('hazard_perception');
+        },
+        async load_video_clip() {
+            if (this.current_C < this.clips.length) {
+                // Load the corrosponding clip
+                this.click_x = 0;
+                this.click_y = 0;
+                this.click_time = 0;
+                this.click_history = [];
+                this.clicks = [];
+                this.too_many_clicks = false;
+
+                this.selected_clip = this.clips[this.current_C];
+                this.clip_url = this.selected_clip.url;
+                console.log(this.selected_clip.name);
+            } else {
+                this.finish_mock_exam();
+            }
+        },
+        finish_mock_exam() {
+            // Add up scores
+            this.questions.forEach(item => {
+                if (item.selected_ans !== item.correct_answer) {
+                    this.scores_1+=1;
+                    // {question, correct_ans, selected_ans, image}
+                    const entry = {question: item.question, selected: item.selected_ans, correct: item.correct_answer, image: item.image};
+                    this.feedback.push(entry);
+                }
+            });
+            this.toggle_view('scores')
         },
         async terminate_mock_exam() {
             // Reset states
@@ -177,8 +408,11 @@ export default {
             this.current_Q = 0;
             this.scores_1 = 0;
             this.timer_finished = false;
+            this.finished = false;
             this.image = "";
             this.clips = [];
+            this.selected_clip = null;
+            this.clip_url = '',
             this.current_C = 0;
             this.scores_2 = 0;
             this.click_x = 0;
@@ -190,6 +424,14 @@ export default {
             this.feedback = [];
             this.message = { error: "", success: "" };
             this.toggle_view('instructions');
+        },
+        init_feedback() {
+            // Setup for the feedback page
+            console.log("/feedback");
+            this.$router.push({
+                path: `/feedback`,
+                query: { input: this.feedback }
+            })
         },
         async add_achievement(name) {
             // Add achievement to user's achievements and notify on the UI.
@@ -249,6 +491,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+img {
+  max-width: 300px; /* Limits the width to 200px */
+  max-height: 200px; /* Limits the height to 100px */
+  width: auto; /* Maintain aspect ratio */
+  height: auto; /* Maintain aspect ratio */
+}
+
 .instruction-box {
   background-color: #f9f9f9;
   border-left: 5px solid #007bff;
@@ -257,6 +506,11 @@ export default {
   font-size: 14px;
   color: #333;
   border-radius: 5px;
+}
+
+button.flagged {
+  background-color: #ffc107; // Yellow
+  color: black;
 }
 
 .overlay {
@@ -281,6 +535,132 @@ export default {
   width: 80%;
   max-width: 400px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.questionnaire {
+  text-align: center;
+  max-width: 500px;
+  margin: auto;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: #f9f9f9;
+}
+
+h2 {
+  margin-bottom: 15px;
+}
+
+.options button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  border: none;
+  background-color: #969faa;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.options button.selected {
+  background-color: #418ade;
+}
+
+.next-button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  border: none;
+  background-color: green;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.next-button:hover {
+  background-color: darkgreen;
+}
+
+.floating-grid {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  z-index: 999;
+  width: 160px;
+  max-height: 300px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(35px, 1fr));
+  gap: 6px;
+}
+
+.grid-item {
+  padding: 6px;
+  text-align: center;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.grid-item.answered {
+  background-color: #4caf50;
+  color: white;
+}
+
+.grid-item.flagged {
+  background-color: #ffc107;
+  color: black;
+}
+
+.grid-item.current {
+  border: 2px solid #007bff;
+}
+
+.video-container {
+  position: relative;
+  display: inline-block;
+}
+
+/* Animated Click Circle */
+.click-circle {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background-color: rgba(237, 18, 18, 0.8);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: clickEffect 0.6s ease-out forwards;
+}
+
+@keyframes clickEffect {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.horizontal-container {
+    display: flex; /* Display items in a row */
+    gap: 10px; /* Optional: Adds space between the items */
+}
+
+.item {
+    width: 20px; /* Set width */
+    height: 20px; /* Set height */
+    padding: 10px;
+    border-radius: 4px;
 }
 
 </style>
