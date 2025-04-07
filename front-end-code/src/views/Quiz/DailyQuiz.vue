@@ -147,8 +147,6 @@ export default {
             isCorrect: false, // boolean if the question is actually correct
             explanation: { showExplanation: false, wasClicked: false }, // Explanation of the question, flag if it got clicked on
 
-            // 3 Hazard Perception Clips
-
             // Timer
             answer_time: { elapsedTime: 0, stopwatch: null, stopwatchRunning: false },
 
