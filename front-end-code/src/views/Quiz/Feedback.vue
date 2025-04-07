@@ -5,6 +5,7 @@
         <!-- LOADING SCREEN FOR FEEDBACK -->
         <div v-if="state.current_view === 'loading'">
             <p class="text-gray-500">LOADING FEEDBACK ...</p>
+            <button @click="next_page('dashboard')">Finish</button>
         </div>
 
         <!-- ACTUAL FEEDBACK PAGE -->
@@ -22,7 +23,6 @@
                 <h3>{{ state.feedback[current_Q].feedback }}</h3>
 
                 <div class="mt-4 flex justify-between">
-                    <button @click="next_page('dashboard')">Finish</button>
                     <button 
                         @click="prev_feedback()" 
                         class="px-4 py-2 rounded-lg text-white" 
@@ -37,6 +37,7 @@
                     >Next</button>
                 </div>
             </div>
+            <button @click="next_page('dashboard')">Finish</button>
         </div>
 
         <p v-if="message.error" class="mt-2 text-red-500">{{ message.error }}</p>
