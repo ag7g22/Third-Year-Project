@@ -77,6 +77,7 @@ export default {
     },
 
     check_login() {
+      console.log('Notifying server ...');
       this.client_socket.emit('check-login', this.loginUsername);
     },
 

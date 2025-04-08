@@ -1,35 +1,23 @@
 {
-    "name": "client",
+    "name": "gearup",
     "version": "0.1.0",
     "private": true,
-    "main": "dist/index.js",
+    "main": "main.js",
     "scripts": {
-        "serve": "vue-cli-service serve",
+        "serve": "node server.js",
         "build": "vue-cli-service build",
         "lint": "vue-cli-service lint"
     },
     "dependencies": {
-        "@syncfusion/ej2-vue-notifications": "^28.2.3",
-        "browserify-zlib": "^0.2.0",
-        "core-js": "^3.8.3",
-        "crypto-browserify": "^3.12.1",
         "express": "^4.21.2",
-        "path-browserify": "^1.0.1",
-        "querystring-es3": "^0.2.1",
         "socket.io": "^4.8.1",
         "socket.io-client": "^4.8.1",
-        "stream-browserify": "^3.0.0",
-        "stream-http": "^3.2.0",
-        "timers-browserify": "^2.0.12",
         "toastr": "^2.1.4",
-        "url": "^0.11.4",
         "vue": "^2.6.14",
         "vue-router": "^3.6.5",
-        "vue-toastr": "^2.1.2",
         "vuex": "^3.6.2"
     },
     "devDependencies": {
-        "@babel/core": "^7.12.16",
         "@babel/eslint-parser": "^7.12.16",
         "@vue/cli-plugin-babel": "~5.0.0",
         "@vue/cli-plugin-eslint": "~5.0.0",

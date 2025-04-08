@@ -22,7 +22,7 @@ export default {
     },
     data() {
       return {
-        appName: "Vroom Vroom Quiz"
+        appName: "GearUp"
       };
     },
     methods: {

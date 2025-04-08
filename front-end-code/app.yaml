@@ -1,7 +1,17 @@
-runtime: python39
-env: standard
+# Use NodeJS on flexible app engine
+runtime: nodejs
+env: flex
 
-handlers:
+runtime_config:
+  operating_system: "ubuntu22"
+  runtime_version: "20"
+
+entrypoint: node server.js  # Start your Express server
+
+handlers:  
+  - url: /socket.io/.*
+    script: auto  # Ensure the socket.io path is handled correctly
+    
   - url: /css
     static_dir: dist/css
 
