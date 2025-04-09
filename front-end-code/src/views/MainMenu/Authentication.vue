@@ -261,13 +261,6 @@ export default {
       }
     },
     next_page(page) {
-      this.showLogin = true;
-      this.showPassword = false;
-      this.sentRequest = false;
-      this.loginUsername = '';
-      this.loginPassword = '';
-      this.registerUsername = '';
-      this.registerPassword = '';
       this.$router.push(`/${page}`);
     },
     setup_socket_listeners() {
