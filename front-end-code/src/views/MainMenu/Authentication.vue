@@ -292,7 +292,7 @@ export default {
 
 .left-side {
   flex: 1; /* Takes up the left side space */
-  background-color: #000000; /* Optional: Black background */
+  background-color: rgb(28, 27, 27); /* Black background */
   flex-direction: column;
   display: flex;
   justify-content: center;

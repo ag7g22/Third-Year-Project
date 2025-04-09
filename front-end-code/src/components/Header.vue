@@ -1,11 +1,48 @@
 <template>
     <!-- This is the navigation menu for the different pages (Testing purposes only) -->
     <header>
-        <nav>
-            <ul>
-                <li><router-link to="/authentication">Authentication</router-link></li>
-            </ul>
-        </nav>
+        <div v-if="this.$route.name === 'mainPage'" class="header-title">
+          <h2>Welcome!</h2>
+        </div>
+        <div v-if="this.$route.name === 'authentication'" class="header-title">
+          <h2>Sign in to GearUp!</h2>
+        </div>
+        <div v-if="this.$route.name === 'dashboard'" class="header-title">
+          <h2>Welcome {{ this.$store.state.currentUser }}!</h2>
+        </div>
+        <div v-if="this.$route.name === 'account'" class="header-title">
+          <h2>Profile</h2>
+        </div>
+        <div v-if="this.$route.name === 'friends'" class="header-title">
+          <h2>My friends</h2>
+        </div>
+        <div v-if="this.$route.name === 'leaderboard'" class="header-title">
+          <h2>Leaderboard</h2>
+        </div>
+        <div v-if="this.$route.name === 'lobby'" class="header-title">
+          <h2>CRASH QUIZ!</h2>
+        </div>
+        <div v-if="this.$route.name === 'categoryquiz'" class="header-title">
+          <h2>Category Quiz</h2>
+        </div>
+        <div v-if="this.$route.name === 'roadsignquiz'" class="header-title">
+          <h2>Road Sign Quiz</h2>
+        </div>
+        <div v-if="this.$route.name === 'feedback'" class="header-title">
+          <h2>Question feedback</h2>
+        </div>
+        <div v-if="this.$route.name === 'dailyquiz'" class="header-title">
+          <h2>Daily Quiz!</h2>
+        </div>
+        <div v-if="this.$route.name === 'mockexam'" class="header-title">
+          <h2>Mock Exam</h2>
+        </div>
+        <div v-if="this.$route.name === 'hazard'" class="header-title">
+          <h2>Hazard Perception</h2>
+        </div>
+        <div v-if="this.$route.name === 'HPvideo'" class="header-title">
+          <h2>Video clip practice</h2>
+        </div>
     </header>
 </template>
 
@@ -51,28 +88,11 @@ header {
   justify-content: center; /* Horizontally center the navigation items */
 }
 
-nav ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  justify-content: center; /* Center the navigation links */
-}
-
-nav ul li {
-  display: inline;
-  margin-right: 10px; /* Space between items */
-}
-
-nav ul li a {
+h2 {
   color: #ffffff; /* White text */
   text-decoration: none;
   font-weight: bold;
   padding: 10px 15px; /* Some padding for the links */
   display: inline-block; /* Make the links clickable and properly sized */
-}
-
-nav ul li a:hover {
-  text-decoration: underline;
 }
 </style>

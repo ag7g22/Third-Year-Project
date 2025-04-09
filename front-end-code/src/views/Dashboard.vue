@@ -1,20 +1,32 @@
 <template>
-  <div class="container">
-    <h1 class="title">DASHBOARD | {{ logged_in_user }}</h1>
-    <div class="buttons">
-      <button @click="next_page('account')">Account</button>
-      <button @click="load_friends_list">Friends</button>
-      <button @click="next_page('dailyquiz')">Daily Training</button>
-      <button @click="next_page('lobby')">Versus</button>
-      <button @click="next_page('categoryquiz')">Category Practice</button>
-      <button @click="next_page('roadsignquiz')">Road Sign Practice</button>
-      <button @click="next_page('hazard')">Hazard Perception</button>
-      <button @click="next_page('mockexam')">Mock Exam</button>
-      <button @click="load_leaderboards">Leaderboard</button>
-      <button @click="logout">Log out</button>
+  <div class="sidebar-main-layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <img src="@/assets/titles/TitleLogo.png" alt="Logo" class="logo" />
+      <div class="side-buttons">
+        <button disabled>🎲 Dashboard</button>
+        <button @click="next_page('account')">👤 Account</button>
+        <button @click="load_friends_list">👥 Friends</button>
+        <button @click="load_leaderboards">🏆 Leaderboard</button>
+        <button @click="logout">🔒 Log out</button> 
+      </div>
     </div>
-    <p v-if="message.error" class="error-message">{{ message.error }}</p>
-    <p v-if="message.success" class="success-message">{{ message.success }}</p>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <h1 class="title">DASHBOARD</h1>
+      <div class="buttons">
+        <button @click="next_page('dailyquiz')">Daily Training</button>
+        <button @click="next_page('lobby')">Versus</button>
+        <button @click="next_page('categoryquiz')">Category Practice</button>
+        <button @click="next_page('roadsignquiz')">Road Sign Practice</button>
+        <button @click="next_page('hazard')">Hazard Perception</button>
+        <button @click="next_page('mockexam')">Mock Exam</button>
+      </div>
+
+      <p v-if="message.error" class="error-message">{{ message.error }}</p>
+      <p v-if="message.success" class="success-message">{{ message.success }}</p>
+    </div>
   </div>
 </template>
 <script>
@@ -122,7 +134,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
-
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
 </style>

@@ -27,3 +27,59 @@ html, body {
     background-color: rgb(21, 0, 56); /* Black background */
     overflow: hidden; /* Prevent content from overflowing */
 }
+
+.sidebar-main-layout {
+    display: flex;
+    min-height: calc(100vh - 80px);
+}
+
+.sidebar {
+    color: white;
+    background-color: rgb(28, 27, 27); /* Black background */
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    align-items: center;
+}
+
+.sidebar img {
+    width: 150px;
+    margin-top: 30px;
+}
+
+.side-buttons {
+    background-color: rgb(28, 28, 28); /* Black background */
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+}
+
+.side-buttons button {
+    font-size: 20px; /* Increase the font size */
+    text-align: left;
+    left: 10px;
+    color: #f3af59; /* Set the text color to the original color */
+    background-color: rgb(28, 28, 28); /* Black background */
+    width: 100%;
+    height: 80px;
+    box-sizing: border-box;
+    border: none; /* Remove the border */
+}
+
+.side-buttons button:hover {
+    color: #f3af59; /* Set the text color to the original color */
+    background-color: rgb(15, 15, 15); /* Black background */
+}
+
+.side-buttons button:disabled {
+    color: white;
+    background-color: #079cb0; /* Black background */
+    border-left: white;
+}
+
+.main-content {
+    background-color: rgb(21, 0, 56); /* Dark background */
+    flex: 1;
+    padding: 1rem;
+}
