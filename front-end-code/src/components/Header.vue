@@ -3,9 +3,7 @@
     <header>
         <nav>
             <ul>
-                <li><router-link to="/main">Main</router-link></li>
                 <li><router-link to="/authentication">Authentication</router-link></li>
-                <li><router-link to="/dashboard">Dashboard</router-link></li>
             </ul>
         </nav>
     </header>
@@ -42,18 +40,39 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-/** This section applies SCSS styles to the component: */
 header {
-    background-color: #f8f8f8;
-    padding: 10px 20px;
-    text-align: center;
+  background-color: #10012a; /* Dark purple */
+  text-align: center;
+  height: 80px; /* Set a fixed height for the header */
+  width: 100%; /* Ensure it stretches across the entire width of the screen */
+  box-sizing: border-box; /* Include padding and border in the height calculation */
+  display: flex;
+  align-items: center; /* Vertically center the content inside the header */
+  justify-content: center; /* Horizontally center the navigation items */
 }
+
 nav ul {
-    list-style: none;
-    padding: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: center; /* Center the navigation links */
 }
+
 nav ul li {
-    display: inline;
-    margin-right: 10px;
+  display: inline;
+  margin-right: 10px; /* Space between items */
+}
+
+nav ul li a {
+  color: #ffffff; /* White text */
+  text-decoration: none;
+  font-weight: bold;
+  padding: 10px 15px; /* Some padding for the links */
+  display: inline-block; /* Make the links clickable and properly sized */
+}
+
+nav ul li a:hover {
+  text-decoration: underline;
 }
 </style>

@@ -32,7 +32,7 @@ export default new Router({
   mode: 'history', 
   routes: [
     {
-      path: '/main',
+      path: '/',
       name: 'mainPage',
       component: MainPage
     },
