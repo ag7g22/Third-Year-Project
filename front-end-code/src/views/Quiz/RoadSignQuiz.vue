@@ -1,30 +1,37 @@
 <template>
-    <div class="container">
-        <h1 class="title">ROAD SIGN QUIZ | {{ logged_in_user }}</h1>
-
-        <div v-if="current_view === 'instructions'">
-            <div class="instruction-box">
-                <p>This is a quick flashcard quiz designed to </p>
-                <p>help you memorise the important road signs.</p>
-                <p> </p>
-                <p> You have {{ num_questions.selected }} to answer. </p>
+    <div v-if="current_view === 'instructions'" class="split-container">
+        <div class="left-side">
+            <div class="instructions-container">
+                <h3>WHY ARE THERE SO MANY ROAD SIGNS!?!</h3>
+                <p>It's important to memorize these signs because they help ensure safety on the road by making you aware of potential hazards, speed limits, and important regulations. 
+                    Knowing road signs is essential for passing the driving theory exam and driving safely in real-life situations.</p>
+                <h3>The quiz rules as follows:</h3>
+                <div class="feature-list">
+                    <p>- You are given 4 options, 1 is the correct answer.</p>
+                    <p>- You can see the question explanation, but that'll lower your final score.</p>
+                    <p>- The score is also time-based, the quicker the better! (You'll need to spend at most a minute per question.)</p>
+                </div>
+                <p>Good luck!</p>
             </div>
-
+        </div>
+        <div class="right-side">
+            <img src="@/assets/titles/RoadSign.png" alt="Logo" class="task-logo"/>
             <div class="options-dropdown">
-                <label for="num-questions">Select Number of Questions:</label>
+                <label for="num-questions">Select Number of Questions: </label>
                 <select id="num-questions" v-model="num_questions.selected">
                 <option v-for="num in num_questions.options" :key="num" :value="num">{{ num }}</option>
                 </select>
-                <p>You selected: {{ num_questions.selected }} questions</p>
             </div>
 
-            <div class="buttons">
-                <button @click="next_page('dashboard')">Back</button>
-                <button @click="init_quiz()">Start</button>
+            <div class="game-buttons">
+                <button @click="next_page('dashboard')" class="game-button">Back</button>
+                <button @click="init_quiz()" class="game-button">Start</button>
             </div>
         </div>
-
-        <div v-if="current_view === 'quiz'">
+    </div>
+    
+    <div v-else>
+        <div v-if="current_view === 'quiz'" class="container">
             <div class="questionnaire">
                 <div v-if="currentQuestion < questions.length">
                     <p>Question {{ currentQuestion + 1 }} of {{ questions.length }}</p>
@@ -312,7 +319,6 @@ export default {
         },
         terminate_quiz() {
             // Reset everything
-            this.current_view = 'instructions' // State of quiz page
             this.num_questions = { options: [5, 10, 15, 20], selected: 10 } // Dropdown menu
             this.questions = [] // Quiz questions by API
             this.currentQuestion = 0 // Question pointer
@@ -329,7 +335,7 @@ export default {
             this.scoreWasAdded = false;
             this.message = { error: "", success: "" }
 
-            this.toggle_view('categories')
+            this.toggle_view('instructions')
         },
         init_feedback() {
             // Setup for the feedback page
@@ -402,19 +408,22 @@ img {
   height: auto; /* Maintain aspect ratio */
 }
 
-.instruction-box {
-  background-color: #f9f9f9;
-  border-left: 5px solid #007bff;
-  padding: 10px;
-  margin: 10px 0;
-  font-size: 14px;
-  color: #333;
-  border-radius: 5px;
+.options-dropdown {
+    color: white;
+    text-align: center;
+    padding: 10px;
 }
 
-.options-dropdown {
-  text-align: center;
-  padding: 10px;
+#num-questions {
+    background-color: rgb(20, 20, 20);
+    color: #f3af59;
+    border: 1px solid #f3af59;
+    padding: 5px;
+}
+
+#num-questions option {
+    background-color: rgb(20, 20, 20);
+    color: #f3af59;
 }
 
 select {

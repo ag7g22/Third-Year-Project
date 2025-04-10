@@ -1,12 +1,14 @@
 <template>
-  <div class="auth-container">
+  <div class="split-container">
     <!-- Left side: Empty or can contain an image -->
     <div class="left-side">
-      <div class="form-container">
+      <div class="instructions-container">
         <h3>Welcome to GearUp!</h3>
-        <p>The ultimate way to make driving theory prep actually enjoyable.
-          Whether you're just starting out or brushing up before the big test, GearUp! transforms dry material into a fun, interactive learning experience. 
-          No more boring textbooks or endless note-taking — just engaging quizzes, bite-sized challenges, and real-time progress tracking that keeps you motivated.</p>
+          <div class="feature-list">
+            <p>The ultimate way to make driving theory prep actually enjoyable.
+                Whether you're just starting out or brushing up before the big test, GearUp! transforms dry material into a fun, interactive learning experience. 
+                No more boring textbooks or endless note-taking — just engaging quizzes, bite-sized challenges, and real-time progress tracking that keeps you motivated.</p>
+          </div>
           <div class="feature-list">
             <p>✅ Daily quizzes to keep your brain sharp</p>
             <p>✅ Category-specific practice</p>
@@ -16,8 +18,8 @@
             <p>✅ Track your stats and improve over time</p>
           </div>
           <p>Whether you're studying solo or racing your friends to the finish line, you'll be ready to SMASH the theory test!</p>
-        <button @click="navigateBack" class="left-button">Back</button>
       </div>
+      <button @click="navigateBack" class="game-button">Back</button>
     </div>
     
     <!-- Right side: Contains the form -->
@@ -37,10 +39,10 @@
           </div>
           <div>
             <div v-if="sentRequest">
-              <button class="right-button" disabled>Loading ...</button>
+              <button class="request-button" disabled>Loading ...</button>
             </div>
             <div v-else>
-              <button class="right-button" @click="check_login">Login</button>
+              <button class="request-button" @click="check_login">Login</button>
             </div>
             <p>Don't have an account? <span @click="toggle_form">Register here</span></p>
           </div>
@@ -60,10 +62,10 @@
           </div>
           <div>
           <div v-if="sentRequest">
-            <button class="right-button" disabled>Loading ...</button>
+            <button class="request-button" disabled>Loading ...</button>
           </div>
           <div v-else>
-            <button class="right-button" @click="register">Register</button>
+            <button class="request-button" @click="register">Register</button>
           </div>
             <p>Already have an account? <span @click="toggle_form">Login here</span></p>
           </div>
@@ -270,6 +272,7 @@ export default {
 
       this.client_socket.on('check-login-successful', this.login);
       this.client_socket.on('check-login-fail', () => {
+        this.reset_inputs();
         this.error_message('Login failed!', 'Username or password incorrect');
       });
     },
@@ -284,58 +287,17 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.auth-container {
-  display: flex;
-  height: calc(100vh - 80px); /* 100% of the screen height minus the header's height */
-  background-color: rgb(21, 0, 56); /* Dark background */
-}
-
-.left-side {
-  flex: 1; /* Takes up the left side space */
-  background-color: rgb(28, 27, 27); /* Black background */
-  flex-direction: column;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: white;
-  font-size: 24px;
-}
-
-.feature-list {
-  text-align: left;
-  max-width: 600px;
-  margin: 0 auto; /* Center the block itself while keeping text left-aligned */
-  font-size: 16px;
-  line-height: 1.6;
-}
-
-.right-side {
-  flex: 1; /* Takes up the right side space */
-  padding: 30px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between; /* Ensures the form takes up the full height */
-  align-items: center;
-  background-color: rgb(21, 0, 56); /* Dark background */
-  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
-}
-
 .form-container {
   width: 100%;
   max-width: 500px; /* Limit the form width */
   border-radius: 10px;
   padding: 40px;
-  color: white;
+  background-color: none;
   display: flex;
   flex-direction: column;
   justify-content: center; /* Centers form content vertically */
   height: 100%; /* Ensure form takes up all vertical space in the right side */
   min-height: 300px; /* Minimum height for the form */
-  background-color: transparent; /* Make the background transparent */
-}
-
-.form-container > * {
-  visibility: visible; /* Ensure contents are visible */
 }
 
 h2 {
@@ -345,37 +307,7 @@ h2 {
   margin-bottom: 20px;
 }
 
-input {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 15px;
-  border: 1px solid #f3af59;
-  border-radius: 5px;
-  background-color: rgb(0, 0, 0);
-  color: white;
-  font-size: 16px;
-}
-
-input:focus {
-  outline: none;
-  border-color: #f3af59;
-}
-
-.left-button {
-  color: #f3af59; /* Set the text color to the original color */
-  font-size: 25px; /* Increase the font size */
-  border: none; /* Remove the border */
-  background: none; /* Remove the background */
-  margin-top: 30px;
-  cursor: pointer;
-}
-
-.left-button:hover {
-  color: #fff; /* Change text color to white on hover */
-  font-size: 26px; /* Increase the font size */
-}
-
-.right-button {
+.request-button {
   width: 100%;
   padding: 12px;
   background-color: #f3af59;
@@ -387,38 +319,18 @@ input:focus {
   margin-bottom: 20px;
 }
 
-.right-button:hover {
+.request-button:hover {
   background-color: #e09548; /* Hover effect for the button */
 }
 
-.right-button:disabled {
+.request-button:disabled {
   background-color: #5c5c5c;
-}
-
-p {
-  font-size: 14px;
-  text-align: center;
-  color: white;
 }
 
 span {
   color: #f3af59;
   cursor: pointer;
   text-decoration: underline;
-}
-
-.error-message {
-  color: red;
-  text-align: center;
-  font-size: 14px;
-  margin-top: 10px;
-}
-
-.success-message {
-  color: green;
-  text-align: center;
-  font-size: 14px;
-  margin-top: 10px;
 }
 
 form-box {

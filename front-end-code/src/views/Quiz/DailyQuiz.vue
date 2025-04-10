@@ -1,22 +1,31 @@
 <template>
-    <div class="container">
-
-        <div v-if="current_view === 'instructions'">
-            <h1 class="title">DAILY QUIZ | {{ logged_in_user }}</h1>
-            <div class="instruction-box"> 
-                <p> This is your daily training session. </p>
-                <p> 1: Start with practicing 10 road signs to warm up. </p>
-                <p> 2: Proceed with regular 10 multiple choice questions. </p>
-                <p> 3: A Hazard Perception clip to practice on. </p>
-            </div>
-
-            <div class="buttons">
-                <button @click="next_page('dashboard')">Back</button>
-                <button @click="init_road_signs()">Start</button>
+    <div v-if="current_view === 'instructions'" class="split-container">
+        <div class="left-side">
+            <div class="instructions-container">
+                <h3>Welcome to Your Daily Training Session!</h3>
+                <div class="feature-list">
+                    <p>
+                        Daily training sessions are essential for combating the forgetting curve — a psychological principle that shows how quickly we forget information after learning it. 
+                        Without regular review, our memory of new knowledge fades rapidly over time. The training routine is as follows:
+                    </p>
+                </div>
+                <p>1. 🚦 Warm-Up: 10 Road Sign Questions </p>
+                <p>2. 🧠 Core Quiz: 10 Multiple Choice Questions</p>
+                <p>3. 🎥 Simulation: 1 Hazard Perception clip</p>
+                <p>Good luck!</p>
             </div>
         </div>
 
-        <div v-if="current_view === 'quiz'">
+        <div class="right-side">
+            <img src="@/assets/titles/DailyQuiz.png" alt="Logo" class="task-logo"/>
+            <div class="game-buttons">
+                <button @click="next_page('dashboard')" class="game-button">Back</button>
+                <button @click="init_road_signs()" class="game-button">Start</button>
+            </div>
+        </div>
+    </div>
+    <div v-else>
+        <div v-if="current_view === 'quiz'" class="container">
             <h1 class="title">DAILY QUIZ | {{ logged_in_user }}</h1>
             <div class="questionnaire">
                 <div v-if="questions.length === 0">
@@ -585,6 +594,12 @@ img {
   max-height: 200px; /* Limits the height to 100px */
   width: auto; /* Maintain aspect ratio */
   height: auto; /* Maintain aspect ratio */
+}
+
+.right-side img {
+    max-width: 100%;
+    width: auto; /* Maintain aspect ratio */
+    height: auto; /* Maintain aspect ratio */
 }
 
 .instruction-box {

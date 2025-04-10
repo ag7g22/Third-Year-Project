@@ -1,23 +1,30 @@
 <template>
-    <div class="container">
-
-        <div v-if="current_view === 'instructions'">
-            <h1 class="title">MOCK EXAM | {{ logged_in_user }}</h1>
-            <div class="instruction-box"> 
-                <p> These tests are timed, like the actual exam. </p>
-                <p> The exam is split into two sections; Multiple choice and Hazard Perception. </p>
-                <p> 1: 50 multiple questions selected at random. </p>
-                <p> 2: 14 video clips containing developing hazards. </p>
-                <p> You have 1 hour to answer the multiple choice, and each clip is a minute long. </p>
-            </div>
-
-            <div class="buttons">
-                <button @click="next_page('dashboard')">Back</button>
-                <button @click="init_questions()">Start</button>
+    <div v-if="current_view === 'instructions'" class="split-container">
+        <div class="left-side">
+            <div class="instructions-container">
+                <h3>Shh ... time to do your mock exam ...</h3>
+                <div class="feature-list">
+                    <p>
+                        The driving theory exam has two parts: a multiple-choice section with 50 questions, where you need at least 43 correct to pass, and a hazard perception test. 
+                        You have 57 minutes for the multiple-choice section, and the hazard perception test consists of 14 video clips. Both parts must be passed to proceed to the practical test.
+                    </p>
+                </div>
+                <p>1. 🧠 Core Quiz: 50 Multiple Choice Questions</p>
+                <p>2. 🎥 Simulation: 14 Hazard Perception clips</p>
+                <p>Good luck!</p>
             </div>
         </div>
+        <div class="right-side">
+            <img src="@/assets/titles/MockTest.png" alt="Logo" class="task-logo"/>
+            <div class="game-buttons">
+                <button @click="next_page('dashboard')" class="game-button">Back</button>
+                <button @click="init_questions()" class="game-button">Start</button>
+            </div>
+        </div>
+    </div>
 
-        <div v-if="current_view === 'multiple_choice'">
+    <div v-else>
+        <div v-if="current_view === 'multiple_choice'" class="container">
             <h1 class="title">MOCK EXAM | {{ formattedTime }}</h1>
             <div class="questionnaire">
                 <p>Question {{ current_Q + 1 }} of {{ questions.length }}</p>

@@ -1,47 +1,49 @@
 <template>
-    <div class="p-6 bg-gray-100 rounded-2xl shadow-lg max-w-xl mx-auto">
-        <h1 class="text-2xl font-bold text-gray-800">FEEDBACK | {{ logged_in_user }}</h1>
+    <div class="container">
+        <div class="p-6 bg-gray-100 rounded-2xl shadow-lg max-w-xl mx-auto">
+            <h1 class="text-2xl font-bold text-gray-800">FEEDBACK | {{ logged_in_user }}</h1>
 
-        <!-- LOADING SCREEN FOR FEEDBACK -->
-        <div v-if="state.current_view === 'loading'">
-            <p class="text-gray-500">LOADING FEEDBACK ...</p>
-            <button @click="next_page('dashboard')">Finish</button>
-        </div>
-
-        <!-- ACTUAL FEEDBACK PAGE -->
-        <div v-if="state.current_view === 'feedback'">
-            <div class="feedback">
-                <h2>{{ state.feedback[current_Q].question }}</h2>
-
-                <div v-if="input[current_Q].image !== 'n/a'">
-                    <img :src=image alt="Question Image">
-                </div> 
-
-                <p>YOU SELECTED: {{ input[current_Q].selected }}</p>
-                <p>CORRECT ANSWER: {{ input[current_Q].correct }}</p>
-
-                <h3>{{ state.feedback[current_Q].feedback }}</h3>
-
-                <div class="mt-4 flex justify-between">
-                    <button 
-                        @click="prev_feedback()" 
-                        class="px-4 py-2 rounded-lg text-white" 
-                        :class="{ 'bg-gray-400': current_Q === 0, 'bg-blue-600 hover:bg-blue-700': current_Q > 0 }" 
-                        :disabled="current_Q === 0"
-                    >Previous</button>
-                    <button 
-                        @click="next_feedback()" 
-                        class="px-4 py-2 rounded-lg text-white" 
-                        :class="{ 'bg-gray-400': current_Q === state.feedback.length - 1, 'bg-blue-600 hover:bg-blue-700': current_Q < state.feedback.length - 1 }" 
-                        :disabled="current_Q === state.feedback.length - 1"
-                    >Next</button>
-                </div>
+            <!-- LOADING SCREEN FOR FEEDBACK -->
+            <div v-if="state.current_view === 'loading'">
+                <p class="text-gray-500">LOADING FEEDBACK ...</p>
+                <button @click="next_page('dashboard')">Finish</button>
             </div>
-            <button @click="next_page('dashboard')">Finish</button>
-        </div>
 
-        <p v-if="message.error" class="mt-2 text-red-500">{{ message.error }}</p>
-        <p v-if="message.success" class="mt-2 text-green-500">{{ message.success }}</p>
+            <!-- ACTUAL FEEDBACK PAGE -->
+            <div v-if="state.current_view === 'feedback'">
+                <div class="feedback">
+                    <h2>{{ state.feedback[current_Q].question }}</h2>
+
+                    <div v-if="input[current_Q].image !== 'n/a'">
+                        <img :src=image alt="Question Image">
+                    </div> 
+
+                    <p>YOU SELECTED: {{ input[current_Q].selected }}</p>
+                    <p>CORRECT ANSWER: {{ input[current_Q].correct }}</p>
+
+                    <h3>{{ state.feedback[current_Q].feedback }}</h3>
+
+                    <div class="mt-4 flex justify-between">
+                        <button 
+                            @click="prev_feedback()" 
+                            class="px-4 py-2 rounded-lg text-white" 
+                            :class="{ 'bg-gray-400': current_Q === 0, 'bg-blue-600 hover:bg-blue-700': current_Q > 0 }" 
+                            :disabled="current_Q === 0"
+                        >Previous</button>
+                        <button 
+                            @click="next_feedback()" 
+                            class="px-4 py-2 rounded-lg text-white" 
+                            :class="{ 'bg-gray-400': current_Q === state.feedback.length - 1, 'bg-blue-600 hover:bg-blue-700': current_Q < state.feedback.length - 1 }" 
+                            :disabled="current_Q === state.feedback.length - 1"
+                        >Next</button>
+                    </div>
+                </div>
+                <button @click="next_page('dashboard')">Finish</button>
+            </div>
+
+            <p v-if="message.error" class="mt-2 text-red-500">{{ message.error }}</p>
+            <p v-if="message.success" class="mt-2 text-green-500">{{ message.success }}</p>
+        </div>
     </div>
 </template>
   

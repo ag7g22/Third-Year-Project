@@ -28,7 +28,7 @@
     align-items: center;
     justify-content: center;
     height: calc(100vh - 80px); /* 100% of the screen height minus the header's height */
-    background-color: rgb(21, 0, 56); /* Black background */
+    background-color: rgb(28, 27, 27);
     overflow: hidden; /* Prevent content from overflowing */
 }
 
@@ -90,7 +90,7 @@
 
 .menu-button:hover {
   color: #fff; /* Change text color to white on hover */
-  font-size: 26px; /* Increase the font size */
+  transform: scale(1.05); /* Slight zoom without layout shift */
 }
 
 .footer-text {

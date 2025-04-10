@@ -1,18 +1,16 @@
 <template>
     <div class="container">
-
         <div v-if="state.current_view === 'selection'">
-            <h1 class="title">HAZARD PERCEPTION | {{ state.current_topic }} | {{ logged_in_user }}</h1>
-
-            <div class="buttons">
-                <div v-for="clip in clips">
+            <h1 class="title">{{ state.current_topic }}</h1>
+            <div class="buttons-grid">
+                <div v-for="clip in clips" :key="clip.name">
                     <button @click="load_video_clip(clip)">{{ clip.name }}</button>
                 </div>
             </div>
-
-            <button @click="next_page('hazard')">Back</button>
+            <div class="game-buttons">
+                <button @click="next_page('hazard')" class="game-button">Back</button>
+            </div>
         </div>
-
         <div v-if="state.current_view === 'video'" class="video-container">
             <div v-if="clip_url === ''">
                 <h2>LOADING VIDEO CLIP ...</h2>
@@ -329,6 +327,31 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+h1 {
+    color: white;
+}
+
+.buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Exactly 3 buttons per row */
+  gap: 30px;
+  padding: 20px;
+}
+
+.buttons-grid button {
+    color: #f3af59;
+    background-color: #424242;
+    width: 100%;
+    height: 150px;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.buttons-grid button:hover {
+    color: #dd9f4e;
+    background-color: #343333;
+}
+
 .video-container {
   position: relative;
   display: inline-block;

@@ -1,91 +1,90 @@
 <template>
-    <div class="container">
-        <h1 class="title">CRASH QUIZ | {{ state.current_view }} | {{ logged_in_user }}</h1>
-
-        <!-- Toogle Buttons -->
-        <div v-if="state.current_view !== 'LOBBY' && state.current_view !== 'GAME' && state.current_view !== 'GAMEOVER'" class="buttons">
-            <button @click="next_page('dashboard')">Back</button>
-            <button @click="toggle_view('RULES')">Rules</button>
-            <button @click="toggle_view('HOST')">Host Game</button>
-            <button @click="toggle_view('JOIN')">Join Game</button>
+    <div v-if="state.current_view !== 'GAME' && state.current_view !== 'GAMEOVER'" class="split-container">
+        <div class="left-side">
+            <div class="instructions-container">
+                <h3>Win the CRASH OFF or CRASH OUT 🤬</h3>
+                <p>Crash Quiz-Off is a high-speed, 1v1 battle where two drivers face off to see who can answer driving theory questions the fastest and most accurately. 
+                    It's like a race—except instead of speedometers, you're racing against the clock and your brain! Buckle up, it's time to prove who's the real road genius!</p>
+                <h3>The Crash Quiz-Off rules are as follows:</h3>
+                <div class="feature-list">
+                    <p>- You will both be given time to read a question.</p>
+                    <p>- After a countdown, you will be given 4 options in the question.</p>
+                    <p>- You will win the round if you're the fastest and most correct!</p>
+                    <p>- The bar will fill up on the winner's side and if it fills up, you WIN!</p>
+                </div>
+                <p>Hope you're not the loser!</p>
+            </div>
         </div>
-
-        <div v-if="state.current_view === 'RULES'">
-            <div class="instruction-box"> 
-                <p> You are against another player answering different questions </p>
-                <p> and once you click the answer immediately locks in. </p>
-                <p> There will be a car at the top of the screen. </p>
-                <p> If you get the question correct, the car will move towards your opponenent </p>
-                <p> Otherwise the car will move towards you. </p>
-                <p> Once the car crashes on a player, they lose! </p>
+        <div class="right-side">
+            <div v-if="state.current_view === 'HOST'">
+                <img src="@/assets/titles/CrashQuizOff.png" alt="Logo" class="task-logo"/>
+                <h2> Create a HOST password </h2>
+                <input type="text" placeholder="password" v-model="host_password" />
+                <button @click="create_game()" class="create-button">Create Game</button>
+                <div class="game-buttons">
+                    <button @click="next_page('dashboard')" class="game-button">Back</button>
+                    <button disabled class="game-button">Host</button>
+                    <button @click="toggle_view('JOIN')" class="game-button">Join</button>
+                </div>
             </div>
 
-        </div>
+            <div v-if="state.current_view === 'JOIN'">
+                <img src="@/assets/titles/CrashQuizOff.png" alt="Logo" class="task-logo"/>
+                <h2> Enter a HOST password </h2>
+                <input type="text" placeholder="password" v-model="host_password" />
+                <button @click="join_game()" class="create-button">Join Game</button>
+                <div class="game-buttons">
+                    <button @click="next_page('dashboard')" class="game-button">Back</button>
+                    <button @click="toggle_view('HOST')" class="game-button">Host</button>
+                    <button disabled class="game-button">Join</button>
+                </div>
+            </div>
 
-        <div v-if="state.current_view === 'HOST'">
-            <h2> Create a HOST password </h2>
-            <input type="text" placeholder="password" v-model="host_password" />
-            <button @click="create_game()">Create Game</button>
-        </div>
-
-        <div v-if="state.current_view === 'JOIN'">
-            <h2> Enter a HOST password </h2>
-            <input type="text" placeholder="password" v-model="host_password" />
-            <button @click="join_game()">Join Game</button>
-        </div>
-
-        <div v-if="state.current_view === 'LOBBY'">
-
-            <h2>HOST: {{ game_state.host }} | PASSWORD: {{ game_state.password }}</h2>
-
-            <div v-if="state.role === 'HOST'">
-                <div class="buttons">
-                    <div v-if="game_state.players.length > 1">
-                        <button @click="start_game()">Start Game</button>
-                        <button @click="delete_game()">Delete Lobby</button> 
-                    </div>
-                    <div v-else>
-                       <button @click="delete_game()">Delete Lobby</button> 
+            <div v-if="state.current_view === 'LOBBY'">
+                <h2>HOST: {{ game_state.host }} | PASSWORD: {{ game_state.password }}</h2>
+                <h2>PLAYERS:</h2>
+                <div class="players-list">
+                    <div v-for="player in game_state.players" class="player-item">
+                        <p>{{ player }}</p>
                     </div>
                 </div>
-
-                <div class="options-dropdown">
-                    <label for="num-questions">Select Gamemode: </label>
-                    <select id="num-questions" v-model="state.selected_gamemode">
-                    <option v-for="gamemode in state.gamemodes" :key="gamemode" :value="gamemode">{{ gamemode }}</option>
-                    </select>
-                    <p>You selected the "{{ state.selected_gamemode }}" gamemode!</p>
+                <div v-if="state.role === 'HOST'">
+                    <div class="game-buttons">
+                        <div v-if="game_state.players.length > 1">
+                            <div class="game-buttons">
+                                <button @click="start_game()" class="game-button">Start Game</button>
+                                <button @click="delete_game()" class="game-button">Delete Lobby</button>    
+                            </div>
+                        </div>
+                        <div v-else>
+                            <div class="game-buttons">
+                                <button @click="delete_game()" class="game-button">Delete Lobby</button>   
+                            </div>
+                        </div>
+                    </div>
                 </div>
-
+                <div v-else class="game-buttons"> 
+                    <button @click="leave_lobby()" class="game-button">Leave Lobby</button>
+                </div>
+                
             </div>
-            <div v-else>
-                <button @click="leave_lobby()">Leave Lobby</button>
-            </div>
-
-            <h2>PLAYERS:</h2>
-            <div v-for="player in game_state.players">
-                <p>{{ player }}</p>
-            </div>
-            
         </div>
-
-        <div v-if="state.current_view === 'GAME'">
+    </div>
+    <div v-else>
+        <div v-if="state.current_view === 'GAME'" class="container">
             <!-- Count down for game -->
             <div v-if="game_timer !== null">
                 <h1> GAME STARTS IN: </h1>
                 <h1>{{ countdown }}</h1>
             </div>
-
             <div v-else>
                 <!-- Buttons -->
                 <div class="buttons">
                     <button @click="leave_game(false)">Leave Game</button>
                 </div>
-
                 <div class="questionnaire">
-
                     <p> Question {{ game_state.q_counter }} </p>
-
+                    
                     <div class="progress-container">
                         <!-- Player 1 (Left Side) -->
                         <div class="player player-left">{{ game_state.home.username }}</div>
@@ -127,10 +126,9 @@
                     </div>
                 </div>
             </div>
-
         </div>
 
-        <div v-if="state.current_view === 'GAMEOVER'">
+        <div v-if="state.current_view === 'GAMEOVER'" class="container">
             <div v-if="user_state.isWinner === true">
                 <h2> VICTORY! 🎉</h2>
             </div>
@@ -157,7 +155,7 @@ export default {
     },
     data() {
         return {
-            state: { current_view: "RULES", role: '', gamemodes: ['quiz', 'hazard perception', 'road sign'], selected_gamemode: 'quiz' },
+            state: { current_view: "HOST", role: 'HOST' },
 
             // Password to join a hosted game
             host_password: '', 
@@ -197,7 +195,7 @@ export default {
         // LOBBY METHODS
         reset_states() {
             // Run this when leaving a lobby
-            this.state = { current_view: "RULES", role: '' };
+            this.state = { current_view: "HOST", role: 'HOST' };
             this.host_password = '';
             this.game_state = {host: '', password: '', players: [], state: 0, questions: [], currentQuestion: 0, q_counter: 1, 
             home: { username: '', chances: 3, elapsedTime: 0, selected_answer: null }, 
@@ -540,19 +538,39 @@ function listen(vue, client_socket) {
 </script>
 
 <style lang="scss" scoped>
-.instruction-box {
-  background-color: #f9f9f9;
-  border-left: 5px solid #007bff;
-  padding: 10px;
-  margin: 10px 0;
-  font-size: 14px;
-  color: #333;
-  border-radius: 5px;
+.create-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #f3af59;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+.create-button:hover {
+  background-color: #e09548; /* Hover effect for the button */
 }
 
-.options-dropdown {
-  text-align: center;
+.players-list {
+  display: flex;
+  gap: 20px; /* Space between player names */
+  overflow-x: auto; /* Allow horizontal scrolling if too many players */
   padding: 10px;
+  background-color: black;
+  border: 2px solid #f3af59;
+  border-radius: 10px; /* Rounded corners for the container */
+}
+
+.player-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  background-color: none;
+  border: none;
+  color: #f3af59;
 }
 
 .questionnaire {

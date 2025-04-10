@@ -32,7 +32,7 @@
           <h2>Question feedback</h2>
         </div>
         <div v-if="this.$route.name === 'dailyquiz'" class="header-title">
-          <h2>Daily Quiz!</h2>
+          <h2>Daily training session</h2>
         </div>
         <div v-if="this.$route.name === 'mockexam'" class="header-title">
           <h2>Mock Test</h2>
@@ -78,7 +78,7 @@ export default {
 
 <style lang="scss" scoped>
 header {
-  background-color: #10012a; /* Dark purple */
+  background-color: rgb(20, 20, 20);
   text-align: center;
   height: 80px; /* Set a fixed height for the header */
   width: 100%; /* Ensure it stretches across the entire width of the screen */

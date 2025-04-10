@@ -1,42 +1,67 @@
 <template>
-    <div class="container">
-        <h1 class="title">HAZARD PERCEPTION | {{ logged_in_user }}</h1>
-
-        <div v-if="state.current_view === 'categories'" >
-            <div class="instruction-box"> 
-                <p> These are the different types of hazard perception clips as shown below. </p>
-                <p> Try to get the correct clicked hazard! </p>
+    <div v-if="state.current_view === 'categories'" class="split-container">
+        <div class="left-side">
+            <div class="instructions-container">
+                <h3>Now lets test your game senses ...</h3>
+                <div class="feature-list">
+                    <p>The hazard perception test checks how quickly you can spot developing dangers while driving. 
+                        You'll watch video clips and click when you see a potential hazard. The faster you respond, the higher your score, 
+                        helping prove you're alert and ready for real road situations.</p>
+                </div>
+                <h3>The hazard perception rules as follows:</h3>
+                <div class="feature-list">
+                    <p>- You have to click where you think is a developing hazard.</p>
+                    <p>- The clicks will be recorded with a flag. 🚩</p>
+                    <p>- If you click more than 10 times, you will be scored 0.</p>
+                </div>
             </div>
-            <div class="buttons">
+        </div>
+        <div class="right-side">
+            <img src="@/assets/titles/HazardPerception.png" alt="Logo" class="task-logo"/>
+            <div class="cat-buttons">
                 <button @click="init_quiz_instructions('Urban Driving')">Urban Driving</button>
                 <button @click="init_quiz_instructions('Rural Driving')">Rural Driving</button>
                 <button @click="init_quiz_instructions('Bigger Roads')">Bigger Roads</button>
                 <button @click="init_quiz_instructions('Motorways')">Motorways</button>
                 <button @click="init_quiz_instructions('Tricky Conditions')">Tricky Conditions</button>
             </div>
-
-            <div class="buttons">
-                <button @click="next_page('dashboard')">Back</button>
+            <div class="game-buttons">
+                <button @click="next_page('dashboard')" class="game-button">Back</button>
             </div>
         </div>
-
-        <div v-if="state.current_view === 'instructions'">
-            <div class="instruction-box"> 
-                <h2 class="title">{{ this.state.current_topic }}: {{ this.state.current_description }}</h2>
-                <p> You will be presented a driving video clip. </p>
-                <p> Click at the area you believe there is a developing hazard </p>
-                <p> and if you click again that will be your final answer. </p>
-                <p> Select any of the clips to practice. </p>
+    </div>
+    <div v-else>
+        <div v-if="state.current_view === 'instructions'" class="split-container">
+            <div class="left-side">
+                <div class="instructions-container">
+                    <h3>now lets test your game senses ...</h3>
+                    <div class="feature-list">
+                        <p>The hazard perception test checks how quickly you can spot developing dangers while driving. 
+                            You'll watch video clips and click when you see a potential hazard. The faster you respond, the higher your score, 
+                            helping prove you're alert and ready for real road situations.</p>
+                    </div>
+                    <h3>The hazard perception rules as follows:</h3>
+                    <div class="feature-list">
+                        <p>- You have to click where you think is a developing hazard.</p>
+                        <p>- The clicks will be recorded with a flag. 🚩</p>
+                        <p>- If you click more than 10 times, you will be scored 0.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="right-side">
+                <h1>{{ state.current_topic }} {{ state.emoji }}</h1>
+                <div class="description-box">
+                    <p>{{ state.current_description }}</p>
+                </div>
+                <div class="game-buttons">
+                    <button @click="toggle_view('categories')" class="game-button">Back</button>
+                    <button @click="load_selection_screen()" class="game-button">Next</button>
+                </div>
             </div>
 
-            <div class="buttons">
-                <button @click="toggle_view('categories')">Back</button>
-                <button @click="load_selection_screen()">Next</button>
-            </div>
+            <p v-if="message.error" class="error-message">{{ message.error }}</p>
+            <p v-if="message.success" class="success-message">{{ message.success }}</p>
         </div>
-
-        <p v-if="message.error" class="error-message">{{ message.error }}</p>
-        <p v-if="message.success" class="success-message">{{ message.success }}</p>
     </div>
 </template>
   
@@ -47,7 +72,7 @@ export default {
     name: "hazard",
     data() {
         return {
-            state: { current_view: 'categories', current_topic: '', current_description: '' }, // State of quiz page
+            state: { current_view: 'categories', current_topic: '', current_description: '', emoji: '' }, // State of quiz page
             logged_in_user: this.$store.state.currentUser,
             message: { error: "", success: "" },
         };
@@ -69,19 +94,24 @@ export default {
 
             switch (topic) {
                 case 'Urban Driving':
-                    this.state.current_description = 'driving in towns and cities.'
+                    this.state.emoji = '🏙️🚙';
+                    this.state.current_description = "Hazard perception in urban driving involves staying alert in busy environments where hazards can appear suddenly—like pedestrians crossing, cars pulling out, or cyclists weaving through traffic. Being able to quickly spot and respond to these developing risks is crucial for safe driving in cities."
                     break;
                 case 'Rural Driving':
-                    this.state.current_description = 'driving in rural areas.'
+                    this.state.emoji = '🌳🚘';
+                    this.state.current_description = "Hazard perception in rural driving focuses on spotting less obvious dangers, such as sharp bends, hidden junctions, slow-moving farm vehicles, or animals crossing the road. These roads often have limited visibility and higher speeds, so reacting quickly to unexpected hazards is essential for safety."
                     break;
                 case 'Bigger Roads':
-                    this.state.current_description = 'driving in A roads and dual carriageways.'
+                    this.state.emoji = '🛤️🚘';
+                    this.state.current_description = "On bigger roads like A-roads and dual carriageways, hazard perception involves identifying fast-approaching risks such as sudden braking by other vehicles, merging traffic, or debris on the road. Since vehicles travel at higher speeds, early detection and quick response to developing hazards are crucial to avoid collisions and maintain safe driving."
                     break;
                 case 'Motorways':
-                    this.state.current_description = 'driving on the motorway.'
+                    this.state.emoji = '🛣️🚙';
+                    this.state.current_description = "In tricky conditions like rain, fog, snow, or nighttime, hazard perception becomes more challenging due to reduced visibility and lower grip on the road. Drivers must be extra alert for subtle cues such as brake lights, reflections, or changing road surfaces. Spotting hazards early in these conditions is essential for maintaining control and reacting in time to prevent accidents."
                     break;
                 case 'Tricky Conditions':
-                    this.state.current_description = 'driving at night and in bad weather.'
+                    this.state.emoji = '🌧️❄️';
+                    this.state.current_description = "On motorways, hazard perception involves identifying risks at high speeds, such as sudden lane changes, slow-moving vehicles, or debris on the road. Because traffic moves quickly, early detection of developing hazards is crucial to allow for safe braking and lane adjustments. Staying alert and maintaining safe distances helps drivers respond calmly and effectively to any unexpected situations."
                     break;
             }
             

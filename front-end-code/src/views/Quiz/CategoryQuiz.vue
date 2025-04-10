@@ -1,13 +1,24 @@
 <template>
-    <div class="container">
-        <h1 class="title">DRIVING THEORY CATEGORY QUIZ | {{ logged_in_user }}</h1>
-
-        <div v-if="state.current_view === 'categories'" >
-            <div class="instruction-box"> 
-                <p> Here are the questions organised by category. </p>
-                <p> These quizzes are for self-study purposes only. </p>
+    <div v-if="state.current_view !== 'quiz'" class="split-container">
+        <!-- Left side: Empty or can contain an image -->
+        <div class="left-side">
+            <div class="instructions-container">
+                <h3>Time to practice specfics!</h3>
+                <div class="feature-list">
+                    <p>Polishing your knowledge in these areas helps ensure you understand the details of each category, which can improve your overall driving skills and safety on the road. 
+                        Mastering these categories increases your chances of passing the theory exam and becoming a more confident driver.</p>
+                </div>
+                <h3>The quiz rules as follows:</h3>
+                <div class="feature-list">
+                    <p>- You are given 4 options, 1 is the correct answer.</p>
+                    <p>- You can see the question explanation, but that'll lower your final score.</p>
+                    <p>- The score is also time-based, the quicker the better! (You'll need to spend at most a minute per question.)</p>
+                </div>
             </div>
-            <div class="buttons">
+        </div>
+        <div v-if="state.current_view === 'categories'" class="right-side">
+            <img src="@/assets/titles/CategoryQuiz.png" alt="Logo" class="task-logo"/>
+            <div class="cat-buttons">
                 <button @click="init_quiz_instructions('Driving Off')">Driving Off</button>
                 <button @click="init_quiz_instructions('Urban Driving')">Urban Driving</button>
                 <button @click="init_quiz_instructions('Rural Driving')">Rural Driving</button>
@@ -16,36 +27,30 @@
                 <button @click="init_quiz_instructions('Tricky Conditions')">Tricky Conditions</button>
                 <button @click="init_quiz_instructions('Breakdowns')">Breakdowns</button>
             </div>
-
-            <div class="buttons">
-                <button @click="next_page('dashboard')">Back</button>
+            <div class="game-buttons">
+                <button @click="next_page('dashboard')" class="game-button">Back</button>
             </div>
         </div>
-
-        <div v-if="state.current_view === 'instructions'">
-            <div class="instruction-box"> 
-                <h2 class="title">{{ this.state.current_topic }}: {{ this.state.current_description }}</h2>
-                <p> You will be given a select amount of questions to answer </p>
-                <p> and once you click the answer immediately locks in. </p>
-                <p> If you are certainly not sure, then click the explanation box. </p>
-                <p> Select how many questions before you start. </p>
+        <div v-if="state.current_view === 'instructions'"  class="right-side">
+            <h1>{{ state.current_topic }} {{ state.emoji }}</h1>
+            <div class="description-box">
+                <p>{{ state.current_description }}</p>
             </div>
-
             <div class="options-dropdown">
-                <label for="num-questions">Select Number of Questions:</label>
+                <label for="num-questions">Select Number of Questions: </label>
                 <select id="num-questions" v-model="num_questions.selected">
                 <option v-for="num in num_questions.options" :key="num" :value="num">{{ num }}</option>
                 </select>
-                <p>You selected: {{ num_questions.selected }} questions</p>
             </div>
-
-            <div class="buttons">
-                <button @click="toggle_view('categories')">Back</button>
-                <button @click="init_quiz()">Start</button>
+            <div class="game-buttons">
+                <button @click="toggle_view('categories')" class="game-button">Back</button>
+                <button @click="init_quiz()" class="game-button">Start</button>
             </div>
-        </div>
+        </div> 
+    </div>
 
-        <div v-if="state.current_view === 'quiz'">
+    <div v-else>
+        <div v-if="state.current_view === 'quiz'" class="container">
             <div class="questionnaire">
                 <div v-if="currentQuestion < questions.length">
                     <p>Question {{ currentQuestion + 1 }} of {{ questions.length }}</p>
@@ -113,7 +118,7 @@ export default {
     name: "categoryquiz",
     data() {
         return {
-            state: { current_view: 'categories', current_topic: '', current_description: '' }, // State of quiz page
+            state: { current_view: 'categories', current_topic: '', current_description: '', emoji: '' }, // State of quiz page
             num_questions: { options: [5, 10, 15, 20], selected: 10 }, // Dropdown menu
 
             // Quiz variables
@@ -167,25 +172,32 @@ export default {
 
             switch (topic) {
                 case 'Driving Off':
-                    this.state.current_description = 'things to consider before driving off.'
+                    this.state.emoji = '🚗💨';
+                    this.state.current_description = "There are a few things to consider before driving off. This includes checking your vehicle's condition, adjusting your seat and mirrors, fastening your seatbelt, and ensuring all necessary equipment like lights and wipers are functioning. It's also important to check your surroundings for any obstacles, pedestrians, or traffic. Taking these steps helps ensure safety and readiness before you begin driving."
                     break;
                 case 'Urban Driving':
-                    this.state.current_description = 'driving in towns and cities.'
+                    this.state.emoji = '🏙️🚙';
+                    this.state.current_description = 'Driving in towns and cities requires extra attention due to the higher volume of traffic, pedestrians, cyclists, and frequent stops at traffic signals. Drivers must be alert to changing road conditions, one-way streets, parking restrictions, and the presence of other road users. Navigating these areas safely involves anticipating potential hazards and maintaining a lower, more controlled speed.'
                     break;
                 case 'Rural Driving':
-                    this.state.current_description = 'driving in rural areas.'
+                    this.state.emoji = '🌳🚘';
+                    this.state.current_description = "Driving in rural areas often involves quieter roads with fewer distractions, but it also comes with its own set of challenges. Drivers must be cautious of narrow, winding roads, limited visibility, and the potential for livestock or wildlife crossings. Speed limits may be higher, but it's important to stay alert for sudden changes in road conditions or unexpected obstacles."
                     break;
                 case 'Bigger Roads':
-                    this.state.current_description = 'driving in A roads and dual carriageways.'
+                    this.state.emoji = '🛤️🚘';
+                    this.state.current_description = "Driving on A roads and dual carriageways requires attention to higher speeds and more complex traffic flow. These roads often have multiple lanes, junctions, and faster-moving vehicles, so it's important to maintain a safe distance, signal early, and be prepared for lane changes. Always stay aware of speed limits and other road users to ensure a safe journey."
                     break;
                 case 'Motorways':
-                    this.state.current_description = 'driving on the motorway.'
+                    this.state.emoji = '🛣️🚙';
+                    this.state.current_description = "Driving on the motorway involves higher speeds and multiple lanes, requiring greater attention and concentration. It's important to maintain a safe following distance, signal when changing lanes, and observe speed limits. Drivers should be aware of joining and leaving traffic, as well as lane discipline, to ensure a smooth and safe journey for everyone."
                     break;
                 case 'Tricky Conditions':
-                    this.state.current_description = 'driving at night and in bad weather.'
+                    this.state.emoji = '🌧️❄️';
+                    this.state.current_description = "Driving at night and in bad weather requires extra caution. Reduced visibility, such as in rain, fog, or snow, makes it harder to judge distances and spot hazards. It's crucial to adjust your speed, keep headlights on, and increase following distances. Always stay alert and be prepared for sudden changes in road conditions to ensure your safety and that of others."
                     break;
                 case 'Breakdowns':
-                    this.state.current_description = 'breakdowns and car accidents.'
+                    this.state.emoji = '⚠️🛠️';
+                    this.state.current_description = "Breakdowns and car accidents can happen unexpectedly, so it's important to stay calm and follow the right procedures. If your vehicle breaks down, move to a safe location, turn on hazard lights, and call for roadside assistance. In case of an accident, always prioritize safety and follow legal protocols to handle these situations effectively."
                     break;
             }
             
@@ -479,19 +491,22 @@ img {
   height: auto; /* Maintain aspect ratio */
 }
 
-.instruction-box {
-  background-color: #f9f9f9;
-  border-left: 5px solid #007bff;
-  padding: 10px;
-  margin: 10px 0;
-  font-size: 14px;
-  color: #333;
-  border-radius: 5px;
+.options-dropdown {
+    color: white;
+    text-align: center;
+    padding: 10px;
 }
 
-.options-dropdown {
-  text-align: center;
-  padding: 10px;
+#num-questions {
+    background-color: rgb(20, 20, 20);
+    color: #f3af59;
+    border: 1px solid #f3af59;
+    padding: 5px;
+}
+
+#num-questions option {
+    background-color: rgb(20, 20, 20);
+    color: #f3af59;
 }
 
 select {
