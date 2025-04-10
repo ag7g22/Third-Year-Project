@@ -14,18 +14,32 @@
 
     <!-- Main Content -->
     <div class="main-content">
-      <h1 class="title">DASHBOARD</h1>
-      <div class="buttons">
-        <button @click="next_page('dailyquiz')">Daily Training</button>
-        <button @click="next_page('lobby')">Versus</button>
-        <button @click="next_page('categoryquiz')">Category Practice</button>
-        <button @click="next_page('roadsignquiz')">Road Sign Practice</button>
-        <button @click="next_page('hazard')">Hazard Perception</button>
-        <button @click="next_page('mockexam')">Mock Exam</button>
+      <div class="progress-container">
+        <p class="progress-title">Exam-ready level</p>
+        <div class="progress-bar-wrapper">
+          <div class="progress-bar" style="width: 60%;"></div>
+        </div>
       </div>
-
-      <p v-if="message.error" class="error-message">{{ message.error }}</p>
-      <p v-if="message.success" class="success-message">{{ message.success }}</p>
+      <div class="buttons-grid">
+        <button @click="next_page('dailyquiz')">
+          <img src="@/assets/titles/DailyQuiz.png" alt="Logo"/>
+        </button>
+        <button @click="next_page('categoryquiz')">
+          <img src="@/assets/titles/CategoryQuiz.png" alt="Logo"/>
+        </button>
+        <button @click="next_page('roadsignquiz')">
+          <img src="@/assets/titles/RoadSign.png" alt="Logo"/>
+        </button>
+        <button @click="next_page('hazard')">
+          <img src="@/assets/titles/HazardPerception.png" alt="Logo"/>
+        </button>
+        <button @click="next_page('lobby')">
+          <img src="@/assets/titles/CrashQuizOff.png" alt="Logo"/>
+        </button>
+        <button @click="next_page('mockexam')">
+          <img src="@/assets/titles/MockTest.png" alt="Logo"/>
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -134,10 +148,68 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.main-content h1 {
+  color: #f3af59; /* Set the text color to the original color */
+  padding: 40px;
+  text-decoration: underline;
+}
+
+.main-content img {
+  width: 280px;
+}
+
+.buttons-grid {
+  padding: 30px;
+  width: 90%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  place-items: center;
+  margin: 0 auto; /* centers the grid horizontally */
+}
+
+.buttons-grid button {
+  width: 90%;
+  height: 200px;
+  background: none;
+  background-size: cover; /* Make sure the image covers the entire button */
+  background-position: center; /* Center the image */
+  border: none; /* Remove any border */
+  cursor: pointer; /* Make the cursor a pointer to indicate it's clickable */
+  transition: transform 0.3s ease; /* Smooth transition for the scale effect */
+}
+
+.buttons-grid button:hover {
+  transform: scale(1.2); /* Grow the button when hovering */
+}
+
+.progress-container {
+  width: 90%;
+  margin: 20px auto;
+  text-align: center;
+}
+
+.progress-title {
+  color: #079cb0;
+  font-size: 18px;
+  margin-bottom: 10px;
+  font-weight: bold;
+  text-align: left;
+}
+
+.progress-bar-wrapper {
+  width: 100%;
+  height: 20px;
+  background-color: #000; /* Black outline */
+  border-radius: 10px; /* Optional rounded corners */
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background-color: #079cb0;
+  border-radius: 5px 0 0 5px; /* Optional rounded corners on the left */
+  transition: width 0.5s ease-in-out; /* Smooth animation when width changes */
 }
 
 </style>

@@ -8,10 +8,10 @@
           <h2>Sign in to GearUp!</h2>
         </div>
         <div v-if="this.$route.name === 'dashboard'" class="header-title">
-          <h2>Welcome {{ this.$store.state.currentUser }}!</h2>
+          <h2>Welcome {{ this.$store.state.currentUser }}! What are we practicing today?</h2>
         </div>
         <div v-if="this.$route.name === 'account'" class="header-title">
-          <h2>Profile</h2>
+          <h2>User profile</h2>
         </div>
         <div v-if="this.$route.name === 'friends'" class="header-title">
           <h2>My friends</h2>
@@ -20,7 +20,7 @@
           <h2>Leaderboard</h2>
         </div>
         <div v-if="this.$route.name === 'lobby'" class="header-title">
-          <h2>CRASH QUIZ!</h2>
+          <h2>1 vs 1 Quiz battle</h2>
         </div>
         <div v-if="this.$route.name === 'categoryquiz'" class="header-title">
           <h2>Category Quiz</h2>
@@ -35,7 +35,7 @@
           <h2>Daily Quiz!</h2>
         </div>
         <div v-if="this.$route.name === 'mockexam'" class="header-title">
-          <h2>Mock Exam</h2>
+          <h2>Mock Test</h2>
         </div>
         <div v-if="this.$route.name === 'hazard'" class="header-title">
           <h2>Hazard Perception</h2>
