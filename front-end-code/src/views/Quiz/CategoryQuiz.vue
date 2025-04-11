@@ -53,60 +53,63 @@
         <div v-if="state.current_view === 'quiz'" class="container">
             <div class="questionnaire">
                 <div v-if="currentQuestion < questions.length">
-                    <p>Question {{ currentQuestion + 1 }} of {{ questions.length }}</p>
-
-                    <!-- Progress Bar -->
-                    <div class="progress-container">
-                    <div class="progress-bar" :style="{ width: progressBarWidth + '%' }"></div>
+                    <h2>Question {{ currentQuestion + 1 }} of {{ questions.length }}</h2>
+                    <div class="progress-bar">
+                        <div class="progress-fill" :style="{ width: progressBarWidth + '%' }"></div>
                     </div>
-
-                    <h2>{{ questions[currentQuestion].question }}</h2>
-
-                    <div v-if="questions[currentQuestion].image !== 'n/a'">
-                        <img :src=image alt="Question Image">
-                    </div>
-
-                    <button @click="toggleExplanation" class="explanation-button">
-                        {{ explanation.showExplanation ? "Hide Explanation" : "Show Explanation" }}
-                    </button>
-                    <button class="stop-button" @click="terminate_quiz()">Stop Quiz</button>
-
-                    <div v-if="explanation.showExplanation" class="overlay" @click="toggleExplanation">
-                        <div class="overlay-content" @click.stop>
-                            <h2>Explanation</h2>
-                            <p>{{ questions[currentQuestion].explanation }}</p>
-                            <button @click="explanation.showExplanation = false">Close</button>
+                    <div class="question-container">
+                        <div class="question-text">
+                            <h1>{{ questions[currentQuestion].question }}</h1>
+                        </div>
+                        <div class="question-image" v-if="questions[currentQuestion].image !== 'n/a'">
+                            <img :src="image" alt="Question Image">
                         </div>
                     </div>
-
-                    <div class="options">
-                        <button 
-                        v-for="(option, index) in questions[currentQuestion].options"
-                        :key="index"
-                        :class="{
-                            selected: selectedAnswer === option,
-                            correct: selectedAnswer === option && isCorrect,
-                            incorrect: selectedAnswer === option && !isCorrect
-                        }"
-                        @click="selectAnswer(option)"
-                        >
-                        {{ option }}
-                        </button>
+                    <div v-if="explanation.showExplanation" class="overlay" @click="toggleExplanation">
+                        <div class="overlay-content" @click.stop>
+                            <h2>Explanation (Click outside box to close)</h2>
+                            <p>{{ questions[currentQuestion].explanation }}</p>
+                        </div>
                     </div>
-                    <button v-if="selectedAnswer" @click="nextQuestion">Next</button>
+                    <div class="quiz-buttons-container">
+                        <div class="quiz-buttons-grid">
+                            <button 
+                            v-for="(option, index) in questions[currentQuestion].options"
+                            :key="index"
+                            :class="{
+                                selected: selectedAnswer === option,
+                                correct: selectedAnswer === option && isCorrect,
+                                incorrect: selectedAnswer === option && !isCorrect
+                            }"
+                            @click="selectAnswer(option)"
+                            >
+                            {{ option }}
+                            </button>
+                        </div> 
+                        <div class="game-buttons">
+                            <button class="game-button" @click="terminate_quiz()">Stop Quiz</button>
+                            <button class="game-button" @click="toggleExplanation">
+                                {{ explanation.showExplanation ? "Hide Explanation" : "Show Explanation" }}
+                            </button>
+                            <div v-if="selectedAnswer">
+                                <button v-if="selectedAnswer" @click="nextQuestion" class="game-button">Next</button>
+                            </div>
+                            <div v-else>
+                                <button disabled class="game-button">Next</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div v-else>
-                    <h2>You've completed the category quiz! 🎉</h2>
-                    <h3> Score: {{ percentage }}% </h3>
-                    <p> {{ quiz_message }} </p>
-                    <button v-if="updateFinished" class="stop-button" @click="terminate_quiz()">Back</button>
-                    <button @click="init_feedback()">Feedback</button>
+                <div v-else class="quiz-result">
+                    <h1>You've completed the category quiz! 🎉</h1>
+                    <h1> Score: {{ percentage }}% </h1>
+                    <h2> {{ quiz_message }} </h2>
+                    <div class="game-buttons">
+                       <button @click="init_feedback()" class="game-button">Feedback</button> 
+                    </div>
                 </div>
             </div>
-
         </div>
-        <p v-if="message.error" class="error-message">{{ message.error }}</p>
-        <p v-if="message.success" class="success-message">{{ message.success }}</p>
     </div>
 </template>
   
@@ -283,7 +286,7 @@ export default {
             let question_image = this.questions[this.currentQuestion].image
             let q_obj = this.questions[this.currentQuestion]
             console.log(JSON.stringify({question: q_obj.question, selected: this.selectedAnswer, correct: q_obj.correct_answer, image: question_image}))
-            this.feedback.push({question: q_obj.question, selected: this.selectedAnswer, correct: q_obj.correct_answer, image: question_image})
+            this.feedback.push({question: q_obj.question, selected: this.selectedAnswer, correct: q_obj.correct_answer, image: question_image, explanation: q_obj.explanation})
         },
         add_image() {
             // Library of images
@@ -484,147 +487,4 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-img {
-  max-width: 300px; /* Limits the width to 200px */
-  max-height: 200px; /* Limits the height to 100px */
-  width: auto; /* Maintain aspect ratio */
-  height: auto; /* Maintain aspect ratio */
-}
-
-.options-dropdown {
-    color: white;
-    text-align: center;
-    padding: 10px;
-}
-
-#num-questions {
-    background-color: rgb(20, 20, 20);
-    color: #f3af59;
-    border: 1px solid #f3af59;
-    padding: 5px;
-}
-
-#num-questions option {
-    background-color: rgb(20, 20, 20);
-    color: #f3af59;
-}
-
-select {
-  padding: 5px;
-  font-size: 16px;
-}
-
-.questionnaire {
-  text-align: center;
-  max-width: 500px;
-  margin: auto;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  background: #f9f9f9;
-}
-
-h2 {
-  margin-bottom: 15px;
-}
-
-.options button {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  margin: 5px 0;
-  border: none;
-  background-color: #969faa;
-  color: white;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-.options button.selected {
-  background-color: #595f66;
-}
-
-/* Flash green for correct answers */
-.options button.correct {
-    background-color: #5bd45f;
-}
-
-/* Flash red for incorrect answers */
-.options button.incorrect {
-    background-color: #e34242;
-}
-
-.next-button {
-  margin-top: 15px;
-  padding: 10px 20px;
-  border: none;
-  background-color: green;
-  color: white;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-.next-button:hover {
-  background-color: darkgreen;
-}
-
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-
-/* Centered box but slightly above the middle */
-.overlay-content {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  text-align: center;
-  width: 80%;
-  max-width: 400px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-}
-
-/* Open button */
-.open-overlay-btn {
-  padding: 10px 15px;
-  background: blue;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-/* Close button */
-.close-overlay-btn {
-  margin-top: 10px;
-  padding: 10px;
-  background: red;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-.progress-container {
-  width: 100%;
-  height: 20px;
-  background-color: #f3f3f3;
-  border-radius: 2px;
-  margin-bottom: 2px;
-}
-
-.progress-bar {
-  height: 100%;
-  background-color: #4caf50;
-  border-radius: 10px;
-}
-
 </style>

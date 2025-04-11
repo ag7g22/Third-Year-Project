@@ -28,7 +28,7 @@
     align-items: center;
     justify-content: center;
     height: calc(100vh - 80px); /* 100% of the screen height minus the header's height */
-    background-color: rgb(28, 27, 27);
+    background-color: rgb(30, 30, 30);
     overflow: hidden; /* Prevent content from overflowing */
 }
 

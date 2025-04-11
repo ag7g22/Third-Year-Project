@@ -1,48 +1,48 @@
 <template>
     <div class="container">
-        <div class="p-6 bg-gray-100 rounded-2xl shadow-lg max-w-xl mx-auto">
-            <h1 class="text-2xl font-bold text-gray-800">FEEDBACK | {{ logged_in_user }}</h1>
-
+        <div class="questionnaire">
             <!-- LOADING SCREEN FOR FEEDBACK -->
             <div v-if="state.current_view === 'loading'">
-                <p class="text-gray-500">LOADING FEEDBACK ...</p>
-                <button @click="next_page('dashboard')">Finish</button>
+                <h1>LOADING FEEDBACK ...</h1>
             </div>
-
             <!-- ACTUAL FEEDBACK PAGE -->
             <div v-if="state.current_view === 'feedback'">
-                <div class="feedback">
-                    <h2>{{ state.feedback[current_Q].question }}</h2>
-
-                    <div v-if="input[current_Q].image !== 'n/a'">
-                        <img :src=image alt="Question Image">
-                    </div> 
-
-                    <p>YOU SELECTED: {{ input[current_Q].selected }}</p>
-                    <p>CORRECT ANSWER: {{ input[current_Q].correct }}</p>
-
-                    <h3>{{ state.feedback[current_Q].feedback }}</h3>
-
-                    <div class="mt-4 flex justify-between">
-                        <button 
-                            @click="prev_feedback()" 
-                            class="px-4 py-2 rounded-lg text-white" 
-                            :class="{ 'bg-gray-400': current_Q === 0, 'bg-blue-600 hover:bg-blue-700': current_Q > 0 }" 
-                            :disabled="current_Q === 0"
-                        >Previous</button>
-                        <button 
-                            @click="next_feedback()" 
-                            class="px-4 py-2 rounded-lg text-white" 
-                            :class="{ 'bg-gray-400': current_Q === state.feedback.length - 1, 'bg-blue-600 hover:bg-blue-700': current_Q < state.feedback.length - 1 }" 
-                            :disabled="current_Q === state.feedback.length - 1"
-                        >Next</button>
+                <h2>Feedback {{ current_Q + 1 }} of {{ state.feedback.length }}</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" :style="{ width: progressBarWidth + '%' }"></div>
+                </div>
+                <div class="question-container">
+                    <div class="question-text">
+                        <h1>{{ state.feedback[current_Q].question }}</h1>
+                    </div>
+                    <div class="question-image" v-if="input[current_Q].image !== 'n/a'">
+                        <img :src="image" alt="Question Image">
                     </div>
                 </div>
-                <button @click="next_page('dashboard')">Finish</button>
+                <div class="feedback-box">
+                    <div class="answer-row">
+                        <p class="incorrect">{{ input[current_Q].selected }}❌</p>
+                        <p class="correct">{{ input[current_Q].correct }}✔️</p>
+                    </div>
+                    <div class="feedback-text">
+                        <h3>{{ state.feedback[current_Q].feedback }}</h3>
+                    </div>
+                </div>
+                <div class="game-buttons">
+                    <button 
+                        class="game-button" @click="prev_feedback()" 
+                        :disabled="current_Q === 0">Previous
+                    </button>
+                    <button 
+                        class="game-button" @click="next_feedback()" 
+                        :disabled="current_Q === state.feedback.length - 1">Next
+                    </button>
+                    <button 
+                        class="game-button" @click="next_page('dashboard')"
+                        :disabled="current_Q < state.feedback.length - 1">Finish
+                    </button>
+                </div>
             </div>
-
-            <p v-if="message.error" class="mt-2 text-red-500">{{ message.error }}</p>
-            <p v-if="message.success" class="mt-2 text-green-500">{{ message.success }}</p>
         </div>
     </div>
 </template>
@@ -82,28 +82,32 @@ export default {
         async get_feedback() {
             // Get feedback from API:
             const new_input = this.input.map(item => {
-                const { image, ...rest } = item; // Destructure to remove the 'author' property
+                const { image, explanation, ...rest } = item; // Destructure to remove the 'author' property
                 return rest; // Return the rest of the object
             });
-
             console.log(new_input);
-
-            const feedback = await this.azure_function('POST', '/question/get/feedback', {incorrect_answers: new_input});
-            if (feedback.result) {
-                this.message.success = 'Loading feedback successful!';
-                this.state.feedback = JSON.parse(feedback.msg);
-
-                console.log('Is array:', Array.isArray(this.state.feedback));
-                console.log('Type:', typeof this.state.feedback);
-
-                console.log(this.state.feedback);
-                console.log(this.state.feedback[this.current_Q]);
-
+            
+            try {
+                const feedback = await this.azure_function('POST', '/question/get/feedback', {incorrect_answers: new_input});
+                if (feedback.result) {
+                    this.state.feedback = JSON.parse(feedback.msg);
+                    console.log('Is array:', Array.isArray(this.state.feedback));
+                    console.log('Type:', typeof this.state.feedback);
+                    console.log(this.state.feedback);
+                    console.log(this.state.feedback[this.current_Q]);
+                    this.add_image();
+                    this.toggle_view('feedback');
+                } else {
+                    this.message.error = feedback.msg || "Loading feedback failed."
+                }
+            } catch (error) {
+                console.log('Unable to generate, using the explanation as a substitute feedback.');
+                this.state.feedback = this.input.map(({ image, explanation, ...rest }) => ({
+                    feedback: explanation,
+                    ...rest
+                }));
                 this.add_image();
-
                 this.toggle_view('feedback');
-            } else {
-                this.message.error = feedback.msg || "Loading feedback failed."
             }
         },
         next_feedback() {
@@ -173,24 +177,51 @@ export default {
             this.$router.push(`/${page}`);
         }
     },
+    computed: {
+        progressBarWidth() {
+        return (this.current_Q / (this.state.feedback.length - 1)) * 100;
+    }
+  },
 };
 </script>
 
 <style lang="scss" scoped>
-img {
-  max-width: 300px; /* Limits the width to 200px */
-  max-height: 200px; /* Limits the height to 100px */
-  width: auto; /* Maintain aspect ratio */
-  height: auto; /* Maintain aspect ratio */
+.feedback-box {
+    color: #ffffff;
+    background-color: black;
+    border: 2px solid #f3af59;
+    width: 100%;
+    max-width: 1400px;
+    height: 180px;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
 }
 
-.feedback {
-  text-align: center;
-  max-width: 600px;
-  margin: auto;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  background: #f9f9f9;
+.answer-row {
+    font-size: 1.1rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
 }
+
+.feedback-box p.correct {
+    color: #5bd45f;
+}
+
+.feedback-box p.incorrect {
+    color: #e34242;
+}
+
+.feedback-text {
+    padding-top: 10px;
+}
+
+h1 {
+    color: white;
+}
+
 </style>
