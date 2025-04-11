@@ -158,6 +158,29 @@ export default {
         };
     },
     methods: {
+        exp_message() {
+            if (this.exp_gain === 0) return;
+            toastr.info(" ", `Gained ${this.exp_gain} exp!`, {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-right",
+                timeOut: 5000,
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut",
+                preventDuplicates: true
+            });
+        },
+        level_up_message() {
+            toastr.info(" ", "LEVELED UP!", {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-right",
+                timeOut: 5000,
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut",
+                preventDuplicates: true
+            });
+        },
         toggle_view(view) {
             // Reset state
             this.message.error = "";
@@ -390,13 +413,11 @@ export default {
                 // Update rank in UI too.
                 this.$store.commit("setCurrentRank", this.currentRank);
                 this.currentRank = this.$store.state.currentRank;
-            
                 if (prev_level < this.currentRank.level) {
-                    this.message.success = `LEVELED UP TO LEVEL ${this.currentRank.level}!` 
+                    this.level_up_message();
                 } else {
-                    this.message.success = `Gained ${this.exp_gain} exp!`
+                    this.exp_message();
                 }
-
             } else {
                 this.message.error = update_response.msg || "Score update Failed."
             }

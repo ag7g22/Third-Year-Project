@@ -11,61 +11,51 @@
                 <button @click="next_page('hazard')" class="game-button">Back</button>
             </div>
         </div>
-        <div v-if="state.current_view === 'video'" class="video-container">
-            <div v-if="clip_url === ''">
-                <h2>LOADING VIDEO CLIP ...</h2>
-            </div>
-            <div v-else>
-                <div>
-                    <video ref="hazard_perception"
-                        :src="clip_url"
-                        @click="handleClick"
-                        @ended="finish_video_clip"
-                        autoplay 
-                        muted 
-                        playsinline 
-                        width="800"
-                        height="500">
-                    </video>
-
-                    <!-- Click Effect -->
-                    <div 
-                        v-for="(click, index) in clicks"
-                        :key="index"
-                        class="click-circle"
-                        :style="{ top: (click.y - 10) + 'px', left: (click.x - 15) + 'px' }"
-                    ></div>
+        <div v-if="state.current_view === 'video'" >
+            <div v-if="too_many_clicks" class="overlay" @click="toggle_view('score')">
+                <div class="overlay-content" @click.stop>
+                    <h2>You've clicked too many times.</h2>
+                    <p>(Click outside the box to move to the results screen.)</p>
                 </div>
-
-                <div v-if="too_many_clicks" class="overlay">
-                    <div class="overlay-content" @click.stop>
-                        <p>You've clicked too many times.</p>
-                        <button @click="toggle_view('score')">Next</button>
+            </div>
+            <div class="video-container">
+                <video ref="hazard_perception"
+                    :src="clip_url"
+                    @click="handleClick"
+                    @ended="finish_video_clip"
+                    autoplay 
+                    muted 
+                    playsinline 
+                    width="950"
+                    height="650">
+                </video>
+                <!-- Click Effect -->
+                <div 
+                    v-for="(click, index) in clicks"
+                    :key="index"
+                    class="click-circle"
+                    :style="{ top: (click.y - 10) + 'px', left: (click.x - 15) + 'px' }"
+                ></div>
+                <!-- Footer Section -->
+                <div class="video-footer">
+                    <div class="flags-container">
+                        <div v-for="clicks in click_history" class="item">🚩</div>
                     </div>
-                </div>
-                
-                <div class="horizontal-container">
-                    <div v-for="clicks in click_history" class="item">🚩</div>
+                    <button @click="terminate_page()" class="game-button">Back</button>  
                 </div>
             </div>
 
-            <div class="buttons">
-                <button @click="terminate_page()">Back</button>  
+        </div>
+        <div v-if="state.current_view === 'score'" class="questionnaire">
+            <div class="quiz-result">
+                <h1>You've completed the video! 🎉</h1>
+                <h1> Score: {{ final_score }} / 5 </h1>
+                <h2> {{ score_message }} </h2>
+                <div class="game-buttons">
+                   <button v-if="updateFinished" class="game-button" @click="terminate_page()">Back</button> 
+                </div>
             </div>
         </div>
-
-        <div v-if="state.current_view === 'score'">
-            <h1 class="title">HAZARD PERCEPTION | {{ state.current_topic }} | {{ logged_in_user }}</h1>
-            <div class="score">
-                <h2>You've completed the video! 🎉</h2>
-                <h3> Score: {{ final_score }} / 5 </h3>
-                <p> {{ score_message }} </p>
-                <button v-if="updateFinished" class="stop-button" @click="terminate_page()">Back</button>
-            </div>
-        </div>
-
-        <p v-if="message.error" class="error-message">{{ message.error }}</p>
-        <p v-if="message.success" class="success-message">{{ message.success }}</p>
     </div>
 </template>
   
@@ -109,6 +99,29 @@ export default {
         };
     },
     methods: {
+        exp_message() {
+            if (this.exp_gain === 0) return;
+            toastr.info(" ", `Gained ${this.exp_gain} exp!`, {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-right",
+                timeOut: 5000,
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut",
+                preventDuplicates: true
+            });
+        },
+        level_up_message() {
+            toastr.info(" ", "LEVELED UP!", {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-right",
+                timeOut: 5000,
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut",
+                preventDuplicates: true
+            });
+        },
         handleClick(event) {
             // This method records when and where in the video you clicked.
             const video = this.$refs.hazard_perception;
@@ -260,18 +273,15 @@ export default {
             console.log(input);
 
             const update_response = await this.azure_function("PUT", "/user/update/info", input)
-            // Show message incase the API response fails, otherwise update state.
             if (update_response.result) {
                 // Update rank in UI too.
                 this.$store.commit("setCurrentRank", this.currentRank);
                 this.currentRank = this.$store.state.currentRank;
-            
                 if (prev_level < this.currentRank.level) {
-                    this.message.success = `LEVELED UP TO LEVEL ${this.currentRank.level}!` 
+                    this.level_up_message();
                 } else {
-                    this.message.success = `Gained ${this.exp_gain} exp!`
+                    this.exp_message();
                 }
-
             } else {
                 this.message.error = update_response.msg || "Score update Failed."
             }
@@ -287,12 +297,15 @@ export default {
                 this.$store.commit("setCurrentAchievements", this.achievements);
                 this.message.success = 'Achievements update Successful!'
 
-                const options = { "closeButton": true, "debug": false, "newestOnTop": true, "progressBar": true,
-                "positionClass": "toast-top-right", "preventDuplicates": true, "onclick": null, "showDuration": "300",
-                "hideDuration": "1000", "timeOut": "5000", "extendedTimeOut": "1000", "showEasing": "swing",
-                "hideEasing": "linear", "showMethod": "fadeIn","hideMethod": "fadeOut"}
-
-                toastr.success('"' + `/${name}` + '""',"Achievement Unlocked:", options)
+                toastr.success('"' + `/${name}` + '""', "Achievement Unlocked:", {
+                    closeButton: true,
+                    progressBar: true,
+                    positionClass: "toast-bottom-full-width",
+                    timeOut: 5000,
+                    showMethod: "fadeIn",
+                    hideMethod: "fadeOut",
+                    preventDuplicates: true
+                });
             }
         },
         async azure_function(function_type, function_route, json_doc) {
@@ -353,8 +366,20 @@ h1 {
 }
 
 .video-container {
-  position: relative;
-  display: inline-block;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    line-height: 0;
+}
+
+video {
+  display: block; /* Prevents inline spacing */
+  border: none;
+  margin: 0;
+  padding: 0;
 }
 
 /* Animated Click Circle */
@@ -379,50 +404,22 @@ h1 {
   }
 }
 
-.horizontal-container {
+.flags-container {
+    font-size: medium;
     display: flex; /* Display items in a row */
-    gap: 10px; /* Optional: Adds space between the items */
+    gap: 40px; /* Optional: Adds space between the items */
 }
 
-.item {
-    width: 20px; /* Set width */
-    height: 20px; /* Set height */
-    padding: 10px;
-    border-radius: 4px;
+.video-footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background-color: rgba(20, 20, 20, 0.9);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    box-sizing: border-box;
+    border-top: 2px solid #333;
 }
-
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-
-/* Centered box but slightly above the middle */
-.overlay-content {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  text-align: center;
-  width: 80%;
-  max-width: 400px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-}
-
-.score {
-  text-align: center;
-  max-width: 500px;
-  margin: auto;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  background: #f9f9f9;
-}
-
 </style>

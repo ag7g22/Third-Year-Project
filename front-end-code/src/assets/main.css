@@ -251,7 +251,7 @@ select {
     height: 90%;
     padding: 30px;
     border-radius: 10px;
-    background-color: rgb(20, 20, 20);
+    background: linear-gradient(to bottom, #000000, #333333); /* Gradient from black to dark grey */
     border: 2px solid #ccc; /* Optional: Add a grey border around the container */
 }
 
@@ -342,7 +342,8 @@ select {
     padding: 40px; /* Increased padding for more space */
     text-align: center;
     width: 60%;
-    height: 40%;
+    min-height: 150px; /* Ensures the box has a minimum height */
+    height: auto; /* Let the height adjust based on content */
     font-size: 1.5rem; /* Increase font size */
 }
 
