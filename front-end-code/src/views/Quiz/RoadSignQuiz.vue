@@ -82,7 +82,7 @@
                     </div>
                 </div>
                 <div v-else class="quiz-result">
-                    <h1>You've completed the category quiz! 🎉</h1>
+                    <h1>You've completed the road sign quiz! 🛑</h1>
                     <h1> Score: {{ percentage }}% </h1>
                     <h2> {{ quiz_message }} </h2>
                     <div class="game-buttons">
@@ -152,7 +152,7 @@ export default {
             toastr.info(" ", `Gained ${this.exp_gain} exp!`, {
                 closeButton: true,
                 progressBar: true,
-                positionClass: "toast-top-right",
+                positionClass: "toast-bottom-center",
                 timeOut: 5000,
                 showMethod: "fadeIn",
                 hideMethod: "fadeOut",
@@ -163,7 +163,7 @@ export default {
             toastr.info(" ", "LEVELED UP!", {
                 closeButton: true,
                 progressBar: true,
-                positionClass: "toast-top-right",
+                positionClass: "toast-bottom-center",
                 timeOut: 5000,
                 showMethod: "fadeIn",
                 hideMethod: "fadeOut",

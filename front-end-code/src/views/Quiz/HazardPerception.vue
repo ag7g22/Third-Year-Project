@@ -225,13 +225,4 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.instruction-box {
-  background-color: #f9f9f9;
-  border-left: 5px solid #007bff;
-  padding: 10px;
-  margin: 10px 0;
-  font-size: 14px;
-  color: #333;
-  border-radius: 5px;
-}
 </style>

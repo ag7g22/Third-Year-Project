@@ -11,7 +11,7 @@
                 </div>
                 <p>1. 🚦 Warm-Up: 10 Road Sign Questions </p>
                 <p>2. 🧠 Core Quiz: 10 Multiple Choice Questions</p>
-                <p>3. 🎥 Simulation: 1 Hazard Perception clip</p>
+                <p>3. 🎥 Simulation: 3 Hazard Perception clips</p>
                 <p>Good luck!</p>
             </div>
         </div>
@@ -20,120 +20,134 @@
             <img src="@/assets/titles/DailyQuiz.png" alt="Logo" class="task-logo"/>
             <div class="game-buttons">
                 <button @click="next_page('dashboard')" class="game-button">Back</button>
-                <button @click="init_road_signs()" class="game-button">Start</button>
+                <button @click="init_daily_quiz()" class="game-button">Start</button>
             </div>
         </div>
     </div>
     <div v-else>
         <div v-if="current_view === 'quiz'" class="container">
-            <h1 class="title">DAILY QUIZ | {{ logged_in_user }}</h1>
             <div class="questionnaire">
-                <div v-if="questions.length === 0">
-                    <p>LOADING ASSETS ...</p>
-                </div>
-                <div v-else-if="currentQuestion < questions.length">
-                    <p>Question {{ currentQuestion + 1 }} of {{ questions.length }}</p>
-
-                    <!-- Progress Bar -->
-                    <div class="progress-container">
-                    <div class="progress-bar" :style="{ width: progressBarWidth + '%' }"></div>
+                <div v-if="currentQuestion < questions.length">
+                    <h2>Question {{ currentQuestion + 1 }} of {{ questions.length }}</h2>
+                    <div class="progress-bar">
+                        <div class="progress-fill" :style="{ width: progressBarWidth + '%' }"></div>
                     </div>
-
-                    <h2>{{ questions[currentQuestion].question }}</h2>
-
-                    <div v-if="questions[currentQuestion].image !== 'n/a'">
-                        <img :src=image alt="Question Image">
-                    </div>
-
-                    <button @click="toggleExplanation" class="explanation-button">
-                        {{ explanation.showExplanation ? "Hide Explanation" : "Show Explanation" }}
-                    </button>
-                    <button class="stop-button" @click="terminate_daily_quiz()">Stop Quiz</button>
-
-                    <div v-if="explanation.showExplanation" class="overlay" @click="toggleExplanation">
-                        <div class="overlay-content" @click.stop>
-                            <h2>Explanation</h2>
-                            <p>{{ questions[currentQuestion].explanation }}</p>
-                            <button @click="explanation.showExplanation = false">Close</button>
+                    <div class="question-container">
+                        <div class="question-text">
+                            <h1>{{ questions[currentQuestion].question }}</h1>
+                        </div>
+                        <div class="question-image" v-if="questions[currentQuestion].image !== 'n/a'">
+                            <img :src="image" alt="Question Image">
                         </div>
                     </div>
-
-                    <div class="options">
-                        <button 
-                        v-for="(option, index) in questions[currentQuestion].options"
-                        :key="index"
-                        :class="{
-                            selected: selectedAnswer === option,
-                            correct: selectedAnswer === option && isCorrect,
-                            incorrect: selectedAnswer === option && !isCorrect
-                        }"
-                        @click="selectAnswer(option)"
-                        >
-                        {{ option }}
-                        </button>
+                    <div v-if="explanation.showExplanation" class="overlay" @click="toggleExplanation">
+                        <div class="overlay-content" @click.stop>
+                            <h2>Explanation (Click outside box to close)</h2>
+                            <p>{{ questions[currentQuestion].explanation }}</p>
+                        </div>
                     </div>
-                    <button v-if="selectedAnswer" @click="nextQuestion">Next</button>
-                </div>
-                <div v-else>
-                    <h3>Finished the {{ current_part }}!</h3>
-                    <h3>Moving onto the {{ next_part }}...</h3>
-                    <button @click="next_section(next_part)">Next</button>
-                </div>
-            </div>
-        </div>
-
-        <div v-if="current_view === 'hazard_perception'" class="video-container">
-            <div v-if="clip_url === ''">
-                <h2>LOADING VIDEO CLIP ...</h2>
-            </div>
-            <div v-else>
-                <div>
-                    <video ref="hazard_perception"
-                        :src="clip_url"
-                        @click="handleClick"
-                        @ended="finish_video_clip"
-                        autoplay 
-                        muted 
-                        playsinline 
-                        width="800"
-                        height="500">
-                    </video>
-
-                    <!-- Click Effect -->
-                    <div 
-                        v-for="(click, index) in clicks"
-                        :key="index"
-                        class="click-circle"
-                        :style="{ top: (click.y - 10) + 'px', left: (click.x - 15) + 'px' }"
-                    ></div>
-                </div>
-
-                <div v-if="too_many_clicks" class="overlay">
-                    <div class="overlay-content" @click.stop>
-                        <p>You've clicked too many times.</p>
-                        <button @click="toggle_view('score')">Next</button>
+                    <div class="quiz-buttons-container">
+                        <div class="quiz-buttons-grid">
+                            <button 
+                            v-for="(option, index) in questions[currentQuestion].options"
+                            :key="index"
+                            :class="{
+                                selected: selectedAnswer === option,
+                                correct: selectedAnswer === option && isCorrect,
+                                incorrect: selectedAnswer === option && !isCorrect
+                            }"
+                            @click="selectAnswer(option)"
+                            >
+                            {{ option }}
+                            </button>
+                        </div> 
+                        <div class="game-buttons">
+                            <button class="game-button" @click="terminate_daily_quiz()">Stop Quiz</button>
+                            <button class="game-button" @click="toggleExplanation">
+                                {{ explanation.showExplanation ? "Hide Explanation" : "Show Explanation" }}
+                            </button>
+                            <div v-if="selectedAnswer">
+                                <button v-if="selectedAnswer" @click="nextQuestion" class="game-button">Next</button>
+                            </div>
+                            <div v-else>
+                                <button disabled class="game-button">Next</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="horizontal-container">
-                    <div v-for="clicks in click_history" class="item">🚩</div>
+                <div v-if="questions.length === 0 " class="quiz-result">
+                    <h1>Loading ...</h1>
+                </div>
+                <div v-else class="quiz-result">
+                    <h1>Finished the {{ current_part }}!</h1>
+                    <h1>Moving onto the {{ next_part }}...</h1>
+                    <div class="game-buttons">
+                        <button  class="game-button" @click="next_section(next_part)">Next</button>
+                    </div>
                 </div>
             </div>
-            <button class="stop-button" @click="terminate_daily_quiz()">Stop Quiz</button>
         </div>
 
-        <div v-if="current_view === 'score'">
-            <h1 class="title">DAILY QUIZ | {{ logged_in_user }}</h1>
-            <div class="score">
-                <h2>You've completed the video! 🎉</h2>
-                <h3> Score: {{ hazard_score }} / 5 </h3>
-                <p> {{ score_message }} </p>
-                <button @click="init_feedback()">Feedback</button>
+        <div v-if="current_view === 'hazard_perception'" class="container">
+            <div v-if="clip_url === ''" class="quiz-result">
+                <h1>Loading ...</h1>
+            </div>
+            <div v-if="too_many_clicks" class="overlay" @click="load_video_clip()">
+                <div class="overlay-content" @click.stop>
+                    <h2>You've clicked too many times.</h2>
+                    <p>(Click outside the box.)</p>
+                </div>
+            </div>
+            <div class="video-container">
+                <video ref="hazard_perception"
+                    :src="clip_url"
+                    @click="handleClick"
+                    @ended="finish_video_clip"
+                    autoplay 
+                    muted 
+                    playsinline 
+                    width="950"
+                    height="650">
+                </video>
+                <!-- Click Effect -->
+                <div 
+                    v-for="(click, index) in clicks"
+                    :key="index"
+                    class="click-circle"
+                    :style="{ top: (click.y - 10) + 'px', left: (click.x - 15) + 'px' }"
+                ></div>
+                <!-- Footer Section -->
+                <div class="video-footer">
+                    <div class="flags-container">
+                        <div v-for="clicks in click_history" class="item">🚩</div>
+                    </div>
+                    <button @click="terminate_daily_quiz()" class="game-button">Back</button>  
+                </div>
             </div>
         </div>
 
-        <p v-if="message.error" class="error-message">{{ message.error }}</p>
-        <p v-if="message.success" class="success-message">{{ message.success }}</p>
+        <div v-if="current_view === 'score'" class="container">
+            <div class="questionnaire">
+                <div class="quiz-result">
+                    <h2>You've completed the daily quiz! 💡</h2>
+                    <h1> Score: {{ percentage }}% </h1>
+                    <div class="graph-box">
+                        <div class="score-row" v-for="(score, topic) in update_scores" :key="topic">
+                            <div class="label">{{ topic }}</div>
+                            <div class="bar-container">
+                                <div class="bar"
+                                    :style="{ width: (score * 100) + '%', backgroundColor: colorMap[topic] }">
+                                </div>
+                            </div>
+                            <div class="value">{{ (score * 100).toFixed(0) }}%</div>
+                        </div>
+                    </div>
+                    <div class="game-buttons">
+                        <button @click="init_feedback()" class="game-button">Feedback</button> 
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
   
@@ -150,6 +164,8 @@ export default {
             next_part: 'Multiple choice section',
 
             // Quiz variables
+            r_questions: [], // Road sign questions
+            m_questions: [], // Multiple choice questions
             questions: [], // Quiz questions by API
             currentQuestion: 0, // Question pointer
             selectedAnswer: null, // This is the selected answer
@@ -160,8 +176,9 @@ export default {
             answer_time: { elapsedTime: 0, stopwatch: null, stopwatchRunning: false },
 
             // Clips
-            clips: [],
+            clips: [], // {name, x, y, time}
             selected_clip: null,
+            current_C: 0, // Clip pointer
             clip_url: '',
 
             // Clicking the video
@@ -175,6 +192,26 @@ export default {
             // Feedback
             feedback: [],
             // {question, correct_ans, selected_ans, image}
+
+            // Scores the upload to database
+            update_scores: {
+                "Driving Off": [],
+                "Urban Driving": [],
+                "Rural Driving": [],
+                "Bigger Roads": [],
+                "Motorways": [],
+                "Tricky Conditions": [],
+                "Breakdowns": [],
+            },
+            colorMap: {
+                "Driving Off": "#4caf50",         // green
+                "Urban Driving": "#2196f3",       // blue
+                "Rural Driving": "#9c27b0",       // purple
+                "Bigger Roads": "#ff9800",        // orange
+                "Motorways": "#f44336",           // red
+                "Tricky Conditions": "#ffc107",   // amber
+                "Breakdowns": "#795548",          // brown
+            },
 
             // Score, averaged out by number of questions.
             hazard_score: 0,
@@ -192,90 +229,94 @@ export default {
             updateFinished: false,
 
             logged_in_user: this.$store.state.currentUser,
+            currentRank: this.$store.state.currentRank,
             message: { error: "", success: "" },
         };
     },
     methods: {
+        exp_message() {
+            if (this.exp_gain === 0) return;
+            toastr.info(" ", `Gained ${this.exp_gain} exp!`, {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-bottom-center",
+                timeOut: 5000,
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut",
+                preventDuplicates: true
+            });
+        },
+        level_up_message() {
+            toastr.info(" ", "LEVELED UP!", {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-bottom-center",
+                timeOut: 5000,
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut",
+                preventDuplicates: true
+            });
+        },
         toggle_view(view) {
             // Reset state
             this.message = { error: "", success: "" };
             this.current_view = view;
         },
-        async init_road_signs() {
-            // Reset messages
-            this.message = { error: "", success: "" };
-            this.message.success = 'Loading daily quiz ...';
+        async init_daily_quiz() {
+            // Load ALL assests 
+            await this.init_road_signs();
+            await this.init_multiple_choice();
+            await this.init_hazard_perception();
 
+            // Switch to the quiz section, start timer for question.
+            this.questions = this.r_questions;
+            this.add_image();
+            this.toggle_view('quiz');
+            this.startStopwatch();
+        },
+        async init_road_signs() {
             // Initalise the road sign questions.
             const input = { "No_of_Qs": 10, "topic": "sign_question" }
             const quiz = await this.azure_function('POST', '/question/get/category', input);
             if (quiz.result) {
                 // Populate the questions list
-                this.message.success = 'Loading quiz successful!';
-                this.questions = quiz.msg;
-
-                this.add_image();
-
-                // Switch to the quiz section, start timer for question.
-                this.toggle_view('quiz');
-                this.startStopwatch();
+                this.r_questions = quiz.msg;
             } else {
                 this.message.error = quiz.msg || "Loading quiz failed.";
             } 
-
         },
         async init_multiple_choice() {
-            // Reset messages
-            this.message = { error: "", success: "" };
-            this.questions = [];
-
             // Initalise the road sign questions.
-            const input = { "No_of_Qs": 10, "username": this.logged_in_user }
-            const quiz = await this.azure_function('POST', '/question/get/quiz', input);
+            const input = { "No_of_Qs": 10, "topic": "no_sign_question" }
+            const quiz = await this.azure_function('POST', '/question/get/category', input);
             if (quiz.result) {
                 // Populate the questions list
-                this.message.success = 'Loading quiz successful!';
-                this.questions = quiz.msg;
-
-                // RESET QUIZ VARIABLES
-                this.currentQuestion = 0;
-                this.selectedAnswer = null;
-                this.isCorrect = false;
-                this.explanation = { showExplanation: false, wasClicked: false };
-                this.answer_time = { elapsedTime: 0, stopwatch: null, stopwatchRunning: false };
-                this.add_image();
-
-                // Switch to the quiz section again, start timer for question.
-                this.toggle_view('quiz');
-                this.startStopwatch();
+                this.m_questions = quiz.msg;
             } else {
                 this.message.error = quiz.msg || "Loading quiz failed.";
             } 
         },
         async init_hazard_perception() {
-            // Reset messages
-            this.message = { error: "", success: "" };
-            this.message.success = 'Loading hazard perception clips ...';
-
-            // Initalise the hazard perception clips.
-            // List of dictionaries
+            // Fetch the 3 clips:
             const dictList = [
-                {name: 'Urban Driving 1', x: 370, y: 270, time: 15.25}, {name: 'Urban Driving 2', x: 540, y: 270, time: 18.00}, {name: 'Urban Driving 3', x: 410, y: 260, time: 29.00},
-                {name: 'Urban Driving 4', x: 415, y: 260, time: 37.60}, {name: 'Urban Driving 5', x: 350, y: 260, time: 29.00}, {name: 'Rural Driving 1', x: 490, y: 220, time: 47.00},
-                {name: 'Rural Driving 2', x: 250, y: 250, time: 31.00}, {name: 'Rural Driving 3', x: 395, y: 230, time: 17.50}, {name: 'Rural Driving 4', x: 450, y: 290, time: 13.45},
-                {name: 'Rural Driving 5', x: 295, y: 240, time: 37.85}, {name: 'Bigger Roads 1', x: 415, y: 250, time: 13.90}, {name: 'Bigger Roads 2', x: 425, y: 240, time: 14.55},
-                {name: 'Bigger Roads 3', x: 510, y: 260, time: 26.30}, {name: 'Bigger Roads 4', x: 500, y: 245, time: 21.45}, {name: 'Motorways 1', x: 25, y: 190, time: 2.55},
-                {name: 'Motorways 2', x: 320, y: 250, time: 25.45}, {name: 'Motorways 3', x: 690, y: 290, time: 30.20}, {name: 'Tricky Conditions 1', x: 110, y: 250, time: 17.10},
-                {name: 'Tricky Conditions 2', x: 515, y: 240, time: 31.80}, {name: 'Tricky Conditions 3', x: 280, y: 254, time: 33.45}, {name: 'Tricky Conditions 4', x: 325, y: 235, time: 22.70},
-                {name: 'Tricky Conditions 5', x: 320, y: 255, time: 24.00}
+                {name: 'Urban Driving 1', x: 370, y: 270, time: 15.25}, {name: 'Urban Driving 2', x: 540, y: 270, time: 18.00}, {name: 'Urban Driving 3', x: 410, y: 260, time: 29.00}, {name: 'Urban Driving 4', x: 415, y: 260, time: 37.60}, {name: 'Urban Driving 5', x: 350, y: 260, time: 29.00}, {name: 'Rural Driving 1', x: 490, y: 220, time: 47.00},
+                {name: 'Rural Driving 2', x: 250, y: 250, time: 31.00}, {name: 'Rural Driving 3', x: 395, y: 230, time: 17.50}, {name: 'Rural Driving 4', x: 450, y: 290, time: 13.45}, {name: 'Rural Driving 5', x: 295, y: 240, time: 37.85}, {name: 'Bigger Roads 1', x: 415, y: 250, time: 13.90}, {name: 'Bigger Roads 2', x: 425, y: 240, time: 14.55},
+                {name: 'Bigger Roads 3', x: 510, y: 260, time: 26.30}, {name: 'Bigger Roads 4', x: 500, y: 245, time: 21.45}, {name: 'Motorways 1', x: 25, y: 190, time: 2.55}, {name: 'Motorways 2', x: 320, y: 250, time: 25.45}, {name: 'Motorways 3', x: 690, y: 290, time: 30.20}, {name: 'Tricky Conditions 1', x: 110, y: 250, time: 17.10},
+                {name: 'Tricky Conditions 2', x: 515, y: 240, time: 31.80}, {name: 'Tricky Conditions 3', x: 280, y: 254, time: 33.45}, {name: 'Tricky Conditions 4', x: 325, y: 235, time: 22.70}, {name: 'Tricky Conditions 5', x: 320, y: 255, time: 24.00}
             ];
             // Shuffle and select random clips
             this.clips = dictList
                 .sort(() => 0.5 - Math.random())  // Randomly shuffle
-                .slice(0, 1);           // Select the first item
-
-            console.log(this.clips[0]);
-            await this.load_video_clip(this.clips[0]);
+                .slice(0, 3);           // Select the first 3 clips
+            this.clips.forEach(async item => {
+                const input = {'filename': item.name + ".mp4"};
+                const video = await this.azure_function('POST', '/question/get/video', input);
+                if (video.result) {
+                    // Set the playing video
+                    item.url = video.msg;
+                    console.log(video.msg);
+                }
+            });
         },
         selectAnswer(option) {
             // When you select an answer it locks in, and calculate score and add it to total.
@@ -296,8 +337,6 @@ export default {
             if (this.currentQuestion < this.questions.length) {
                this.add_image();
                this.startStopwatch();
-            } else {
-                this.next_section();
             }
         },
         async next_section(section) {
@@ -306,22 +345,35 @@ export default {
                 // Move to multiple choice:
                 this.current_part = 'Multiple choice section';
                 this.next_part = 'Hazard Perception section';
-                this.init_multiple_choice();
+
+                // RESET QUIZ VARIABLES
+                this.currentQuestion = 0;
+                this.selectedAnswer = null;
+                this.isCorrect = false;
+                this.explanation = { showExplanation: false, wasClicked: false };
+                this.answer_time = { elapsedTime: 0, stopwatch: null, stopwatchRunning: false };
+
+                // Switch to the quiz section, start timer for question.
+                this.questions = this.m_questions;
+                this.add_image();
+                this.toggle_view('quiz');
+                this.startStopwatch();
 
             } else if (section === "Hazard Perception section") {
                 // Move to hazard perception:
                 this.current_part = 'Hazard Perception section.';
                 this.next_part = "Results";
-                this.init_hazard_perception();
+                // Start the hazard perception section
+                this.load_video_clip();
+                this.toggle_view('hazard_perception');
 
             } else if (section === "Results") {
                 // Move to results:
                 await this.get_stats();
-                // Update score if quiz completed:
                 console.log("FINAL SCORE:", this.final_score);
-                await this.update_user_topic_score();
                 await this.update_user_exp();
-                this.updateFinished = true;
+                await this.db_update_scores();
+                this.toggle_view('score');
             }
         },
         toggleExplanation() {
@@ -367,20 +419,22 @@ export default {
             }, 600);
 
         },
-        async load_video_clip(clip) {
-            // Load the corrosponding clip
-            console.log(clip.name);
-            this.selected_clip = clip;
-            const input = {'filename': clip.name + ".mp4"};
+        async load_video_clip() {
+            if (this.current_C < this.clips.length) {
+                // Load the corrosponding clip
+                this.click_x = 0;
+                this.click_y = 0;
+                this.click_time = 0;
+                this.click_history = [];
+                this.clicks = [];
+                this.too_many_clicks = false;
 
-            const video = await this.azure_function('POST', '/question/get/video', input);
-            if (video.result) {
-                // Set the playing video
-                this.clip_url = video.msg;
+                this.selected_clip = this.clips[this.current_C];
+                this.clip_url = this.selected_clip.url;
+                console.log(this.selected_clip.name);
                 console.log(this.clip_url);
-                this.toggle_view('hazard_perception');
             } else {
-                this.message.error = video.msg || 'Loading video failed.'
+                this.next_section(this.next_part);
             }
         },
         click_fail() {
@@ -388,102 +442,83 @@ export default {
             const video = this.$refs.hazard_perception;
             video.pause();
             this.too_many_clicks = true;
-            this.score_message = "Don't give up! Every attempt makes you better. Keep pushing forward!";
-            this.message.success = "Gained no exp."
-            this.updateFinished = true;
+            this.current_C++;
+
+            // Add update score
+            const topic = this.selected_clip.name.replace(/\s\d+$/, '');
+            this.add_update_score(topic, 0);
         },
         async finish_video_clip() {
-
-            // Check if the user clicked on the appropriate (x,y) range:
-            if ((this.click_x <= this.selected_clip.x + 50 && this.click_x >= this.selected_clip.x - 50) && 
-                (this.click_y <= this.selected_clip.y + 50 && this.click_y >= this.selected_clip.y - 50)) {
-
-                let interval = 1;
-
-                // Then check if the user clicked at the right time:
-                if (this.click_time >= this.selected_clip.time && this.click_time < this.selected_clip.time + interval) {
-                    this.hazard_score = 5;
-                    this.score_message = "Eagle eyed legend!";
-                    this.exp_gain = 350;
-                } else if (this.click_time >= this.selected_clip.time + interval && this.click_time < this.selected_clip.time + interval*2) {
-                    this.hazard_score = 4;
-                    this.score_message = "You almost got it, keep trying!";
-                    this.exp_gain = 280;
-                } else if (this.click_time >= this.selected_clip.time + interval*2 && this.click_time < this.selected_clip.time + interval*3) {
-                    this.hazard_score = 3;
-                    this.score_message = "This is pretty good, you can do better!";
-                    this.exp_gain = 210;
-                } else if (this.click_time >= this.selected_clip.time + interval*3 && this.click_time < this.selected_clip.time + interval*4) {
-                    this.hazard_score = 2;
-                    this.score_message = "You're learning, and that's what matters! Keep challenging yourself!";
-                    this.exp_gain = 140;
-                } else if (this.click_time >= this.selected_clip.time + interval*4 && this.click_time < this.selected_clip.time + interval*5) {
-                    this.hazard_score = 1;
-                    this.score_message = "Not bad! Mistakes help us grow—review what you missed and try again!";
-                    this.exp_gain = 70;
-                } else {
-                    this.hazard_score = 0;
-                    this.score_message = "Don't give up! Every attempt makes you better. Keep pushing forward!";
-                }
-
-            } else {
-                this.score_message = "Don't give up! Every attempt makes you better. Keep pushing forward!";
+        // Check if the user clicked on the appropriate (x,y) range:
+        if ((this.click_x <= this.selected_clip.x + 50 && this.click_x >= this.selected_clip.x - 50) && 
+            (this.click_y <= this.selected_clip.y + 50 && this.click_y >= this.selected_clip.y - 50)) {
+            let interval = 1;
+            // Then check if the user clicked at the right time:
+            let score = 0
+            if (this.click_time >= this.selected_clip.time && this.click_time < this.selected_clip.time + interval) {
+                score = 1;
+            } else if (this.click_time >= this.selected_clip.time + interval && this.click_time < this.selected_clip.time + interval*2) {
+                score = 0.8;
+            } else if (this.click_time >= this.selected_clip.time + interval*2 && this.click_time < this.selected_clip.time + interval*3) {
+                score = 0.6;
+            } else if (this.click_time >= this.selected_clip.time + interval*3 && this.click_time < this.selected_clip.time + interval*4) {
+                score = 0.4;
+            } else if (this.click_time >= this.selected_clip.time + interval*4 && this.click_time < this.selected_clip.time + interval*5) {
+                score = 0.2;
             }
-
-            this.toggle_view('score');
-
-            if (this.hazard_score >= 1) {
-                console.log('Got a score!')
-                //await this.update_user_exp();
-                this.updateFinished = true;
-            } else {
-                console.log('No score!')
-                this.message.error = "Gained no exp."
-                this.updateFinished = true;
-            }
+            const topic = this.selected_clip.name.replace(/\s\d+$/, '');
+            this.add_update_score(topic, score);
+            this.total_score += score;
+            console.log(`Added score: ${score}, Total Score: ${this.total_score}`)
+        }
+        // Clicking the video
+        this.click_x = 0;
+        this.click_y = 0;
+        this.click_time = 0;
+        this.click_history = [];
+        this.clicks = [];
+        this.too_many_clicks = false;
+        this.current_C++;
+        this.load_video_clip();
         },
         terminate_daily_quiz() {
             // End the quiz early
-            this.current_view = 'instructions';
+            this.resetStopwatch();
             this.current_part = 'Road sign section';
             this.next_part = 'Multiple choice section';
-            this.questions = [];
-            this.currentQuestion = 0;
-            this.selectedAnswer = null;
-            this.isCorrect = false;
-            this.explanation = { showExplanation: false, wasClicked: false };
-            this.answer_time = { elapsedTime: 0, stopwatch: null, stopwatchRunning: false };
-            this.clips = [];
-            this.selected_clip = null;
-            this.clip_url = '';
-            this.feedback = [];
-            this.total_score = 0;
-            this.percentage = null;
-            this.final_score = null;
-            this.exp_gain = null;
-            this.quiz_message = "";
-            this.image = "";
-            this.updateFinished = false;
-            this.clips = [];
-            this.selected_clip = null;
-            this.clip_url = '';
-            this.click_x = 0;
-            this.click_y = 0;
-            this.click_time = 0;
-            this.click_history = [];
-            this.clicks = [];
-            this.too_many_clicks = false;
+            this.r_questions = []; // Road sign questions
+            this.m_questions = []; // Multiple choice questions
+            this.questions = []; // Quiz questions by API
+            this.currentQuestion = 0; // Question pointer
+            this.selectedAnswer = null; // This is the selected answer
+            this.isCorrect = false; // boolean if the question is actually correct
+            this.explanation = { showExplanation: false, wasClicked: false }; // Explanation of the question, flag if it got clicked on
+            this.answer_time = { elapsedTime: 0, stopwatch: null, stopwatchRunning: false },
+            this.clips = [], // {name, x, y, time}
+            this.selected_clip = null,
+            this.current_C = 0, // Clip pointer
+            this.clip_url = '',
+            this.click_x = 0,
+            this.click_y = 0,
+            this.click_time = 0,
+            this.click_history = [],
+            this.clicks = [],
+            this.too_many_clicks = false,
+            this.feedback = [],
+            this.update_scores = {"Driving Off": [], "Urban Driving": [],"Rural Driving": [],"Bigger Roads": [],"Motorways": [],"Tricky Conditions": [],"Breakdowns": [],},
+            this.total_score = 0,
+            this.percentage = null,
+            this.final_score = null,
+            this.exp_gain = null,
+            this.quiz_message = "",
+            this.image = "",
 
             this.toggle_view('instructions');
-        },
-        end_quiz() {
-            // End the daily quiz
-
         },
         add_score() {
             let score = 0;
             if (this.isCorrect) { // If answered correct, calculate score based on how long was spent on that question.
-                score = parseFloat(((60-this.answer_time.elapsedTime) / 60).toPrecision(2))
+                score = Math.ceil(((90 - this.answer_time.elapsedTime) / 90) * 10) / 10;
             }
             if (this.explanation.wasClicked) { // If the explanation was toggled, cap the score to 0.1.
                 score = 0.1;
@@ -492,6 +527,8 @@ export default {
                 score = 0;
                 this.add_feedback();
             }
+            const topic = this.questions[this.currentQuestion].topic;
+            this.add_update_score(topic, score);
             this.total_score += score;
             console.log(`Time taken: ${this.answer_time.elapsedTime}, Added score: ${score}, Total Score: ${this.total_score}`)
         },
@@ -501,6 +538,30 @@ export default {
             let q_obj = this.questions[this.currentQuestion]
             console.log(JSON.stringify({question: q_obj.question, selected: this.selectedAnswer, correct: q_obj.correct_answer, image: question_image}))
             this.feedback.push({question: q_obj.question, selected: this.selectedAnswer, correct: q_obj.correct_answer, image: question_image})
+        },
+        add_update_score(topic, score) {
+            // Adding score to database
+            console.log(`Adding score for ${topic}: ${score}`);
+            this.update_scores[topic].push(score);
+        },
+        async db_update_scores() {
+            // Calculate averages
+            for (let topic in this.update_scores) {
+                const scores = this.update_scores[topic];
+                const average = scores.length > 0
+                    ? scores.reduce((sum, val) => sum + val, 0) / scores.length
+                    : 0; // default to 0 if no scores
+
+                this.update_scores[topic] = Number(average.toPrecision(2)); // 1 sig fig
+            }
+            console.log(this.update_scores);
+            // Update database
+            const user_stats = this.$store.state.currentStats;
+            const input = { 'id': user_stats.id, 'updates': this.update_scores }
+            const update = await this.azure_function("PUT", "/user/update/scores", input)
+            if (update) {
+                console.log('Updated scores!');
+            }
         },
         add_image() {
             // Library of images
@@ -532,6 +593,68 @@ export default {
                 path: `/feedback`,
                 query: { input: this.feedback }
             })
+        },
+        get_stats() {
+            this.percentage = parseFloat((this.total_score / 23) * 100).toFixed(1);
+            this.final_score = parseFloat((this.total_score / 23)).toPrecision(2);
+            this.exp_gain = Math.round(((this.total_score / 23) * 500) / 100) * 100; 
+            console.log(this.exp_gain)
+            
+            if (this.final_score >= 0.9 && this.final_score < 1.0) {
+                this.quiz_message = "Amazing job! You crushed it! Your hard work really paid off!"
+            }
+            if (this.final_score >= 0.8 && this.final_score < 0.9) {
+                this.quiz_message = "Great work! You're so close to perfection—keep it up!"
+            }
+            if (this.final_score >= 0.7 && this.final_score < 0.8) {
+                this.quiz_message = "Nice effort! You've got a solid understanding. A little more practice, and you'll master it!"
+            }
+            if (this.final_score >= 0.6 && this.final_score < 0.7) {
+                this.quiz_message = "You're doing well! Keep going, and you'll improve even more!"
+            }
+            if (this.final_score >= 0.5 && this.final_score < 0.6) {
+                this.quiz_message = "Good attempt! Every step is progress—keep practicing, and you'll get there!"
+            }
+            if (this.final_score >= 0.4 && this.final_score < 0.5) {
+                this.quiz_message = "You're learning, and that's what matters! Keep challenging yourself!"
+            }
+            if (this.final_score >= 0.3 && this.final_score < 0.4) {
+                this.quiz_message = "Not bad! Mistakes help us grow—review what you missed and try again!"
+            }
+            if (this.final_score < 0.3) {
+                this.quiz_message = "Don't give up! Every attempt makes you better. Keep pushing forward!"
+            }
+        },
+        async update_user_exp() {
+            // Add changes to database
+            const user_stats = this.$store.state.currentStats;
+            const prev_level = this.currentRank.level;
+
+            // Increment level if exp exceeds threshold:
+            if (this.currentRank.exp + this.exp_gain >= this.currentRank.exp_threshold) {
+                // Reset exp progress but add leftover exp and update exp threshold
+                this.currentRank.exp = (this.currentRank.exp + this.exp_gain) - this.currentRank.exp_threshold;
+                this.currentRank.level += 1;
+                this.currentRank.exp_threshold += 500;
+            } else {
+                this.currentRank.exp += this.exp_gain;
+            }
+            const input = { id: user_stats.id, updates: { "rank": this.currentRank } };
+            console.log(input);
+            const update_response = await this.azure_function("PUT", "/user/update/info", input)
+            // Show message incase the API response fails, otherwise update state.
+            if (update_response.result) {
+                // Update rank in UI too.
+                this.$store.commit("setCurrentRank", this.currentRank);
+                this.currentRank = this.$store.state.currentRank;
+                if (prev_level < this.currentRank.level) {
+                    this.level_up_message();
+                } else {
+                    this.exp_message();
+                }
+            } else {
+                this.message.error = update_response.msg || "Score update Failed."
+            }
         },
         async add_achievement(name) {
             // Add achievement to user's achievements and notify on the UI.
@@ -589,184 +712,53 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-img {
-  max-width: 300px; /* Limits the width to 200px */
-  max-height: 200px; /* Limits the height to 100px */
-  width: auto; /* Maintain aspect ratio */
-  height: auto; /* Maintain aspect ratio */
-}
-
-.right-side img {
-    max-width: 100%;
-    width: auto; /* Maintain aspect ratio */
-    height: auto; /* Maintain aspect ratio */
-}
-
-.instruction-box {
-  background-color: #f9f9f9;
-  border-left: 5px solid #007bff;
-  padding: 10px;
-  margin: 10px 0;
-  font-size: 14px;
-  color: #333;
-  border-radius: 5px;
-}
-
-select {
-  padding: 5px;
-  font-size: 16px;
-}
-
-.questionnaire {
-  text-align: center;
-  max-width: 500px;
-  margin: auto;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  background: #f9f9f9;
-}
-
-h2 {
-  margin-bottom: 15px;
-}
-
-.options button {
-  display: block;
+.graph-box { 
+  color: #ffffff;
+  background-color: black;
+  border: 2px solid #f3af59;
   width: 100%;
-  padding: 10px;
-  margin: 5px 0;
-  border: none;
-  background-color: #969faa;
-  color: white;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-.options button.selected {
-  background-color: #595f66;
-}
-
-/* Flash green for correct answers */
-.options button.correct {
-    background-color: #5bd45f;
-}
-
-/* Flash red for incorrect answers */
-.options button.incorrect {
-    background-color: #e34242;
-}
-
-.next-button {
-  margin-top: 15px;
-  padding: 10px 20px;
-  border: none;
-  background-color: green;
-  color: white;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-.next-button:hover {
-  background-color: darkgreen;
-}
-
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+  max-width: 1400px;
+  height: auto;
+  padding: 30px;  /* More internal padding */
+  box-sizing: border-box;
   display: flex;
+  flex-direction: column;
   justify-content: center;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.score-row {
+  display: flex;
   align-items: center;
-  z-index: 9999;
+  gap: 10px;
 }
 
-/* Centered box but slightly above the middle */
-.overlay-content {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  text-align: center;
-  width: 80%;
-  max-width: 400px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+.label {
+  width: 150px;
+  font-size: 14px;
+  color: #f3af59;
 }
 
-/* Open button */
-.open-overlay-btn {
-  padding: 10px 15px;
-  background: blue;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
+.bar-container {
+  flex: 1;
+  height: 6px; /* thinner */
+  background-color: black;
+  border-radius: 0; /* squared edges */
+  overflow: hidden;
 }
 
-/* Close button */
-.close-overlay-btn {
-  margin-top: 10px;
-  padding: 10px;
-  background: red;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-.progress-container {
-  width: 100%;
-  height: 20px;
-  background-color: #f3f3f3;
-  border-radius: 2px;
-  margin-bottom: 2px;
-}
-
-.progress-bar {
+.bar {
   height: 100%;
-  background-color: #4caf50;
-  border-radius: 10px;
+  width: 0%; /* start at 0 for animation */
+  transition: width 0.6s ease-in-out;
+  border-radius: 0; /* squared edges */
 }
 
-.video-container {
-  position: relative;
-  display: inline-block;
+.value {
+  width: 40px;
+  text-align: right;
+  font-size: 12px;
+  color: #f3af59;
 }
-
-/* Animated Click Circle */
-.click-circle {
-  position: absolute;
-  width: 30px;
-  height: 30px;
-  background-color: rgba(237, 18, 18, 0.8);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  animation: clickEffect 0.6s ease-out forwards;
-}
-
-@keyframes clickEffect {
-  0% {
-    transform: scale(0);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(2);
-    opacity: 0;
-  }
-}
-
-.horizontal-container {
-    display: flex; /* Display items in a row */
-    gap: 10px; /* Optional: Adds space between the items */
-}
-
-.item {
-    width: 20px; /* Set width */
-    height: 20px; /* Set height */
-    padding: 10px;
-    border-radius: 4px;
-}
-
 </style>

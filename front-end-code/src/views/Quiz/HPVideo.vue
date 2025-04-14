@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <div v-if="state.current_view === 'selection'">
-            <h1 class="title">{{ state.current_topic }}</h1>
+            <h1>{{ state.current_topic }}</h1>
             <div class="buttons-grid">
                 <div v-for="clip in clips" :key="clip.name">
                     <button @click="load_video_clip(clip)">{{ clip.name }}</button>
@@ -44,7 +44,6 @@
                     <button @click="terminate_page()" class="game-button">Back</button>  
                 </div>
             </div>
-
         </div>
         <div v-if="state.current_view === 'score'" class="questionnaire">
             <div class="quiz-result">
@@ -104,7 +103,7 @@ export default {
             toastr.info(" ", `Gained ${this.exp_gain} exp!`, {
                 closeButton: true,
                 progressBar: true,
-                positionClass: "toast-top-right",
+                positionClass: "toast-bottom-center",
                 timeOut: 5000,
                 showMethod: "fadeIn",
                 hideMethod: "fadeOut",
@@ -115,7 +114,7 @@ export default {
             toastr.info(" ", "LEVELED UP!", {
                 closeButton: true,
                 progressBar: true,
-                positionClass: "toast-top-right",
+                positionClass: "toast-bottom-center",
                 timeOut: 5000,
                 showMethod: "fadeIn",
                 hideMethod: "fadeOut",
@@ -340,10 +339,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-h1 {
-    color: white;
-}
-
 .buttons-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr); /* Exactly 3 buttons per row */
@@ -363,63 +358,5 @@ h1 {
 .buttons-grid button:hover {
     color: #dd9f4e;
     background-color: #343333;
-}
-
-.video-container {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0;
-    margin: 0;
-    line-height: 0;
-}
-
-video {
-  display: block; /* Prevents inline spacing */
-  border: none;
-  margin: 0;
-  padding: 0;
-}
-
-/* Animated Click Circle */
-.click-circle {
-  position: absolute;
-  width: 30px;
-  height: 30px;
-  background-color: rgba(237, 18, 18, 0.8);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  animation: clickEffect 0.6s ease-out forwards;
-}
-
-@keyframes clickEffect {
-  0% {
-    transform: scale(0);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(2);
-    opacity: 0;
-  }
-}
-
-.flags-container {
-    font-size: medium;
-    display: flex; /* Display items in a row */
-    gap: 40px; /* Optional: Adds space between the items */
-}
-
-.video-footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    background-color: rgba(20, 20, 20, 0.9);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 40px;
-    box-sizing: border-box;
-    border-top: 2px solid #333;
 }
 </style>

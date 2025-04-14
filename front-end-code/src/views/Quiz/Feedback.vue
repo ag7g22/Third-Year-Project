@@ -2,8 +2,8 @@
     <div class="container">
         <div class="questionnaire">
             <!-- LOADING SCREEN FOR FEEDBACK -->
-            <div v-if="state.current_view === 'loading'">
-                <h1>LOADING FEEDBACK ...</h1>
+            <div v-if="state.current_view === 'loading'" class="quiz-result">
+                <h1>Loading ...</h1>
             </div>
             <!-- ACTUAL FEEDBACK PAGE -->
             <div v-if="state.current_view === 'feedback'">

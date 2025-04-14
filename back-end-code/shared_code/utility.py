@@ -217,8 +217,9 @@ class utility():
         # Get the questions by category OR get the sign questions:
         query = 'SELECT * FROM questions WHERE questions.topic = "{}"'.format(topic)
         
-        if topic == "sign_question":
-            query = 'SELECT * FROM questions WHERE questions.sign_question = true'
+        if topic in ["sign_question", "no_sign_question"]:
+            sign_value = topic == "sign_question"
+            query = f'SELECT * FROM questions WHERE questions.sign_question = {str(sign_value).lower()}'
 
         query_result = self.query_items(proxy=proxy,query=query)
         return self.select_random(query_result, No_of_Qs)

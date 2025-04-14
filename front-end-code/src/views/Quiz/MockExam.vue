@@ -337,7 +337,6 @@ export default {
             this.current_C++;
         },
         async finish_video_clip() {
-
             // Check if the user clicked on the appropriate (x,y) range:
             if ((this.click_x <= this.selected_clip.x + 50 && this.click_x >= this.selected_clip.x - 50) && 
                 (this.click_y <= this.selected_clip.y + 50 && this.click_y >= this.selected_clip.y - 50)) {
