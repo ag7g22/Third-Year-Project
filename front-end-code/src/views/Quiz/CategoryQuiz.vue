@@ -105,7 +105,12 @@
                     <h1> Score: {{ percentage }}% </h1>
                     <h2> {{ quiz_message }} </h2>
                     <div class="game-buttons">
-                       <button @click="init_feedback()" class="game-button">Feedback</button> 
+                        <div v-if="feedback.length === 0">
+                            <button class="game-button" @click="terminate_quiz()">Back</button>
+                        </div>
+                        <div v-else>
+                            <button @click="init_feedback()" class="game-button">Feedback</button> 
+                        </div>
                     </div>
                 </div>
             </div>
@@ -275,7 +280,6 @@ export default {
                 await this.get_stats();
                 // Update score if quiz completed:
                 console.log("FINAL SCORE:", this.final_score);
-                await this.update_user_topic_score();
                 await this.update_user_exp();
                 this.updateFinished = true;
             }
@@ -292,7 +296,7 @@ export default {
         add_score() {
             let score = 0;
             if (this.isCorrect) { // If answered correct, calculate score based on how long was spent on that question.
-                score = parseFloat(((60-this.answer_time.elapsedTime) / 60).toPrecision(2))
+                score = Math.ceil(((90 - this.answer_time.elapsedTime) / 90) * 10) / 10;
             }
             if (this.explanation.wasClicked) { // If the explanation was toggled, cap the score to 0.1.
                 score = 0.1;
@@ -335,7 +339,7 @@ export default {
             this.answer_time.elapsedTime = 0; // Reset back to 0
         },
         get_stats() {
-            this.percentage = parseFloat((this.total_score / this.num_questions.selected) * 100).toPrecision(2);
+            this.percentage = parseFloat((this.total_score / this.num_questions.selected) * 100).toFixed(1);
             this.final_score = parseFloat((this.total_score / this.num_questions.selected)).toPrecision(2);
             this.exp_gain = Math.round(((this.total_score / this.num_questions.selected) * 500) / 100) * 100; 
             console.log(this.exp_gain)
@@ -365,30 +369,6 @@ export default {
                 this.quiz_message = "Don't give up! Every attempt makes you better. Keep pushing forward!"
             }
         },
-        async update_user_topic_score() {
-            // Add changes to database
-            const user_stats = this.$store.state.currentStats;
-            const topicMap = {
-                'Driving Off': 'Driving Off',
-                'Urban Driving': 'Urban Driving',
-                'Rural Driving': 'Rural Driving',
-                'Bigger Roads': 'Bigger Roads',
-                'Motorways': 'Motorways',
-                'Tricky Conditions': 'Tricky Conditions',
-                'Breakdowns': 'Breakdowns'
-            };
-
-            const input = { id: user_stats.id, updates: { [topicMap[this.state.current_topic]]: parseFloat(this.final_score)} };
-            console.log(input)
-
-            const update_response = await this.azure_function("PUT", "/user/update/scores", input)
-            // Show message incase the API response fails, otherwise update state.
-            if (update_response.result) {
-                this.message.success = 'Score update Successful!'
-            } else {
-                this.message.error = update_response.msg || "Score update Failed."
-            }
-        },
         async update_user_exp() {
             // Add changes to database
             const user_stats = this.$store.state.currentStats;
@@ -403,10 +383,8 @@ export default {
             } else {
                 this.currentRank.exp += this.exp_gain;
             }
-
             const input = { id: user_stats.id, updates: { "rank": this.currentRank } };
             console.log(input);
-
             const update_response = await this.azure_function("PUT", "/user/update/info", input)
             // Show message incase the API response fails, otherwise update state.
             if (update_response.result) {
@@ -424,6 +402,7 @@ export default {
         },
         terminate_quiz() {
             // Reset everything
+            this.resetStopwatch();
             this.state = { current_view: 'categories', current_topic: '', current_description: '' } // State of quiz page
             this.num_questions = { options: [5, 10, 15, 20], selected: 10 } // Dropdown menu
             this.questions = [] // Quiz questions by API
