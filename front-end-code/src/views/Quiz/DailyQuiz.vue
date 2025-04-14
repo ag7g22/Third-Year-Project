@@ -13,6 +13,14 @@
                 <p>2. 🧠 Core Quiz: 10 Multiple Choice Questions</p>
                 <p>3. 🎥 Simulation: 3 Hazard Perception clips</p>
                 <p>Good luck!</p>
+                <h3>How the daily score works:</h3>
+                <div class="feature-list">
+                    <p>
+                        Each time you answer a question correctly, you'll earn points based on both your speed and accuracy. 
+                        Keep the streak going with consecutive correct answers, and you'll unlock a multiplier to boost your score even higher! 
+                        Rack up those points and climb the leaderboard! (You get one shot a day to score on the leaderboard, but don't worry—you can still take the daily quiz for fun and practice! :p) 👑
+                    </p>
+                </div>
             </div>
         </div>
 
@@ -130,7 +138,7 @@
             <div class="questionnaire">
                 <div class="quiz-result">
                     <h2>You've completed the daily quiz! 💡</h2>
-                    <h1> Score: {{ percentage }}% </h1>
+                    <h1> Accuracy: {{ percentage }}% | Daily score: {{ daily_score }} </h1>
                     <div class="graph-box">
                         <div class="score-row" v-for="(score, topic) in update_scores" :key="topic">
                             <div class="label">{{ topic }}</div>
@@ -157,6 +165,9 @@ const images = require.context('@/assets/questions/.', false, /\.(jpg|jpeg|png)$
 export default {
     // Page member variables and methods:
     name: "dailyquiz",
+    mounted: function() {
+        this.daily_quiz_reminder();
+    },
     data() {
         return {
             current_view: 'instructions', // State of quiz page
@@ -221,16 +232,16 @@ export default {
             exp_gain: null,
             quiz_message: "",
 
+            // Daily score is calculated with a multipler.
+            daily_score: 0,
+            multipler: 1,
+
             // Images
             images: images.keys().map(image => images(image)),
             image: "",
 
-            // Flag for updating database scores.
-            updateFinished: false,
-
             logged_in_user: this.$store.state.currentUser,
             currentRank: this.$store.state.currentRank,
-            message: { error: "", success: "" },
         };
     },
     methods: {
@@ -255,6 +266,17 @@ export default {
                 showMethod: "fadeIn",
                 hideMethod: "fadeOut",
                 preventDuplicates: true
+            });
+        },
+        daily_score_message(score) {
+            toastr.info(`x ${this.multipler}`, `+ ${score} points!`, {
+                closeButton: true,
+                progressBar: true,
+                preventDuplicates: false,
+                positionClass: "toast-bottom-left",
+                timeOut: 1000,
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut",
             });
         },
         toggle_view(view) {
@@ -368,13 +390,57 @@ export default {
                 this.toggle_view('hazard_perception');
 
             } else if (section === "Results") {
-                // Move to results:
+                // Calculate the scores for upload.
                 await this.get_stats();
                 console.log("FINAL SCORE:", this.final_score);
-                await this.update_user_exp();
-                await this.db_update_scores();
+
+                // Update user stats:
+                const user_stats = this.$store.state.currentStats;
+                await this.update_streak(user_stats);
+                await this.update_daily_score(user_stats);
+                await this.update_training_completion_date(user_stats);
+                await this.update_user_exp(user_stats);
+                await this.db_update_scores(user_stats);
+
                 this.toggle_view('score');
             }
+        },
+        async update_streak(user_stats) {
+            if (user_stats.training_completion_date === 'n/a') {
+                user_stats.streak+=1;
+                console.log('Started streak.');
+                return;
+            }
+            // Get user's completion date, today's date and yesterday's date
+            const tcd = new Date(user_stats.training_completion_date);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+
+            if (tcd.getFullYear() === yesterday.getFullYear() && tcd.getMonth() === yesterday.getMonth() && tcd.getDate() === yesterday.getDate()) {
+                // If a day hasn't past yet, increase the streak.
+                user_stats.streak+=1;
+                console.log('Incremented streak.');
+            } else if (tcd.getFullYear() === today.getFullYear() && tcd.getMonth() === today.getMonth() && tcd.getDate() === today.getDate()) {
+                // If they did their daily quiz, don't increase the streak.
+                console.log('Already did daily quiz!');
+            } else {
+                // If they missed the daily quiz, set to zero.
+                user_stats.streak = 0;
+                console.log('Restarted streak.');
+            }
+        },
+        async update_daily_score(user_stats) {
+            user_stats.daily_training_score = this.daily_score;
+        },
+        async update_training_completion_date(user_stats) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0'); // months are 0-indexed
+            const day = String(today.getDate()).padStart(2, '0');
+            user_stats.training_completion_date = `${year}-${month}-${day}`;
         },
         toggleExplanation() {
             // Toggle flag id the explanation was toggled at least once.
@@ -457,19 +523,30 @@ export default {
             let score = 0
             if (this.click_time >= this.selected_clip.time && this.click_time < this.selected_clip.time + interval) {
                 score = 1;
+                this.multipler+=1;
             } else if (this.click_time >= this.selected_clip.time + interval && this.click_time < this.selected_clip.time + interval*2) {
                 score = 0.8;
+                this.multipler = 1;
             } else if (this.click_time >= this.selected_clip.time + interval*2 && this.click_time < this.selected_clip.time + interval*3) {
                 score = 0.6;
+                this.multipler = 1;
             } else if (this.click_time >= this.selected_clip.time + interval*3 && this.click_time < this.selected_clip.time + interval*4) {
                 score = 0.4;
+                this.multipler = 1;
             } else if (this.click_time >= this.selected_clip.time + interval*4 && this.click_time < this.selected_clip.time + interval*5) {
                 score = 0.2;
+                this.multipler = 1;
+            } else {
+                this.multipler = 1;
             }
             const topic = this.selected_clip.name.replace(/\s\d+$/, '');
             this.add_update_score(topic, score);
             this.total_score += score;
             console.log(`Added score: ${score}, Total Score: ${this.total_score}`)
+
+            // Add mulitpled score to daily score.
+            this.daily_score += score * this.multipler * 100;
+            this.daily_score_message(score * this.multipler * 100);
         }
         // Clicking the video
         this.click_x = 0;
@@ -512,6 +589,9 @@ export default {
             this.exp_gain = null,
             this.quiz_message = "",
             this.image = "",
+            this.daily_score = 0,
+            this.multipler = 1,
+
 
             this.toggle_view('instructions');
         },
@@ -519,18 +599,26 @@ export default {
             let score = 0;
             if (this.isCorrect) { // If answered correct, calculate score based on how long was spent on that question.
                 score = Math.ceil(((90 - this.answer_time.elapsedTime) / 90) * 10) / 10;
+                this.multipler+=1;
             }
             if (this.explanation.wasClicked) { // If the explanation was toggled, cap the score to 0.1.
                 score = 0.1;
+                this.multipler = 1;
             } 
             if (!this.isCorrect) { // If not answered correct, add nothing to the score.
                 score = 0;
+                this.multipler = 1;
                 this.add_feedback();
             }
+            // Add to category score
             const topic = this.questions[this.currentQuestion].topic;
             this.add_update_score(topic, score);
             this.total_score += score;
             console.log(`Time taken: ${this.answer_time.elapsedTime}, Added score: ${score}, Total Score: ${this.total_score}`)
+
+            // Add mulitpled score to daily score.
+            this.daily_score += score * this.multipler * 100;
+            this.daily_score_message(score * this.multipler * 100);
         },
         add_feedback() {
             // Add to feedback list to send to API later
@@ -544,7 +632,7 @@ export default {
             console.log(`Adding score for ${topic}: ${score}`);
             this.update_scores[topic].push(score);
         },
-        async db_update_scores() {
+        async db_update_scores(user_stats) {
             // Calculate averages
             for (let topic in this.update_scores) {
                 const scores = this.update_scores[topic];
@@ -556,7 +644,6 @@ export default {
             }
             console.log(this.update_scores);
             // Update database
-            const user_stats = this.$store.state.currentStats;
             const input = { 'id': user_stats.id, 'updates': this.update_scores }
             const update = await this.azure_function("PUT", "/user/update/scores", input)
             if (update) {
@@ -599,35 +686,9 @@ export default {
             this.final_score = parseFloat((this.total_score / 23)).toPrecision(2);
             this.exp_gain = Math.round(((this.total_score / 23) * 500) / 100) * 100; 
             console.log(this.exp_gain)
-            
-            if (this.final_score >= 0.9 && this.final_score < 1.0) {
-                this.quiz_message = "Amazing job! You crushed it! Your hard work really paid off!"
-            }
-            if (this.final_score >= 0.8 && this.final_score < 0.9) {
-                this.quiz_message = "Great work! You're so close to perfection—keep it up!"
-            }
-            if (this.final_score >= 0.7 && this.final_score < 0.8) {
-                this.quiz_message = "Nice effort! You've got a solid understanding. A little more practice, and you'll master it!"
-            }
-            if (this.final_score >= 0.6 && this.final_score < 0.7) {
-                this.quiz_message = "You're doing well! Keep going, and you'll improve even more!"
-            }
-            if (this.final_score >= 0.5 && this.final_score < 0.6) {
-                this.quiz_message = "Good attempt! Every step is progress—keep practicing, and you'll get there!"
-            }
-            if (this.final_score >= 0.4 && this.final_score < 0.5) {
-                this.quiz_message = "You're learning, and that's what matters! Keep challenging yourself!"
-            }
-            if (this.final_score >= 0.3 && this.final_score < 0.4) {
-                this.quiz_message = "Not bad! Mistakes help us grow—review what you missed and try again!"
-            }
-            if (this.final_score < 0.3) {
-                this.quiz_message = "Don't give up! Every attempt makes you better. Keep pushing forward!"
-            }
         },
-        async update_user_exp() {
+        async update_user_exp(user_stats) {
             // Add changes to database
-            const user_stats = this.$store.state.currentStats;
             const prev_level = this.currentRank.level;
 
             // Increment level if exp exceeds threshold:
@@ -639,13 +700,28 @@ export default {
             } else {
                 this.currentRank.exp += this.exp_gain;
             }
-            const input = { id: user_stats.id, updates: { "rank": this.currentRank } };
+            // Only update rank if they already did the daily quiz!
+            let input = { id: user_stats.id, updates: { "rank": this.currentRank } };
+            const tcd = new Date(user_stats.training_completion_date);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            if ((tcd.getFullYear() === today.getFullYear() && tcd.getMonth() === today.getMonth() && tcd.getDate() === today.getDate())) {
+                // Only update exp
+                input = { id: user_stats.id, updates: { 
+                    "rank": this.currentRank,
+                    "streak": user_stats.streak,
+                    "daily_training_score": user_stats.daily_training_score,
+                    "training_completion_date": user_stats.training_completion_date
+                } };
+            }
             console.log(input);
-            const update_response = await this.azure_function("PUT", "/user/update/info", input)
+
+            const update_response = await this.azure_function("PUT", "/user/update/info", input);
             // Show message incase the API response fails, otherwise update state.
             if (update_response.result) {
                 // Update rank in UI too.
                 this.$store.commit("setCurrentRank", this.currentRank);
+                this.$store.commit("setCurrentStats", user_stats);
                 this.currentRank = this.$store.state.currentRank;
                 if (prev_level < this.currentRank.level) {
                     this.level_up_message();
