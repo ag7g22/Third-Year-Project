@@ -26,6 +26,13 @@
 
         <div class="right-side">
             <img src="@/assets/titles/DailyQuiz.png" alt="Logo" class="task-logo"/>
+            <div v-if="completed_daily_quiz">
+                <h3>Completed today's quiz: ✔️</h3>
+            </div>
+            <div v-else>
+                <h3>Completed today's quiz: ❌</h3>
+            </div>
+            
             <div class="game-buttons">
                 <button @click="next_page('dashboard')" class="game-button">Back</button>
                 <button @click="init_daily_quiz()" class="game-button">Start</button>
@@ -166,10 +173,19 @@ export default {
     // Page member variables and methods:
     name: "dailyquiz",
     mounted: function() {
-        this.daily_quiz_reminder();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const date = new Date(this.$store.state.currentStats.training_completion_date);
+        if ((date.getFullYear() !== today.getFullYear() && date.getMonth() !== today.getMonth() && date.getDate() !== today.getDate()) ||
+            (this.$store.state.currentStats.training_completion_date === 'n/a')) {
+            this.completed_daily_quiz = false;
+        } else {
+            this.completed_daily_quiz = true;
+        }
     },
     data() {
         return {
+            completed_daily_quiz: false,
             current_view: 'instructions', // State of quiz page
             current_part: 'Road sign section',
             next_part: 'Multiple choice section',
@@ -705,14 +721,17 @@ export default {
             const tcd = new Date(user_stats.training_completion_date);
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            if ((tcd.getFullYear() === today.getFullYear() && tcd.getMonth() === today.getMonth() && tcd.getDate() === today.getDate())) {
-                // Only update exp
+            if (!this.completed_daily_quiz) {// Only update exp
                 input = { id: user_stats.id, updates: { 
                     "rank": this.currentRank,
                     "streak": user_stats.streak,
                     "daily_training_score": user_stats.daily_training_score,
                     "training_completion_date": user_stats.training_completion_date
                 } };
+                this.completed_daily_quiz = true;
+            } else {
+                // Don't update the stats.
+                user_stats = this.$store.state.currentStats;
             }
             console.log(input);
 
