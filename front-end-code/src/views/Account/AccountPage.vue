@@ -34,33 +34,65 @@
 
     <!-- Main Content -->
     <div class="main-content">
-      <h1 class="title">ACCOUNT | {{ username }}</h1>
-  
-      <!-- User Stats -->
-      <div>
-        <div>
-          <p>ID: {{ stats.id }}</p>
-          <p>LEVEL {{ rank.level }}</p>
-          <p>EXP: {{ rank.exp }} / {{ rank.exp_threshold }}</p>
-          <p>STREAK: {{ stats.streak }}</p>
-          <p>Daily Score: {{ stats.daily_training_score }}</p>
-          <p>Daily Quiz Completed: {{ stats.training_completion_date }}</p>
+
+      <div class="list-container">
+      <!-- Top: Username and EXP Bar -->
+      <div class="profile-header">
+        <h2 class="username">🔥{{ stats.streak }} {{ username }}</h2>
+        <p class="level">LVL. {{ rank.level }}</p>
+      </div>
+
+      <div class="exp-bar-container">
+        <div class="exp-bar-fill" :style="{ width: ((rank.exp / rank.exp_threshold) * 100) + '%' }"></div>
+      </div>
+      <p class="exp-label">EXP: {{ rank.exp }} / {{ rank.exp_threshold }}</p>
+
+        <div class="profile-content">
+          <!-- Left: User Stats -->
+          <div class="user-stats">
+            <p>ID: {{ stats.id }}</p>
+            <p>Daily Score: {{ stats.daily_training_score }}</p>
+            <p>Daily Completed: {{ stats.training_completion_date }}</p>
+          </div>
+
+          <!-- Right: Achievements -->
+          <div class="achievements-box" v-if="user_achievements.length">
+            <h3>Achievements</h3>
+            <ul>
+              <li v-for="achievement in user_achievements" :key="achievement.name">
+                {{ achievement.name }} - {{ achievement.description }}
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Bottom: Graph Box -->
+        <div class="graph-box">
+          <div class="score-row" v-for="(score, topic) in progress_scores" :key="topic">
+            <div class="label">{{ topic }}</div>
+            <div class="bar-container">
+              <div class="bar"
+                  :style="{ width: (score * 100) + '%', backgroundColor: colorMap[topic] }">
+              </div>
+            </div>
+            <div class="value">{{ (score * 100).toFixed(0) }}%</div>
+          </div>
         </div>
       </div>
-  
-      <!-- Achievements Box -->
-      <div v-if="user_achievements.length" class="achievements-box">
-        <h3>Achievements</h3>
-        <ul>
-          <li v-for="achievement in user_achievements" :key="achievement.name">
-            {{ achievement.name }} - {{ achievement.description }}
-          </li>
-        </ul>
-      </div>
+
+      <!-- Buttons -->
       <div v-if="view !== 'logged_user'">
-        <button @click="handleBack">Return</button> 
+        <div class="game-buttons">
+          <button class="game-button" @click="handleBack">Return</button> 
+        </div>
+      </div>
+      <div v-else>
+        <div class="game-buttons">
+          <button class="game-button">Toggle graph</button> 
+        </div>
       </div>
     </div>
+
   </div>
 </template>
 
@@ -76,17 +108,27 @@ export default {
       rank: this.$route.query.rank || this.$store.state.currentRank,
       stats: this.$route.query.stats || this.$store.state.currentStats,
       achievements: this.$route.query.achievements || this.$store.state.currentAchievements,
+      recent_category_scores: this.$store.state.recent_category_scores || this.$store.state.currentRecentCatScores,
       current_list: this.$route.query.current_list || "friends",
       search: this.$route.query.search || { query: "", users: [] },
       achievementsWithDescriptions: [
-        { name: 'Hello World!', description: 'Unlocked after logging in for the first time.' },
-        { name: 'Start of a Journey', description: 'Done a daily quiz for the first time.' },
+        { name: 'Start of a Journey', description: 'Unlocked after logging in for the first time.' },
+        { name: 'Gearin up', description: 'Done a daily quiz for the first time.' },
         { name: 'Levelin up', description: 'Reached level 10 for the first time.' },
         { name: 'Gear 2nd', description: 'Reached a streak of 10' },
         { name: 'Gear 3rd', description: 'Reached a streak of 50' },
         { name: 'Gear 4th', description: 'Reached a streak of 100' },
         { name: 'Gear 5th', description: 'Reached a streak of 500' },
       ],
+      colorMap: {
+                "Driving Off": "#4caf50",         // green
+                "Urban Driving": "#2196f3",       // blue
+                "Rural Driving": "#9c27b0",       // purple
+                "Bigger Roads": "#ff9800",        // orange
+                "Motorways": "#f44336",           // red
+                "Tricky Conditions": "#ffc107",   // amber
+                "Breakdowns": "#795548",          // brown
+      },
       message: { error: "", success: "" }
     };
   },
@@ -96,6 +138,16 @@ export default {
         const match = this.achievementsWithDescriptions.find(a => a.name === name);
         return match || { name, description: 'No description available' };
       });
+    },
+    progress_scores() {
+      const scores = {};
+      console.log(this.recent_category_scores);
+      for (const category in this.recent_category_scores) {
+        const values = this.recent_category_scores[category];
+        const sum = values.reduce((acc, val) => acc + val, 0);
+        scores[category] = parseFloat((sum / 10).toFixed(2));
+      }
+      return scores;
     }
   },
   methods: {
@@ -203,4 +255,62 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.username {
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
+  margin: 0;
+}
+
+.level {
+  font-size: 20px;
+  font-weight: bold;
+  color: #f3af59;
+  margin: 0;
+}
+
+.exp-bar-container {
+  width: 100%;
+  height: 10px;
+  background-color: #333;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+
+.exp-bar-fill {
+  height: 100%;
+  background-color: #079cb0;
+  transition: width 0.3s ease-in-out;
+}
+
+.profile-content {
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
+  margin-bottom: 30px;
+}
+
+.user-stats {
+  color: #f3af59;
+  flex: 1;
+  text-align: left;
+  justify-content: center;
+  gap: 20px;
+}
+
+.achievements-box {
+  flex: 2;
+}
+
+.achievements-box ul {
+  padding-left: 20px;
+}
 </style>

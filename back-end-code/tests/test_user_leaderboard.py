@@ -1,3 +1,4 @@
+from datetime import date
 import unittest
 import requests
 import json
@@ -46,6 +47,8 @@ class test_user_leaderboard(unittest.TestCase):
             self.users_proxy.delete_item(item=doc,partition_key=doc['id'])
 
     def test_leaderboard_gearup(self):
+        today_str = date.today().strftime('%Y-%m-%d')
+        print(today_str)
         response = requests.get(self.TEST_URL,params={"code": self.FUNCTION_KEY})
 
         # Get json response, check the response code for brevity

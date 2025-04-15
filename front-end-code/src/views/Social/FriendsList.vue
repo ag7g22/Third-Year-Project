@@ -176,6 +176,7 @@ export default {
               training_completion_date: info.training_completion_date
             },
             achievements: info.achievements,
+            recent_category_scores: info.recent_category_scores,
             current_list: this.current_list,
             search: this.search
           }

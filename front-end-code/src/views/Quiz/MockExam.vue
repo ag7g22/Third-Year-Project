@@ -550,19 +550,24 @@ export default {
             this.update_scores[topic].push(score);
         },
         async db_update_scores(user_stats) {
+            let cat_scores = this.$store.state.currentRecentCatScores;
             for (let topic in this.update_scores) {
                 const scores = this.update_scores[topic];
                 const average = scores.length > 0
                     ? (scores.reduce((sum, val) => sum + val, 0) / scores.length)
                     : 0;
-
                 this.averaged_scores[topic] = parseFloat(average.toFixed(2));
+                cat_scores[topic].push(parseFloat(average.toFixed(2)));
+                if (cat_scores.length > 10) {
+                    cat_scores[topic].shift();
+                }
             }
             // Update database
             const input = { 'id': user_stats.id, 'updates': this.averaged_scores }
             console.log(input);
             const update = await this.azure_function("PUT", "/user/update/scores", input)
             if (update) {
+                this.$store.commit("setCurrentRecentCatScores", cat_scores);
                 console.log('Updated scores!');
             }
         },

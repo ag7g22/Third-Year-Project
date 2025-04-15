@@ -446,7 +446,7 @@ video {
     width: 100%;
     max-width: 1400px;
     height: auto;
-    padding: 30px;  /* More internal padding */
+    padding: 20px;  /* More internal padding */
     box-sizing: border-box;
     display: flex;
     flex-direction: column;

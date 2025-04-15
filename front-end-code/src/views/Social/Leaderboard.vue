@@ -104,7 +104,7 @@ export default {
     async view_user(username) {
       const response = await this.azure_function("POST", "/user/get/info", { username });
       if (response?.result) {
-        const { id, streak, daily_training_score, training_completion_date, achievements, rank } = response.msg;
+        const { id, streak, daily_training_score, training_completion_date, achievements, rank, recent_category_scores } = response.msg;
 
         this.$router.push({
           path: "/account",
@@ -114,6 +114,7 @@ export default {
             rank,
             stats: { id, streak, daily_training_score, training_completion_date },
             achievements,
+            recent_category_scores,
           },
         });
       } else {

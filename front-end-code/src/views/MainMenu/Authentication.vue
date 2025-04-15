@@ -238,9 +238,10 @@ export default {
           training_completion_date: info.training_completion_date,
         });
         this.$store.commit("setCurrentAchievements", info.achievements);
+        this.$store.commit("setCurrentRecentCatScores", info.recent_category_scores);
 
         if (info.achievements.length === 0) {
-          this.add_achievement('Hello World!');
+          this.add_achievement('Start of a Journey');
         }
         
         this.daily_quiz_reminder();

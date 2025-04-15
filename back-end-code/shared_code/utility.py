@@ -1,5 +1,6 @@
 import random
-from datetime import date
+from datetime import datetime, timezone
+import pytz
 from typing import Dict, List, Any
 from azure.cosmos import ContainerProxy, CosmosDict
 from shared_code.user import UniqueUserError, InvalidUserError, InvalidPasswordError
@@ -232,7 +233,13 @@ class utility():
         - streak
         Excludes users who completed today's training.
         """
-        today_str = date.today().strftime('%Y-%m-%d')
+        # Get current UTC time
+        utc_now = datetime.now(pytz.utc)
+
+        # Convert to UK time
+        uk_time = utc_now.astimezone(pytz.timezone("Europe/London"))
+
+        today_str = uk_time.strftime('%Y-%m-%d')
 
         # Filter out users who haven't completed today
         filtered_users = [

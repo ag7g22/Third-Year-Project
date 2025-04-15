@@ -9,6 +9,7 @@ const state = {
     currentRank: { level: 'n/a', exp: 0, exp_threshold: 0 }, // Current rank of the logged user
     currentStats: { id: 'n/a', streak: 0, daily_training_score: 0, training_completion_date: 'n/a'}, // Current stats of the logged in user
     currentAchievements: [], // The achievements of the logged in user.
+    currentRecentCatScores: {"Driving Off": [], "Urban Driving": [], "Rural Driving": [], "Bigger Roads": [], "Motorways": [], "Tricky Conditions": [], "Breakdowns": []},
     currentSocialLists: {friends: [], friend_requests: []}, // Friends and friend requests of the current user
     currentLeaderboards: {public: [], friends: []}, // Public and friend leaderbaords
     currentClientSocket: null // Socket of connected client
@@ -36,6 +37,10 @@ export default new Vuex.Store({
 
         setCurrentAchievements(state, achievements) {
             state.currentAchievements = achievements;
+        },
+
+        setCurrentRecentCatScores(state, recentCatScores) {
+            state.currentRecentCatScores = recentCatScores
         },
 
         setCurrentSocialLists(state, lists) {

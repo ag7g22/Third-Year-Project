@@ -167,7 +167,7 @@ def user_get_info(req: func.HttpRequest) -> func.HttpResponse:
             info = {"id": user['id'], "username": user['username'], 'rank': user['rank'], 
                     "streak": user['streak'], "daily_training_score": user['daily_training_score'], 
                     "training_completion_date": user['training_completion_date'], 
-                    "achievements": user['achievements']}
+                    "achievements": user['achievements'], "recent_category_scores": user['recent_category_scores']}
             
             logging.info('User info extracted: {}'.format(info))
 
