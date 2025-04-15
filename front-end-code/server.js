@@ -271,7 +271,7 @@ function compare_answers(theGame) {
         end_round(home, away, theGame.host);
     } else if (home.selected_answer !== correct_answer && away.selected_answer === correct_answer) {
         end_round(away, home, theGame.host);
-    } else if (home.selected_answer === away.selected_answer) {
+    } else if (home.selected_answer === away.selected_answer || (home.selected_answer !== correct_answer && away.selected_answer !== correct_answer)) {
         tie_round(home, away, home.selected_answer, correct_answer, theGame.host);
     }
 }
@@ -324,6 +324,7 @@ async function load_next_question(theGame) {
     }
     console.log(theGame.home);
     console.log(theGame.away);
+    updateAllInServer(theGame.host);
 }
 
 function end_round(winner, loser, host_username) {

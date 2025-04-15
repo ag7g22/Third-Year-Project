@@ -20,7 +20,7 @@
                 <img src="@/assets/titles/CrashQuizOff.png" alt="Logo" class="task-logo"/>
                 <h2> Create a HOST password </h2>
                 <input type="text" placeholder="password" v-model="host_password" />
-                <button @click="create_game()" class="create-button">Create Game</button>
+                <button @click="create_game()" class="game-button">Create Game</button>
                 <div class="game-buttons">
                     <button @click="next_page('dashboard')" class="game-button">Back</button>
                     <button disabled class="game-button">Host</button>
@@ -32,7 +32,7 @@
                 <img src="@/assets/titles/CrashQuizOff.png" alt="Logo" class="task-logo"/>
                 <h2> Enter a HOST password </h2>
                 <input type="text" placeholder="password" v-model="host_password" />
-                <button @click="join_game()" class="create-button">Join Game</button>
+                <button @click="join_game()" class="game-button">Join Game</button>
                 <div class="game-buttons">
                     <button @click="next_page('dashboard')" class="game-button">Back</button>
                     <button @click="toggle_view('HOST')" class="game-button">Host</button>
@@ -42,29 +42,22 @@
 
             <div v-if="state.current_view === 'LOBBY'">
                 <h2>HOST: {{ game_state.host }} | PASSWORD: {{ game_state.password }}</h2>
-                <h2>PLAYERS:</h2>
                 <div class="players-list">
                     <div v-for="player in game_state.players" class="player-item">
                         <p>{{ player }}</p>
                     </div>
                 </div>
                 <div v-if="state.role === 'HOST'">
-                    <div class="game-buttons">
-                        <div v-if="game_state.players.length > 1">
-                            <div class="game-buttons">
-                                <button @click="start_game()" class="game-button">Start Game</button>
-                                <button @click="delete_game()" class="game-button">Delete Lobby</button>    
-                            </div>
-                        </div>
-                        <div v-else>
-                            <div class="game-buttons">
-                                <button @click="delete_game()" class="game-button">Delete Lobby</button>   
-                            </div>
-                        </div>
+                    <div class="game-buttons" v-if="game_state.players.length > 1">
+                        <button @click="start_game()" class="game-button">Start</button>
+                        <button @click="delete_game()" class="game-button">Leave</button>    
+                    </div>
+                    <div class="game-buttons" v-else>
+                        <button @click="delete_game()" class="game-button">Leave</button>   
                     </div>
                 </div>
                 <div v-else class="game-buttons"> 
-                    <button @click="leave_lobby()" class="game-button">Leave Lobby</button>
+                    <button @click="leave_lobby()" class="game-button">Leave</button>
                 </div>
                 
             </div>
@@ -72,47 +65,71 @@
     </div>
     <div v-else>
         <div v-if="state.current_view === 'GAME'" class="container">
-            <!-- Count down for game -->
-            <div v-if="game_timer !== null">
-                <h1> GAME STARTS IN: </h1>
-                <h1>{{ countdown }}</h1>
-            </div>
-            <div v-else>
-                <!-- Buttons -->
-                <div class="buttons">
-                    <button @click="leave_game(false)">Leave Game</button>
+            <div class="questionnaire">
+                <!-- Count down for game -->
+                <div v-if="game_timer !== null" class="quiz-result">
+                    <h1> GAME STARTS IN: </h1>
+                    <h1>{{ countdown }}</h1>
                 </div>
-                <div class="questionnaire">
-                    <p> Question {{ game_state.q_counter }} </p>
-                    
+                <div v-else>
+                    <div v-if="end_of_round_timer !== null">
+                        <h2> Question {{ game_state.q_counter - 1}} </h2>
+                    </div>
+                    <div v-else-if="end_of_round_timer === null">
+                        <h2> Question {{ game_state.q_counter }} </h2>
+                    </div>
                     <div class="progress-container">
                         <!-- Player 1 (Left Side) -->
                         <div class="player player-left">{{ game_state.home.username }}</div>
-
                         <!-- Progress Bar -->
                         <div class="progress-bar">
                             <div class="progress-fill" :style="{ width: progressPercentage + '%' }"></div>
                         </div>
-
                         <!-- Player 2 (Right Side) -->
                         <div class="player player-right">{{ game_state.away.username }}</div>
                     </div>
 
-                    <p>{{ game_state.questions[game_state.currentQuestion].question }}</p>
+                    <div v-if="end_of_round_timer !== null" class="question-container">
+                        <div class="question-text">
+                            <h1>{{ game_state.questions[game_state.currentQuestion - 1].question }}</h1>
+                        </div>
+                        <div class="question-image" v-if="game_state.questions[game_state.currentQuestion - 1].image !== 'n/a'">
+                            <img :src="image" alt="Question Image">
+                        </div>
+                    </div>
+                    <div v-else-if="end_of_round_timer === null" class="question-container">
+                        <div class="question-text">
+                            <h1>{{ game_state.questions[game_state.currentQuestion].question }}</h1>
+                        </div>
+                        <div class="question-image" v-if="game_state.questions[game_state.currentQuestion].image !== 'n/a'">
+                            <img :src="image" alt="Question Image">
+                        </div>
+                    </div>
 
                     <!-- Count down for question -->
-                    <div v-if="question_timer !== null">
-                        <h2>{{ countdown }}</h2>
+                    <div v-if="question_timer !== null" class="feedback-box">
+                        <h1>{{ countdown }}</h1>
                     </div>
-                    <div v-else>
-                        <div class="options">
+                    <!-- Show results for a few seconds -->
+                    <div v-else-if="end_of_round_timer !== null" class="feedback-box">
+                        <div v-if="user_state.selected_answer === game_state.questions[game_state.currentQuestion - 1].correct_answer" class="answer-row">
+                            <p class="correct">{{ user_state.selected_answer }}✔️</p>
+                        </div>
+                        <div v-else class="answer-row">
+                            <p class="incorrect">{{ user_state.selected_answer }}❌</p>
+                            <p class="correct">{{ game_state.questions[game_state.currentQuestion - 1].correct_answer }}✔️</p>
+                        </div>
+                        <div class="feedback-text">
+                            <h3>{{ game_state.questions[game_state.currentQuestion - 1].explanation }}</h3>
+                        </div>
+                    </div>
+                    <div v-else class="quiz-buttons-container">
+                        <div class="quiz-buttons-grid">
                             <button 
                             v-for="(option, index) in game_state.questions[game_state.currentQuestion].options"
                             :key="index"
                             :class="{
                                 selected: user_state.selected_answer === option && user_state.isWaiting,
-                                correct: user_state.selected_answer === option && user_state.isCorrect && !user_state.isWaiting,
-                                incorrect: user_state.selected_answer === option && !user_state.isCorrect && !user_state.isWaiting
                             }"
                             @click="select_answer(option)"
                             >
@@ -120,38 +137,43 @@
                             </button>
                         </div>
                     </div>
-                    <!-- Show results for a few seconds -->
-                    <div v-if="end_of_round_timer !== null">
-                        <p>{{ game_state.questions[game_state.currentQuestion].explanation }}</p>
+
+                    <!-- Buttons -->
+                    <div class="game-buttons">
+                        <button class="game-button" @click="leave_game(false)">Concede</button>
                     </div>
                 </div>
             </div>
         </div>
-
         <div v-if="state.current_view === 'GAMEOVER'" class="container">
-            <div v-if="user_state.isWinner === true">
-                <h2> VICTORY! 🎉</h2>
+            <div class="questionnaire">
+                <div class="quiz-result">
+                    <div v-if="user_state.isWinner === true">
+                        <h1> VICTORY! 🎉</h1>
+                    </div>
+                    <div v-else>
+                        <h1> DEFEATED! ⚰️</h1>
+                    </div>
+                    <div class="game-buttons">
+                        <button class="game-button" @click="return_lobby()">Lobby</button>  
+                    </div>
+                </div>
             </div>
-            <div v-else>
-                <h2> DEFEATED! ⚰️</h2>
-            </div>
-
-            <button @click="return_lobby()">Return to lobby</button>
         </div>
-
-        <p v-if="message.error" class="error-message">{{ message.error }}</p>
-        <p v-if="message.success" class="success-message">{{ message.success }}</p>
     </div>
 </template>
 
 <script>
 import toastr from 'toastr';
-
+const images = require.context('@/assets/questions/.', false, /\.(jpg|jpeg|png)$/);
 export default {
     // Page member variables and methods:
     name: "lobby",
-    mounted: function() {
-        listen(this, this.client_socket); 
+    mounted() {
+        this.setup_socket_listeners();
+    },
+    unmounted() {
+        this.remove_socket_listeners();
     },
     data() {
         return {
@@ -175,6 +197,10 @@ export default {
             game_timer: null, // Timer before the game starts.
             end_of_round_timer: null, // Timer after the round finishes.
 
+            // Images
+            images: images.keys().map(image => images(image)),
+            image: "",
+
             client_socket: this.$store.state.currentClientSocket,
             logged_in_user: this.$store.state.currentUser,
             currentRank: this.$store.state.currentRank,
@@ -182,6 +208,51 @@ export default {
         };
     },
     methods: {
+        exp_message(exp_gain) {
+            if (exp_gain === 0) return;
+            toastr.info(" ", `Gained ${exp_gain} exp!`, {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-bottom-center",
+                timeOut: 5000,
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut",
+                preventDuplicates: true
+            });
+        },
+        level_up_message() {
+            toastr.info(" ", "LEVELED UP!", {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-bottom-center",
+                timeOut: 5000,
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut",
+                preventDuplicates: true
+            });
+        },
+        successful_message(title, msg) {
+            toastr.success(msg, title, {
+            closeButton: true,
+            progressBar: true,
+            positionClass: "toast-bottom-full-width",
+            timeOut: 2000,
+            showMethod: "fadeIn",
+            hideMethod: "fadeOut",
+            preventDuplicates: true
+            });
+        },
+        error_message(title, msg) {
+        toastr.error(msg, title, {
+            closeButton: true,
+            progressBar: true,
+            positionClass: "toast-bottom-full-width",
+            timeOut: 2000,
+            showMethod: "fadeIn",
+            hideMethod: "fadeOut",
+            preventDuplicates: true
+            });
+        },
         toggle_view(view) {
             // Reset state
             this.message = { error: "", success: "" };
@@ -246,7 +317,7 @@ export default {
             home: { username: '', chances: 3, elapsedTime: 0, selected_answer: null }, 
             away: { username: '', chances: 3, elapsedTime: 0, selected_answer: null }}
             this.user_state = {username: '', host: '', role: '', isWinner: false, isCorrect: null, isWaiting: false, selected_answer: null};
-            this.state = { current_view: "RULES", role: '', gamemodes: ['quiz', 'hazard perception', 'road sign'], selected_gamemode: 'quiz' }
+            this.state = { current_view: "HOST", role: 'HOST', gamemodes: ['quiz', 'hazard perception', 'road sign'], selected_gamemode: 'quiz' }
         },
         // GAME METHODS
         async load_quiz() {
@@ -266,13 +337,36 @@ export default {
         },
         async end_of_round(winner) {
             // Show both users the results
-            this.message = { error: "", success: "" }
             if (winner === this.logged_in_user) {
-                this.message.success = " You WON the round!"
+                toastr.success(" ", "You WIN the round!", {
+                    closeButton: true,
+                    progressBar: true,
+                    positionClass: "toast-bottom-left",
+                    timeOut: 4000,
+                    showMethod: "fadeIn",
+                    hideMethod: "fadeOut",
+                    preventDuplicates: true
+                });
             } else if (winner === "tie") {
-                this.message.success = "Round Tie!"
+                toastr.warning(" ", "Round Tie!", {
+                    closeButton: true,
+                    progressBar: true,
+                    positionClass: "toast-bottom-left",
+                    timeOut: 4000,
+                    showMethod: "fadeIn",
+                    hideMethod: "fadeOut",
+                    preventDuplicates: true
+                });
             } else {
-                this.message.success = winner + " WON the round!" 
+                toastr.error(" ", `${winner} WINS the round!`, {
+                    closeButton: true,
+                    progressBar: true,
+                    positionClass: "toast-bottom-left",
+                    timeOut: 4000,
+                    showMethod: "fadeIn",
+                    hideMethod: "fadeOut",
+                    preventDuplicates: true
+                });
             }
             await this.start_end_round_countdown(7);
         },
@@ -281,12 +375,28 @@ export default {
             this.message = { error: "", success: "" }
             if (winner === this.logged_in_user) {
                 this.user_state.isWinner = true;
-                this.message.success = " You WON the game!"
+                toastr.success(" ", "You WIN the game!", {
+                    closeButton: true,
+                    progressBar: true,
+                    positionClass: "toast-bottom-left",
+                    timeOut: 4000,
+                    showMethod: "fadeIn",
+                    hideMethod: "fadeOut",
+                    preventDuplicates: true
+                });
             } else {
                 this.user_state.isWinner = false;
-                this.message.success = winner + " WON the game!" 
+                toastr.error(" ", `${winner} WINS the game!`, {
+                    closeButton: true,
+                    progressBar: true,
+                    positionClass: "toast-bottom-left",
+                    timeOut: 4000,
+                    showMethod: "fadeIn",
+                    hideMethod: "fadeOut",
+                    preventDuplicates: true
+                });
             }
-            await this.start_end_game_countdown(7);
+            await this.start_end_game_countdown(7, winner);
         },
         async next_question() {
             // Transition client to next question.
@@ -313,6 +423,7 @@ export default {
         },
         async start_question_countdown(countdown) {
             // Pick the timer and countdown setting
+            this.add_image();
             this.countdown = countdown;
             this.question_timer = setInterval(() => {
                 if (this.countdown > 0) {
@@ -345,7 +456,7 @@ export default {
                 }
             }, 1000);
         },
-        async start_end_game_countdown(countdown) {
+        async start_end_game_countdown(countdown, winner) {
             // Pick the timer and countdown setting
             this.countdown = countdown;
             this.end_of_round_timer = setInterval(async () => {
@@ -358,7 +469,7 @@ export default {
                         this.countdown = null;
                         console.log("Ending game ... ");
                         this.client_socket.emit('leave-game', this.logged_in_user, this.game_state.host, this.user_state.isWinner);
-                        if (this.user_state.isWinner) {
+                        if (this.logged_in_user === winner) {
                             this.update_user_exp(500);
                         } else {
                             this.update_user_exp(100);
@@ -382,6 +493,13 @@ export default {
         resetStopwatch() {
             this.stopStopwatch();
             this.answer_time.elapsedTime = 0; // Reset back to 0
+        },
+        add_image() {
+            // Library of images
+            let question_image = this.game_state.questions[this.game_state.currentQuestion].image
+            if (question_image !== 'n/a') {
+                this.image = this.images.filter((image, index) => images.keys()[index].includes(question_image))[0];
+            }
         },
         async add_achievement(name) {
             // Add achievement to user's achievements and notify on the UI.
@@ -426,15 +544,11 @@ export default {
                 // Update rank in UI too.
                 this.$store.commit("setCurrentRank", this.currentRank);
                 this.currentRank = this.$store.state.currentRank;
-            
                 if (prev_level < this.currentRank.level) {
-                    this.message.success = `LEVELED UP TO LEVEL ${this.currentRank.level}!` 
+                    this.level_up_message();
                 } else {
-                    this.message.success = `Gained ${exp_gain} exp!`
+                    this.exp_message(exp_gain);
                 }
-
-            } else {
-                this.message.error = update_response.msg || "Score update Failed."
             }
         },
         async azure_function(function_type, function_route, json_doc) {
@@ -463,7 +577,98 @@ export default {
         next_page(page) {
             console.log("/" + page);
             this.$router.replace(`/${page}`);
-        }
+        },
+        setup_socket_listeners() {
+            if (!this.client_socket) return;
+
+            this.remove_socket_listeners(); // Clean slate
+
+            this.client_socket.on('update-user', (data) => {
+                this.game_state = data.game_state;
+                this.user_state = data.user_state; 
+            });
+
+            this.client_socket.on('create-lobby-fail', () => {
+                this.error_message('Lobby creation failed!', "Password already being used.");
+            });
+
+            this.client_socket.on('create-lobby-success', () => {
+                this.toggle_view('LOBBY');
+                this.successful_message('Lobby creation success!', 'Share password for another player to join.');
+            });
+
+            this.client_socket.on('remove-player', () => {
+                this.toggle_view('HOST');
+                this.error_message('Lobby was terminated!', "Host left game.");
+            });
+
+            this.client_socket.on('join-lobby-success', () => {
+                this.toggle_view('LOBBY');
+                this.successful_message('Joined lobby!', 'Waiting for host ...');
+            });
+
+            this.client_socket.on('lobby-full', () => {
+                this.error_message('Failed to join lobby!', 'Game in progress.');
+            });
+
+            this.client_socket.on('join-lobby-fail', () => {
+                this.error_message('Failed to join lobby!', 'No lobby found.');
+            });
+
+            this.client_socket.on('start-game-success', () => {
+                this.load_quiz();
+            });
+
+            this.client_socket.on('start-game-fail', () => {
+                this.error_message('Failed to start game!', 'Failed to load questions. Try again.');
+            });
+
+            this.client_socket.on('selected-answer-waiting', () => {
+                toastr.info("Waiting for other player to answer ...", "Answered question!", {
+                    closeButton: true,
+                    progressBar: true,
+                    positionClass: "toast-bottom-center",
+                    timeOut: 2000,
+                    showMethod: "fadeIn",
+                    hideMethod: "fadeOut",
+                    preventDuplicates: true
+                });
+            });
+
+            this.client_socket.on('end-of-round', (winner) => {
+                this.end_of_round(winner);
+            });
+
+            this.client_socket.on('end-of-game', (winner) => {
+                this.end_of_game(winner);
+            });
+
+            this.client_socket.on('next-question', () => {
+                this.next_question();
+            });
+
+            this.client_socket.on('leave-game-success', () => {
+                this.toggle_view('GAMEOVER');
+            });
+        },
+        remove_socket_listeners() {
+            if (!this.client_socket) return;
+
+                this.client_socket.off('update-user');
+                this.client_socket.off('create-lobby-fail');
+                this.client_socket.off('create-lobby-success');
+                this.client_socket.off('remove-player');
+                this.client_socket.off('join-lobby-success');
+                this.client_socket.off('lobby-full');
+                this.client_socket.off('join-lobby-fail');
+                this.client_socket.off('start-game-success');
+                this.client_socket.off('start-game-fail');
+                this.client_socket.off('selected-answer-waiting');
+                this.client_socket.off('end-of-round');
+                this.client_socket.off('end-of-game');
+                this.client_socket.off('next-question');
+                this.client_socket.off('leave-game-success');
+            },
     },
     computed: {
         progressPercentage() {
@@ -471,88 +676,9 @@ export default {
     }
   }
 };
-
-function listen(vue, client_socket) {
-    console.log("Current Client: ", client_socket);
-
-    client_socket.on('update-user', function(data) {
-        vue.game_state = data.game_state;
-        vue.user_state = data.user_state; 
-    });
-
-    client_socket.on('create-lobby-fail', function() {
-        vue.message.error = "Password already being used."
-    });
-
-    client_socket.on('create-lobby-success', function() {
-        vue.toggle_view('LOBBY');
-    });
-
-    client_socket.on('remove-player', function() {
-        vue.toggle_view('RULES');
-        vue.message.success = "Lobby was terminated."
-    });
-
-    client_socket.on('join-lobby-success', function() {
-        vue.toggle_view('LOBBY');
-        vue.message.success = 'Joined Lobby.';
-    });
-
-    client_socket.on('lobby-full', function() {
-        vue.message.error = 'Lobby is currently full.';
-    });
-
-    client_socket.on('join-lobby-fail', function() {
-        vue.message.error = "Lobby doesn't exist.";
-    });
-
-    client_socket.on('start-game-success', function() {
-        vue.load_quiz();
-    });
-
-    client_socket.on('start-game-fail', function() {
-        vue.message.error = 'Failed to load questions. Try again.'
-    });
-    
-    client_socket.on('selected-answer-waiting', function() {
-        vue.message.success = "Waiting for other player to answer ..."
-    });
-
-    client_socket.on('end-of-round', function(winner) {
-        vue.end_of_round(winner);
-    });
-
-    client_socket.on('end-of-game', function(winner) {
-        vue.end_of_game(winner);
-    });
-
-    client_socket.on('next-question', function() {
-        vue.next_question();
-    });
-
-    client_socket.on('leave-game-success', function() {
-        vue.toggle_view('GAMEOVER');
-    });
-}
-
 </script>
 
 <style lang="scss" scoped>
-.create-button {
-    width: 100%;
-    padding: 12px;
-    background-color: #f3af59;
-    border: none;
-    border-radius: 5px;
-    color: white;
-    font-size: 18px;
-    cursor: pointer;
-    margin-bottom: 20px;
-}
-.create-button:hover {
-  background-color: #e09548; /* Hover effect for the button */
-}
-
 .players-list {
   display: flex;
   gap: 20px; /* Space between player names */
@@ -560,6 +686,7 @@ function listen(vue, client_socket) {
   padding: 10px;
   background-color: black;
   border: 2px solid #f3af59;
+  justify-content: center;
   border-radius: 10px; /* Rounded corners for the container */
 }
 
@@ -573,90 +700,37 @@ function listen(vue, client_socket) {
   color: #f3af59;
 }
 
-.questionnaire {
-  text-align: center;
-  max-width: 500px;
-  margin: auto;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  background: #f9f9f9;
-}
-
-h2 {
-  margin-bottom: 15px;
-}
-
-.options button {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  margin: 5px 0;
-  border: none;
-  background-color: #969faa;
-  color: white;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-.options button.selected {
-  background-color: #595f66;
-}
-
-/* Flash green for correct answers */
-.options button.correct {
-    background-color: #5bd45f;
-}
-
-/* Flash red for incorrect answers */
-.options button.incorrect {
-    background-color: #e34242;
-}
-
-.next-button {
-  margin-top: 15px;
-  padding: 10px 20px;
-  border: none;
-  background-color: green;
-  color: white;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-.next-button:hover {
-  background-color: darkgreen;
-}
-
 .progress-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 80%;
-  margin: 20px auto;
-  position: relative;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 80%;
+    position: relative;
+    margin: 20px auto;
 }
 
 /* Player Containers */
 .player-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 50%;
+    gap: 20px;
 }
 
 /* Player Names on Top */
 .player-name {
-  font-weight: bold;
-  font-size: 16px;
-  margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 24px;
 }
 
 /* Progress Bar */
 .progress-bar {
   width: 100%;
-  height: 20px;
+  height: 6px;
   background-color: #d53333;
-  border-radius: 10px;
+  border-radius: 0; /* squared edges */
   overflow: hidden;
   position: relative;
 }
@@ -667,5 +741,4 @@ h2 {
   background-color: #2d94e3;
   transition: width 0.3s ease-in-out;
 }
-
 </style>
