@@ -438,3 +438,53 @@ video {
     box-sizing: border-box;
     border-top: 2px solid #333;
 }
+
+.graph-box { 
+    color: #ffffff;
+    background-color: black;
+    border: 2px solid #f3af59;
+    width: 100%;
+    max-width: 1400px;
+    height: auto;
+    padding: 30px;  /* More internal padding */
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    overflow-y: auto;
+}
+
+.score-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.label {
+    width: 150px;
+    font-size: 14px;
+    color: #f3af59;
+}
+
+.bar-container {
+    flex: 1;
+    height: 6px; /* thinner */
+    background-color: black;
+    border-radius: 0; /* squared edges */
+    overflow: hidden;
+}
+
+.bar {
+    height: 100%;
+    width: 0%; /* start at 0 for animation */
+    transition: width 0.6s ease-in-out;
+    border-radius: 0; /* squared edges */
+}
+
+.value {
+    width: 40px;
+    text-align: right;
+    font-size: 12px;
+    color: #f3af59;
+}

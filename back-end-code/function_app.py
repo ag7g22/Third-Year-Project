@@ -682,6 +682,8 @@ def question_get_quiz(req: func.HttpRequest) -> func.HttpResponse:
                 topics = ml_model.get_predicted_scores(recent_category_scores=recent_category_scores)
                 logging.info('Ratios of topics: {}'.format(topics))
 
+                remainder = No_of_Qs - math.floor(No_of_Qs * topics['Driving Off']) - math.floor(No_of_Qs * topics['Urban Driving']) - math.floor(No_of_Qs * topics['Rural Driving']) - math.floor(No_of_Qs * topics['Bigger Roads']) - math.floor(No_of_Qs * topics['Motorways']) - math.floor(No_of_Qs * topics['Tricky Conditions'])
+
                 Qs = []
                 Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Driving Off",No_of_Qs=math.floor(No_of_Qs * topics['Driving Off'])))
                 Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Urban Driving",No_of_Qs=math.floor(No_of_Qs * topics['Urban Driving'])))
@@ -689,7 +691,7 @@ def question_get_quiz(req: func.HttpRequest) -> func.HttpResponse:
                 Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Bigger Roads",No_of_Qs=math.floor(No_of_Qs * topics['Bigger Roads'])))
                 Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Motorways",No_of_Qs=math.floor(No_of_Qs * topics['Motorways'])))
                 Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Tricky Conditions",No_of_Qs=math.floor(No_of_Qs * topics['Tricky Conditions'])))
-                Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Breakdowns",No_of_Qs=math.floor(No_of_Qs * topics['Breakdowns'])))
+                Qs.extend(utility.get_random_questions_topic(proxy=questions_proxy,topic="Breakdowns",No_of_Qs=remainder))
 
                 random_Qs = utility.select_random(Qs, len(Qs))
                 quiz_Qs = []

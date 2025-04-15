@@ -56,7 +56,7 @@ export default {
     mounted() {
         // Set up input to send to openai model
         this.input = this.$route.query.input || [];
-        this.get_feedback();
+        this.get_feedback_explaination();
     },
     data() {
         return {
@@ -109,6 +109,16 @@ export default {
                 this.add_image();
                 this.toggle_view('feedback');
             }
+        },
+        async get_feedback_explaination() {
+        // alternative method due to budget constraints:
+            console.log('Generating instant feedback with explanations.');
+            this.state.feedback = this.input.map(({ image, explanation, ...rest }) => ({
+                feedback: explanation,
+                ...rest
+            }));
+            this.add_image();
+            this.toggle_view('feedback');
         },
         next_feedback() {
             this.current_Q++;

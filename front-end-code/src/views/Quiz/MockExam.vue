@@ -25,45 +25,56 @@
 
     <div v-else>
         <div v-if="current_view === 'multiple_choice'" class="container">
-            <h1 class="title">MOCK EXAM | {{ formattedTime }}</h1>
             <div class="questionnaire">
-                <p>Question {{ current_Q + 1 }} of {{ questions.length }}</p>
-
-                <!-- Progress Bar -->
-                <div class="progress-container">
-                <div class="progress-bar" :style="{ width: progressBarWidth + '%' }"></div>
+                <h2>Question {{ current_Q + 1 }} of {{ questions.length }} | {{ formattedTime }}</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" :style="{ width: progressBarWidth + '%' }"></div>
                 </div>
-
-                <h2>{{ questions[current_Q].question }}</h2>
-
-                <div v-if="questions[current_Q].image !== 'n/a'">
-                    <img :src=image alt="Question Image">
+                <div class="question-container">
+                    <div class="question-text">
+                        <h1>{{ questions[current_Q].question }}</h1>
+                    </div>
+                    <div class="question-image" v-if="questions[current_Q].image !== 'n/a'">
+                        <img :src="image" alt="Question Image">
+                    </div>
                 </div>
-                
-                <button 
-                    @click="toggle_flag"
-                    :class="{ 'flagged': questions[current_Q].flagged }"
-                    >
-                    <span v-if="questions[current_Q].flagged">🚩 Unflag</span>
-                    <span v-else>Flag</span>
-                </button>
+                <div class="quiz-buttons-container">
+                    <div class="quiz-buttons-grid">
+                        <button 
+                        v-for="(option, index) in questions[current_Q].options"
+                        :key="index"
+                        :class="{
+                            selected: questions[current_Q].selected_ans === option,
+                        }"
+                        @click="select_answer(option)"
+                        >
+                        {{ option }}
+                        </button>
+                    </div> 
+                    <div class="game-buttons">
+                        <button @click="terminate_mock_exam()" class="game-button">End Exam</button>
+                        <button 
+                            @click="toggle_flag"
+                            class="game-button"
+                            >
+                            <span v-if="questions[current_Q].flagged">Unflag</span>
+                            <span v-else>Flag</span></button>
+                        <div v-if="current_Q !== 0">
+                            <button @click="prev_question()" class="game-button">Previous</button>
+                        </div>
+                        <div v-else><button disabled class="game-button">Previous</button></div>
 
-                <div class="options">
-                    <button 
-                    v-for="(option, index) in questions[current_Q].options"
-                    :key="index"
-                    :class="{
-                        selected: questions[current_Q].selected_ans === option,
-                    }"
-                    @click="select_answer(option)"
-                    >
-                    {{ option }}
-                    </button>
+                        <div v-if="questions[current_Q].selected_ans !== null && current_Q !== questions.length - 1">
+                            <button @click="next_question()" class="game-button">Next</button>
+                        </div>
+                        <div v-else><button disabled class="game-button">Next</button></div>
+
+                        <div v-if="current_Q === questions.length - 1 && questions[current_Q].selected_ans !== null" >
+                            <button  @click="start_hazard_perceptions" class="game-button">Finish Section</button>
+                        </div>
+                        <div v-else><button disabled class="game-button">Finish Section</button></div>
+                    </div>
                 </div>
-                <button @click="terminate_mock_exam()">End Exam</button>
-                <button v-if="current_Q !== 0" @click="prev_question()">Previous</button>
-                <button v-if="questions[current_Q].selected_ans !== null" @click="next_question() && current_Q !== questions.length - 1">Next</button>
-                <button v-if="current_Q === questions.length - 1 && questions[current_Q].selected_ans !== null" @click="start_hazard_perceptions()">Finish Section</button>
             </div>
 
             <div v-if="timer_finished" class="overlay">
@@ -96,58 +107,67 @@
             </div>
         </div>
 
-        <div v-if="current_view === 'hazard_perception'" class="video-container">
-
-            <div v-if="clip_url === ''">
-                <h2>LOADING VIDEO CLIP ...</h2>
+        <div v-if="current_view === 'hazard_perception'" class="container">
+            <div v-if="clip_url === ''" class="quiz-result">
+                <h1>Loading ...</h1>
             </div>
-            <div v-else>
-                <div>
-                    <video ref="hazard_perception"
-                        :src="clip_url"
-                        @click="handleClick"
-                        @ended="finish_video_clip"
-                        autoplay 
-                        muted 
-                        playsinline 
-                        width="800"
-                        height="500">
-                    </video>
-
-                    <!-- Click Effect -->
-                    <div 
-                        v-for="(click, index) in clicks"
-                        :key="index"
-                        class="click-circle"
-                        :style="{ top: (click.y - 10) + 'px', left: (click.x - 15) + 'px' }"
-                    ></div>
-                </div>
-            </div>
-
-            <div v-if="too_many_clicks" class="overlay">
+            <div v-if="too_many_clicks" class="overlay" @click="load_video_clip()">
                 <div class="overlay-content" @click.stop>
-                    <p>You've clicked too many times.</p>
-                    <button @click="load_video_clip()">Next</button>
+                    <h2>You've clicked too many times.</h2>
+                    <p>(Click outside the box.)</p>
                 </div>
             </div>
-
-            <div class="horizontal-container">
-                <div v-for="clicks in click_history" class="item">🚩</div>
+            <div class="video-container">
+                <video ref="hazard_perception"
+                    :src="clip_url"
+                    @click="handleClick"
+                    @ended="finish_video_clip"
+                    autoplay 
+                    muted 
+                    playsinline 
+                    width="950"
+                    height="650">
+                </video>
+                <!-- Click Effect -->
+                <div 
+                    v-for="(click, index) in clicks"
+                    :key="index"
+                    class="click-circle"
+                    :style="{ top: (click.y - 10) + 'px', left: (click.x - 15) + 'px' }"
+                ></div>
+                <!-- Footer Section -->
+                <div class="video-footer">
+                    <div class="flags-container">
+                        <div v-for="clicks in click_history" class="item">🚩</div>
+                    </div>
+                    <button @click="terminate_daily_quiz()" class="game-button">Back</button>  
+                </div>
             </div>
-
-            <button @click="terminate_mock_exam()">End Exam</button>
         </div>
 
-        <div v-if="current_view === 'scores'">
-            <h1 class="title">MOCK EXAM SCORES | {{ logged_in_user }}</h1>
-            <h2>Multiple Choice Score: {{ this.scores_1 }} / 50</h2>
-            <h2>Hazard Perception Score: {{ this.scores_2 }} / 75</h2>
-            <button @click="terminate_mock_exam()">End Exam</button>
-            <button @click="init_feedback()">Feedback</button>
+        <div v-if="current_view === 'scores'" class="container">
+            <div class="questionnaire">
+                <div class="quiz-result">
+                    <h2>You've completed the mock test! 📖</h2>
+                    <h3>Multiple Choice: {{ this.scores_1 }} / 50 | Hazard Perception: {{ this.scores_2 }} / 75</h3>
+                    <div class="graph-box">
+                        <div class="score-row" v-for="(score, topic) in update_scores" :key="topic">
+                            <div class="label">{{ topic }}</div>
+                            <div class="bar-container">
+                                <div class="bar"
+                                    :style="{ width: (score * 100) + '%', backgroundColor: colorMap[topic] }">
+                                </div>
+                            </div>
+                            <div class="value">{{ (score * 100).toFixed(0) }}%</div>
+                        </div>
+                    </div>
+                    <div class="game-buttons">
+                        <button class="game-button" @click="terminate_mock_exam()">End Exam</button>
+                        <button class="game-button" @click="init_feedback()">Feedback</button> 
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <p v-if="message.error" class="error-message">{{ message.error }}</p>
-        <p v-if="message.success" class="success-message">{{ message.success }}</p>
     </div>
 </template>
   
@@ -194,11 +214,56 @@ export default {
             feedback: [],
             // {question, correct_ans, selected_ans, image}
 
+            // Scores the upload to database
+            update_scores: {
+                "Driving Off": [],
+                "Urban Driving": [],
+                "Rural Driving": [],
+                "Bigger Roads": [],
+                "Motorways": [],
+                "Tricky Conditions": [],
+                "Breakdowns": [],
+            },
+            colorMap: {
+                "Driving Off": "#4caf50",         // green
+                "Urban Driving": "#2196f3",       // blue
+                "Rural Driving": "#9c27b0",       // purple
+                "Bigger Roads": "#ff9800",        // orange
+                "Motorways": "#f44336",           // red
+                "Tricky Conditions": "#ffc107",   // amber
+                "Breakdowns": "#795548",          // brown
+            },
+
+
             logged_in_user: this.$store.state.currentUser,
+            currentRank: this.$store.state.currentRank,
             message: { error: "", success: "" },
         };
     },
     methods: {
+        exp_message() {
+            if (this.exp_gain === 0) return;
+            toastr.info(" ", `Gained ${this.exp_gain} exp!`, {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-bottom-center",
+                timeOut: 5000,
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut",
+                preventDuplicates: true
+            });
+        },
+        level_up_message() {
+            toastr.info(" ", "LEVELED UP!", {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-bottom-center",
+                timeOut: 5000,
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut",
+                preventDuplicates: true
+            });
+        },
         toggle_view(view) {
             // Reset state
             this.message = { error: "", success: "" };
@@ -210,7 +275,7 @@ export default {
             this.message.success = 'LOADING QUESTIONS ...';
 
             // Fetch the multiple choice questions:
-            const input = { 'No_of_Qs': 3, 'username': this.logged_in_user };
+            const input = { 'No_of_Qs': 50, 'username': this.logged_in_user };
             const quiz = await this.azure_function('POST', '/question/get/quiz', input);
             if (quiz.result) {
                 // Populate the questions list, and add a flag to them and remove explanation attr.
@@ -397,10 +462,13 @@ export default {
         finish_mock_exam() {
             // Add up scores
             this.questions.forEach(item => {
-                if (item.selected_ans !== item.correct_answer) {
-                    this.scores_1+=1;
+                if (item.selected_ans === item.correct_answer) {
+                    this.scores_1 += 1;
+                    this.add_update_score(item.topic, 1);
+                } else {
                     // {question, correct_ans, selected_ans, image}
-                    const entry = {question: item.question, selected: item.selected_ans, correct: item.correct_answer, image: item.image};
+                    this.add_update_score(item.topic, 0);
+                    const entry = { question: item.question, selected: item.selected_ans, correct: item.correct_answer, image: item.image };
                     this.feedback.push(entry);
                 }
             });
@@ -428,6 +496,7 @@ export default {
             this.clicks = [];
             this.too_many_clicks = false;
             this.feedback = [];
+            this.update_scores = {"Driving Off": [], "Urban Driving": [],"Rural Driving": [],"Bigger Roads": [],"Motorways": [],"Tricky Conditions": [],"Breakdowns": [],},
             this.message = { error: "", success: "" };
             this.toggle_view('instructions');
         },
@@ -438,6 +507,62 @@ export default {
                 path: `/feedback`,
                 query: { input: this.feedback }
             })
+        },
+        async update_user_exp() {
+            // Add changes to database
+            const total_score = this.scores_1 + this.scores_2;
+            this.exp_gain = Math.round(((total_score / 125) * 500) / 100) * 100; 
+            const user_stats = this.$store.state.currentStats;
+            const prev_level = this.currentRank.level;
+
+            // Increment level if exp exceeds threshold:
+            if (this.currentRank.exp + this.exp_gain >= this.currentRank.exp_threshold) {
+                // Reset exp progress but add leftover exp and update exp threshold
+                this.currentRank.exp = (this.currentRank.exp + this.exp_gain) - this.currentRank.exp_threshold;
+                this.currentRank.level += 1;
+                this.currentRank.exp_threshold += 500;
+            } else {
+                this.currentRank.exp += this.exp_gain;
+            }
+            const input = { id: user_stats.id, updates: { "rank": this.currentRank } };
+            console.log(input);
+            const update_response = await this.azure_function("PUT", "/user/update/info", input)
+            // Show message incase the API response fails, otherwise update state.
+            if (update_response.result) {
+                // Update rank in UI too.
+                this.$store.commit("setCurrentRank", this.currentRank);
+                this.currentRank = this.$store.state.currentRank;
+                if (prev_level < this.currentRank.level) {
+                    this.level_up_message();
+                } else {
+                    this.exp_message();
+                }
+            } else {
+                this.message.error = update_response.msg || "Score update Failed."
+            }
+        },
+        add_update_score(topic, score) {
+            // Adding score to database
+            console.log(`Adding score for ${topic}: ${score}`);
+            this.update_scores[topic].push(score);
+        },
+        async db_update_scores(user_stats) {
+            // Calculate averages
+            for (let topic in this.update_scores) {
+                const scores = this.update_scores[topic];
+                const average = scores.length > 0
+                    ? scores.reduce((sum, val) => sum + val, 0) / scores.length
+                    : 0; // default to 0 if no scores
+
+                this.update_scores[topic] = Number(average.toPrecision(2)); // 1 sig fig
+            }
+            console.log(this.update_scores);
+            // Update database
+            const input = { 'id': user_stats.id, 'updates': this.update_scores }
+            const update = await this.azure_function("PUT", "/user/update/scores", input)
+            if (update) {
+                console.log('Updated scores!');
+            }
         },
         async add_achievement(name) {
             // Add achievement to user's achievements and notify on the UI.
@@ -497,108 +622,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-img {
-  max-width: 300px; /* Limits the width to 200px */
-  max-height: 200px; /* Limits the height to 100px */
-  width: auto; /* Maintain aspect ratio */
-  height: auto; /* Maintain aspect ratio */
-}
-
-.instruction-box {
-  background-color: #f9f9f9;
-  border-left: 5px solid #007bff;
-  padding: 10px;
-  margin: 10px 0;
-  font-size: 14px;
-  color: #333;
-  border-radius: 5px;
-}
-
-button.flagged {
-  background-color: #ffc107; // Yellow
-  color: black;
-}
-
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-
-/* Centered box but slightly above the middle */
-.overlay-content {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  text-align: center;
-  width: 80%;
-  max-width: 400px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-}
-
-.questionnaire {
-  text-align: center;
-  max-width: 500px;
-  margin: auto;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  background: #f9f9f9;
-}
-
-h2 {
-  margin-bottom: 15px;
-}
-
-.options button {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  margin: 5px 0;
-  border: none;
-  background-color: #969faa;
-  color: white;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-.options button.selected {
-  background-color: #418ade;
-}
-
-.next-button {
-  margin-top: 15px;
-  padding: 10px 20px;
-  border: none;
-  background-color: green;
-  color: white;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-.next-button:hover {
-  background-color: darkgreen;
-}
-
 .floating-grid {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: white;
-  border: 1px solid #ccc;
-  border-radius: 10px;
+  bottom: 0;
+  right: 0;
+  background-color: black;
+  border: 2px solid #f3af59;
   padding: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   z-index: 999;
   width: 160px;
-  max-height: 300px;
+  max-height: 120px;
   overflow-y: auto;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(35px, 1fr));
@@ -606,67 +639,27 @@ h2 {
 }
 
 .grid-item {
-  padding: 6px;
-  text-align: center;
-  background-color: #e0e0e0;
-  border-radius: 4px;
-  font-size: 13px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s ease;
+    color: #f3af59;
+    padding: 6px;
+    text-align: center;
+    background-color: #5c5c5c;
+    border: 2px solid black;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
 }
 
 .grid-item.answered {
-  background-color: #4caf50;
-  color: white;
+    background-color: #079cb0;
+    color: white;
 }
 
 .grid-item.flagged {
-  background-color: #ffc107;
-  color: black;
+    background-color: #f3af59;
+    color: black;
 }
 
 .grid-item.current {
-  border: 2px solid #007bff;
+    border: 2px solid #ffffff;  
 }
-
-.video-container {
-  position: relative;
-  display: inline-block;
-}
-
-/* Animated Click Circle */
-.click-circle {
-  position: absolute;
-  width: 30px;
-  height: 30px;
-  background-color: rgba(237, 18, 18, 0.8);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  animation: clickEffect 0.6s ease-out forwards;
-}
-
-@keyframes clickEffect {
-  0% {
-    transform: scale(0);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(2);
-    opacity: 0;
-  }
-}
-
-.horizontal-container {
-    display: flex; /* Display items in a row */
-    gap: 10px; /* Optional: Adds space between the items */
-}
-
-.item {
-    width: 20px; /* Set width */
-    height: 20px; /* Set height */
-    padding: 10px;
-    border-radius: 4px;
-}
-
 </style>
