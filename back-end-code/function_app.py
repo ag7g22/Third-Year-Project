@@ -525,7 +525,7 @@ def user_leaderboard(req: func.HttpRequest) -> func.HttpResponse:
 
     try: 
         # Query for the list of players
-        query = "SELECT p.username, p.streak, p.daily_training_score FROM users p"
+        query = "SELECT p.username, p.streak, p.daily_training_score, p.training_completion_date FROM users p"
         query_result = utility.query_items(proxy=users_proxy, query=query)
 
         # Order the players in ranking order and get at most the top 10 users.
@@ -566,7 +566,7 @@ def user_leaderboard_friend(req: func.HttpRequest) -> func.HttpResponse:
         user_query_list = utility.convert_to_query_list(id_list)
         logging.info("Users found: {}".format(user_query_list))
 
-        query_friends = "SELECT u.id, u.username, u.streak, u.daily_training_score FROM u WHERE u.id IN {}".format(user_query_list)
+        query_friends = "SELECT u.id, u.username, u.streak, u.daily_training_score, u.training_completion_date FROM u WHERE u.id IN {}".format(user_query_list)
         query_friends_result = utility.query_items(proxy=users_proxy, query=query_friends)
 
         # Order the players in ranking order and get at most the top 10 users.

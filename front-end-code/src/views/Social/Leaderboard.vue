@@ -14,35 +14,68 @@
     
     <!-- Main Content -->
     <div class="main-content">
-      <h1 class="title">LEADERBOARD | {{ logged_in_user }}</h1>
-      <div>
-        <button @click="next_page('dashboard')">Back</button>
-        <button @click="toggle_list('public')">Public</button>
-        <button @click="toggle_list('friends')">Friends</button>
-      </div>
   
       <!-- Leaderboard Sections -->
       <div v-if="current_list === 'public'">
-        <h2>DAILY QUIZ: PUBLIC</h2>
-        <ul v-if="leaderboards?.public?.length">
-          <li v-for="(user, index) in leaderboards.public" :key="user.username">
-            #{{ index + 1 }} {{ user.username }}: {{ user.daily_training_score }} | STREAK: {{ user.streak }}
-            <button @click="view_user(user.username)">View</button>
-          </li>
-        </ul>
-        <p v-else>No users found.</p>
+        <div class="list-container">
+          <h2>PUBLIC</h2>
+          <ul v-if="leaderboards?.public?.length" class="user-list">
+            <li
+              v-for="(user, index) in leaderboards.public"
+              :key="user.username"
+              :class="['user-card', 
+                        { gold: index === 0, silver: index === 1, bronze: index === 2 }]">
+              <div v-if="index === 0">
+                <div class="username">#{{ index + 1 }} {{ user.username }} 👑</div>
+              </div>
+              <div v-else>
+                <div class="username">#{{ index + 1 }} {{ user.username }}</div>
+              </div>
+              <div class="user-actions">
+                <h3>{{ user.daily_training_score }}</h3>
+                <h3>🔥{{ user.streak }}</h3>
+                <button @click="view_user(user.username)">View</button>
+              </div>
+            </li>
+          </ul>
+          <h3 v-else>Damn, no one has done the daily quiz yet. Bunch of procrasinators</h3>
+        </div>
+        <div class="game-buttons">
+          <button class="game-button" disabled>Public</button>
+          <button class="game-button" @click="toggle_list('friends')">Friends</button>
+        </div>
       </div>
   
       <div v-else-if="current_list === 'friends'">
-        <h2>DAILY QUIZ: FRIENDS</h2>
-        <ul v-if="leaderboards?.friends?.length">
-          <li v-for="(user, index) in leaderboards.friends" :key="user.username">
-            #{{ index + 1 }} {{ user.username }}: {{ user.daily_training_score }} | STREAK: {{ user.streak }}
-            <button @click="view_user(user.username)">View</button>
-          </li>
-        </ul>
-        <p v-else>You have no friends! What's the point of a friend leaderboard if you have no friends, you loser!</p>
+        <div class="list-container">
+          <h2>FRIENDS</h2>
+          <ul v-if="leaderboards?.friends?.length" class="user-list">
+            <li
+              v-for="(user, index) in leaderboards.friends"
+              :key="user.username"
+              :class="['user-card', 
+                        { gold: index === 0, silver: index === 1, bronze: index === 2 }]">
+              <div v-if="index === 0">
+                <div class="username">#{{ index + 1 }} {{ user.username }} 👑</div>
+              </div>
+              <div v-else>
+                <div class="username">#{{ index + 1 }} {{ user.username }}</div>
+              </div>
+              <div class="user-actions">
+                <h3>{{ user.daily_training_score }}</h3>
+                <h3>🔥{{ user.streak }}</h3>
+                <button @click="view_user(user.username)">View</button>
+              </div>
+            </li>
+          </ul>
+          <h3 v-else>You have no friends! What's the point of a friend leaderboard if you have no friends, you loser!</h3>
+        </div>
+        <div class="game-buttons">
+          <button class="game-button" @click="toggle_list('public')">Public</button>
+          <button class="game-button" disabled>Friends</button>
+        </div>
       </div>
+
     </div>
   </div>
 </template>
@@ -162,4 +195,30 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.user-card.gold {
+  border: 2px solid #ffd700;
+  color: #eadfa1;
+}
+
+.user-card.gold button {
+  color: #eadfa1;
+}
+
+.user-card.silver {
+  border: 2px solid #c0c0c0;
+  color: #d6d5d5;
+}
+
+.user-card.user-card.silver button {
+  color: #d6d5d5;
+}
+
+.user-card.bronze {
+  border: 2px solid #cd7f32;
+  color: #fcad5d;
+}
+
+.user-card.user-card.bronze button {
+  color: #fcad5d;
+}
 </style>

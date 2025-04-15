@@ -1,4 +1,5 @@
 import random
+from datetime import date
 from typing import Dict, List, Any
 from azure.cosmos import ContainerProxy, CosmosDict
 from shared_code.user import UniqueUserError, InvalidUserError, InvalidPasswordError
@@ -226,13 +227,26 @@ class utility():
     
     def sort_to_score_and_streak(self, user_stats: List[Dict[str,Any]]) -> List[Dict[str, Any]]:
         """
-        Returns a list of users_stats to ascending order:
-        First daily_training_score, then higher streak
+        Returns a list of user_stats in descending order by:
+        - daily_training_score
+        - streak
+        Excludes users who completed today's training.
         """
-        leaderboard = sorted(user_stats, key=lambda x: (-x['daily_training_score'], -x['streak'], x['username'].lower()))
-        if len(leaderboard) > 10:
-            leaderboard = leaderboard[:10]
-        return leaderboard
+        today_str = date.today().strftime('%Y-%m-%d')
+
+        # Filter out users who haven't completed today
+        filtered_users = [
+            user for user in user_stats
+            if user.get('training_completion_date') == today_str
+        ]
+
+        # Sort the remaining users
+        leaderboard = sorted(
+            filtered_users,
+            key=lambda x: (-x['daily_training_score'], -x['streak'], x['username'].lower())
+        )
+
+        return leaderboard[:10]  # Return top 10 only
     
     def convert_to_query_list(self, users: List[str]):
         """
