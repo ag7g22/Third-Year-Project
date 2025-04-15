@@ -6,7 +6,7 @@
       <div class="side-buttons">
         <button disabled>🎲 Dashboard</button>
         <button @click="next_page('account')">👤 Account</button>
-        <button @click="load_friends_list">👥 Friends</button>
+        <button @click="load_friends_list">👥 Social Hub</button>
         <button @click="load_leaderboards">🏆 Leaderboard</button>
         <button @click="logout">🔒 Log out</button> 
       </div>

@@ -236,7 +236,7 @@ export default {
             closeButton: true,
             progressBar: true,
             positionClass: "toast-bottom-full-width",
-            timeOut: 2000,
+            timeOut: 3000,
             showMethod: "fadeIn",
             hideMethod: "fadeOut",
             preventDuplicates: true
@@ -247,7 +247,7 @@ export default {
             closeButton: true,
             progressBar: true,
             positionClass: "toast-bottom-full-width",
-            timeOut: 2000,
+            timeOut: 3000,
             showMethod: "fadeIn",
             hideMethod: "fadeOut",
             preventDuplicates: true
@@ -628,7 +628,7 @@ export default {
                     closeButton: true,
                     progressBar: true,
                     positionClass: "toast-bottom-center",
-                    timeOut: 2000,
+                    timeOut: 3000,
                     showMethod: "fadeIn",
                     hideMethod: "fadeOut",
                     preventDuplicates: true

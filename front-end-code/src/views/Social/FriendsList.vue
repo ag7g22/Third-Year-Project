@@ -14,51 +14,80 @@
 
     <!-- Main Content -->
     <div class="main-content">
-      <h1 class="title">SOCIAL LIST | {{ logged_in_user }}</h1>
-  
-      <!-- Toggle Buttons -->
-      <div>
-        <button @click="toggle_list('friends')">Friends</button>
-        <button @click="toggle_list('requests')">Friend Requests</button>
-        <button @click="toggle_list('search')">Search Users</button>
-      </div>
-  
+
       <!-- Friends List -->
       <div v-if="current_list === 'friends'">
-        <h2>Friends List</h2>
-        <ul v-if="social_lists.friends.length">
-          <li v-for="friend in social_lists.friends" :key="friend.id">
-            {{ friend.username }}
-            <button @click="view_user(friend.username)">View</button>
-            <button @click="remove_friend(friend.id, friend.username)">Remove Friend</button>
-          </li>
-        </ul>
+        <div class="list-container">
+          <h2>Friends List</h2>
+          <ul v-if="social_lists.friends.length" class="user-list">
+            <li v-for="friend in social_lists.friends" :key="friend.id" class="user-card">
+              <div class="username">{{ friend.username }}</div>
+              <div class="user-actions">
+                <button @click="view_user(friend.username)">View</button>
+                <button @click="remove_friend(friend.id, friend.username)">Remove Friend</button>
+              </div>
+            </li>
+          </ul>
+          <h3 v-else>*cricket noises*</h3>
+        </div>
+        <div class="game-buttons">
+          <button class="game-button" disabled>Friends</button>
+          <button class="game-button" @click="toggle_list('requests')">Friend Requests</button>
+          <button class="game-button" @click="toggle_list('search')">Search Users</button>
+        </div>
       </div>
   
       <!-- Friend Requests -->
       <div v-if="current_list === 'requests'">
-        <h2>Friend Requests</h2>
-        <ul v-if="social_lists.friend_requests.length">
-          <li v-for="request in social_lists.friend_requests" :key="request.id">
-            {{ request.username }}
-            <button @click="accept_request(request.id, request.username)">Accept</button>
-            <button @click="reject_request(request.id, request.username)">Decline</button>
-          </li>
-        </ul>
+        <div class="list-container">
+          <h2>Friend Requests</h2>
+          <ul v-if="social_lists.friend_requests.length" class="user-list">
+            <li v-for="request in social_lists.friend_requests" :key="request.id" class="user-card">
+              <div class="username">{{ request.username }}</div>
+              <div class="user-actions">
+                <button @click="accept_request(request.id, request.username)">Accept</button>
+                <button @click="reject_request(request.id, request.username)">Decline</button>
+              </div>
+            </li>
+          </ul>
+          <h3 v-else>Hey man, just click the "Search Users" button to get you some friends ...</h3>
+        </div>
+        <div class="game-buttons">
+          <button class="game-button" @click="toggle_list('friends')">Friends</button>
+          <button class="game-button" disabled>Friend Requests</button>
+          <button class="game-button" @click="toggle_list('search')">Search Users</button>
+        </div>
       </div>
   
       <!-- Search Users -->
       <div v-if="current_list === 'search'">
-        <h2>Search Users</h2>
-        <input type="text" v-model="search.query" placeholder="Search..." />
-        <button @click="search_users">🔍</button>
-        <ul v-if="search.users.length">
-          <li v-for="user in search.users" :key="user.id">
-            {{ user.username }}
-            <button @click="view_user(user.username)">View</button>
-            <button v-if="!is_friend(user.username)" @click="send_friend_request(user.id, user.username)">Add Friend</button>
-          </li>
-        </ul>
+        <div class="list-container">
+          <h2>Search Users</h2>
+          <div class="search-bar">
+            <input type="text" v-model="search.query" placeholder="Search..." />
+            <button @click="search_users">🔍</button>
+          </div>
+          
+          <ul v-if="search.users.length" class="user-list">
+            <li v-for="user in search.users" :key="user.id" class="user-card">
+              <div class="username">{{ user.username }}</div>
+              <div class="user-actions">
+                <button @click="view_user(user.username)">View</button>
+                <button 
+                  v-if="!is_friend(user.username)" 
+                  @click="send_friend_request(user.id, user.username)">
+                  Add Friend
+                </button>
+              </div>
+            </li>
+          </ul>
+          <h3 v-else>Lets find you some friends eh?</h3>
+        </div>
+        <div class="game-buttons">
+          <button class="game-button" @click="toggle_list('friends')">Friends</button>
+          <button class="game-button" @click="toggle_list('requests')">Friend Requests</button>
+          <button class="game-button" disabled>Search Users</button>
+        </div>
       </div>
   
       <p v-if="message.error" class="error-message">{{ message.error }}</p>
@@ -85,6 +114,39 @@ export default {
     };
   },
   methods: {
+    info_message(title, msg) {
+      toastr.info(msg, title, {
+          closeButton: true,
+          progressBar: true,
+          positionClass: "toast-bottom-left",
+          timeOut: 3000,
+          showMethod: "fadeIn",
+          hideMethod: "fadeOut",
+          preventDuplicates: false
+      });
+    },
+    successful_message(title, msg) {
+        toastr.success(msg, title, {
+        closeButton: true,
+        progressBar: true,
+        positionClass: "toast-bottom-left",
+        timeOut: 3000,
+        showMethod: "fadeIn",
+        hideMethod: "fadeOut",
+        preventDuplicates: true
+        });
+    },
+    error_message(title, msg) {
+    toastr.error(msg, title, {
+        closeButton: true,
+        progressBar: true,
+        positionClass: "toast-bottom-left",
+        timeOut: 3000,
+        showMethod: "fadeIn",
+        hideMethod: "fadeOut",
+        preventDuplicates: true
+        });
+    },
     clearMessages() {
       this.message.error = "";
       this.message.success = "";
@@ -120,7 +182,7 @@ export default {
         };
         this.$router.push(routeData);
       } else {
-        this.message.error = response.msg || "Loading user failed.";
+        this.error_message('Loading user failed!', ' ');
       }
     },
     async remove_friend(id, username) {
@@ -128,11 +190,11 @@ export default {
       const input = { id_1: this.stats.id, id_2: id };
       const response = await this.azure_function("POST", "/user/friend/remove", input);
       if (response.result) {
-        this.message.success = 'Removed friend!';
+        this.successful_message('Removed friend:', username);
         const friends = this.social_lists.friends.filter(friend => friend.id !== id);
         this.update_social_lists(friends, this.social_lists.friend_requests);
       } else {
-        this.message.error = response.msg || "Friend removal Failed.";
+        this.error_message('Failed!', response.msg);
       }
     },
     async accept_request(id, username) {
@@ -140,12 +202,12 @@ export default {
       const input = { sender_id: this.stats.id, recipient_id: id };
       const response = await this.azure_function("POST", "/user/friend/accept", input);
       if (response.result) {
-        this.message.success = 'Accepted request!';
+        this.successful_message('Added friend:', username);
         const friend_requests = this.social_lists.friend_requests.filter(r => r.id !== id);
         const friends = [...this.social_lists.friends, { id, username }];
         this.update_social_lists(friends, friend_requests);
       } else {
-        this.message.error = response.msg || "Friend accept Failed.";
+        this.error_message('Failed!', response.msg);
       }
     },
     async reject_request(id, username) {
@@ -153,11 +215,11 @@ export default {
       const input = { sender_id: id, sender_username: username, recipient_id: this.stats.id };
       const response = await this.azure_function("POST", "/user/friend/reject", input);
       if (response.result) {
-        this.message.success = 'Rejected request!';
+        this.successful_message('Rejected user:', username);
         const friend_requests = this.social_lists.friend_requests.filter(r => r.id !== id);
         this.update_social_lists(this.social_lists.friends, friend_requests);
       } else {
-        this.message.error = response.msg || "Friend reject Failed.";
+        this.error_message('Failed!', response.msg);
       }
     },
     async send_friend_request(recipient_id, recipient_username) {
@@ -165,15 +227,9 @@ export default {
       const input = { sender_id: this.stats.id, sender_username: this.logged_in_user, recipient_id };
       const response = await this.azure_function("POST", "/user/friend/request", input);
       if (response.result) {
-        this.message.success = 'Sent request!';
-        toastr.success(`Sent friend request to "${recipient_username}"`, {
-          closeButton: true,
-          progressBar: true,
-          timeOut: 5000,
-          positionClass: "toast-top-right"
-        });
+        this.info_message('Sent request to user:', recipient_username);
       } else {
-        this.message.error = response.msg || "Friend request Failed.";
+        this.error_message('Failed!', response.msg);
       }
     },
     async search_users() {
@@ -187,10 +243,10 @@ export default {
         search: this.search.query
       });
       if (response.result) {
-        this.message.success = 'Found users!';
+        this.successful_message('Found users!', ' ');
         this.search.users = response.msg;
       } else {
-        this.message.error = response.msg || "Username search Failed.";
+        this.error_message('No users found.', ' ');
       }
     },
     async azure_function(method, route, data) {
@@ -289,4 +345,95 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.list-container {
+  background-color: rgb(25, 25, 25); /* Black background */
+  padding: 20px;
+  border-radius: 14px;
+  height: 70vh;
+  max-width: 1000px;
+  margin: 0 auto;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  color: white;
+}
+
+.list-container h2 {
+  margin-bottom: 15px;
+}
+
+.user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 0;
+  height: 55vh; /* 85% of the viewport height */
+  overflow-y: auto;
+  list-style: none;
+  width: 100%;
+  max-width: 1000px; /* adjust to fit your layout */
+  margin: 0 auto;
+}
+
+.user-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgb(20, 20, 20);
+  color: #ffffff;
+  border: 2px solid #079cb0;
+  padding: 15px 20px;
+  border-radius: 12px;
+  width: 100%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.username {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.user-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.user-card button {
+  background-color: #424242;
+  color: #079cb0;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.user-card button:hover {
+  background-color: #646464;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center; /* ensures vertical alignment */
+  gap: 10px; /* space between input and button */
+}
+
+.search-bar input {
+  flex: 1; /* allow input to grow */
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #f3af59;
+  background-color: rgb(20, 20, 20);
+  height: 40px; /* consistent height */
+}
+
+.search-bar button {
+  height: 40px; /* match input height */
+  padding: 10px 15px;
+  font-size: 1rem;
+  border-radius: 6px;
+  background-color: #f3af59;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
 </style>

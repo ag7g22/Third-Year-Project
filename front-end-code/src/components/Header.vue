@@ -2,46 +2,46 @@
     <!-- This is the navigation menu for the different pages (Testing purposes only) -->
     <header>
         <div v-if="this.$route.name === 'mainPage'" class="header-title">
-          <h2>Welcome!</h2>
+          <h1>Welcome!</h1>
         </div>
         <div v-if="this.$route.name === 'authentication'" class="header-title">
-          <h2>Sign in to GearUp!</h2>
+          <h1>Sign in to GearUp!</h1>
         </div>
         <div v-if="this.$route.name === 'dashboard'" class="header-title">
-          <h2>Welcome {{ this.$store.state.currentUser }}! What are we practicing today?</h2>
+          <h1>Welcome {{ this.$store.state.currentUser }}! What are we practicing today?</h1>
         </div>
         <div v-if="this.$route.name === 'account'" class="header-title">
-          <h2>User profile</h2>
+          <h1>User profile</h1>
         </div>
         <div v-if="this.$route.name === 'friends'" class="header-title">
-          <h2>My friends</h2>
+          <h1>Social Hub</h1>
         </div>
         <div v-if="this.$route.name === 'leaderboard'" class="header-title">
-          <h2>Leaderboard</h2>
+          <h1>Daily Quiz Leaderboards</h1>
         </div>
         <div v-if="this.$route.name === 'lobby'" class="header-title">
-          <h2>1 vs 1 Quiz battle</h2>
+          <h1>1 vs 1 Quiz battle</h1>
         </div>
         <div v-if="this.$route.name === 'categoryquiz'" class="header-title">
-          <h2>Category Quiz</h2>
+          <h1>Category Quiz</h1>
         </div>
         <div v-if="this.$route.name === 'roadsignquiz'" class="header-title">
-          <h2>Road Sign Quiz</h2>
+          <h1>Road Sign Quiz</h1>
         </div>
         <div v-if="this.$route.name === 'feedback'" class="header-title">
-          <h2>Question feedback</h2>
+          <h1>Question feedback</h1>
         </div>
         <div v-if="this.$route.name === 'dailyquiz'" class="header-title">
-          <h2>Daily training session</h2>
+          <h1>Daily training session</h1>
         </div>
         <div v-if="this.$route.name === 'mockexam'" class="header-title">
-          <h2>Mock Test</h2>
+          <h1>Mock Test</h1>
         </div>
         <div v-if="this.$route.name === 'hazard'" class="header-title">
-          <h2>Hazard Perception</h2>
+          <h1>Hazard Perception</h1>
         </div>
         <div v-if="this.$route.name === 'HPvideo'" class="header-title">
-          <h2>Video clip practice</h2>
+          <h1>Video clip practice</h1>
         </div>
     </header>
 </template>
@@ -88,7 +88,7 @@ header {
   justify-content: center; /* Horizontally center the navigation items */
 }
 
-h2 {
+h1 {
   color: #ffffff; /* White text */
   text-decoration: none;
   font-weight: bold;
