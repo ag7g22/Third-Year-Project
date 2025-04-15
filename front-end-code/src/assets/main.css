@@ -477,7 +477,6 @@ video {
 
 .bar {
     height: 100%;
-    width: 0%; /* start at 0 for animation */
     transition: width 0.6s ease-in-out;
     border-radius: 0; /* squared edges */
 }

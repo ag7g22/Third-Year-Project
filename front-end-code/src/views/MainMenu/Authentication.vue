@@ -99,6 +99,23 @@ export default {
     this.remove_socket_listeners();
   },
   methods: {
+    daily_quiz_reminder() {
+      const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const date = new Date(this.$store.state.currentStats.training_completion_date);
+        if ((date.getFullYear() !== today.getFullYear() || date.getMonth() !== today.getMonth() || date.getDate() !== today.getDate()) ||
+            (this.$store.state.currentStats.training_completion_date === 'n/a')) {
+          toastr.error("Don't lose your streak >:(", `DO YOUR DAILY QUIZ!`, {
+            closeButton: true,
+            progressBar: true,
+            positionClass: "toast-top-right",
+            timeOut: 5000,
+            showMethod: "fadeIn",
+            hideMethod: "fadeOut",
+            preventDuplicates: true
+          });
+        }
+    },
     toggle_form() {
       this.reset_inputs();
       this.showLogin = !this.showLogin;
@@ -225,6 +242,8 @@ export default {
         if (info.achievements.length === 0) {
           this.add_achievement('Hello World!');
         }
+        
+        this.daily_quiz_reminder();
       } else {
         const message = response.msg || "Failed to load account stats.";
         this.error_message("Account error", message)

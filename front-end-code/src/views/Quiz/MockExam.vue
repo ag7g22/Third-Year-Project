@@ -151,7 +151,7 @@
                     <h2>You've completed the mock test! 📖</h2>
                     <h3>Multiple Choice: {{ this.scores_1 }} / 50 | Hazard Perception: {{ this.scores_2 }} / 75</h3>
                     <div class="graph-box">
-                        <div class="score-row" v-for="(score, topic) in update_scores" :key="topic">
+                        <div class="score-row" v-for="(score, topic) in averaged_scores" :key="topic">
                             <div class="label">{{ topic }}</div>
                             <div class="bar-container">
                                 <div class="bar"
@@ -162,7 +162,6 @@
                         </div>
                     </div>
                     <div class="game-buttons">
-                        <button class="game-button" @click="terminate_mock_exam()">End Exam</button>
                         <button class="game-button" @click="init_feedback()">Feedback</button> 
                     </div>
                 </div>
@@ -233,7 +232,7 @@ export default {
                 "Tricky Conditions": "#ffc107",   // amber
                 "Breakdowns": "#795548",          // brown
             },
-
+            averaged_scores: {},
 
             logged_in_user: this.$store.state.currentUser,
             currentRank: this.$store.state.currentRank,
@@ -283,7 +282,6 @@ export default {
                 this.questions.forEach(item => {
                     item.selected_ans = null;
                     item.flagged = false;
-                    delete item.explanation;
                 });
                 this.init_clips();
             } else {
@@ -459,19 +457,23 @@ export default {
                 this.finish_mock_exam();
             }
         },
-        finish_mock_exam() {
+        async finish_mock_exam() {
             // Add up scores
-            this.questions.forEach(item => {
+            this.questions.forEach(async item => {
                 if (item.selected_ans === item.correct_answer) {
                     this.scores_1 += 1;
-                    this.add_update_score(item.topic, 1);
+                    await this.add_update_score(item.topic, 1);
                 } else {
                     // {question, correct_ans, selected_ans, image}
-                    this.add_update_score(item.topic, 0);
-                    const entry = { question: item.question, selected: item.selected_ans, correct: item.correct_answer, image: item.image };
+                    await this.add_update_score(item.topic, 0);
+                    const entry = { question: item.question, selected: item.selected_ans, correct: item.correct_answer, image: item.image, explanation: item.explanation };
                     this.feedback.push(entry);
                 }
             });
+            const user_stats = this.$store.state.currentStats;
+            await this.update_user_exp(user_stats);
+            await this.db_update_scores(user_stats);
+
             this.toggle_view('scores')
         },
         async terminate_mock_exam() {
@@ -497,15 +499,17 @@ export default {
             this.too_many_clicks = false;
             this.feedback = [];
             this.update_scores = {"Driving Off": [], "Urban Driving": [],"Rural Driving": [],"Bigger Roads": [],"Motorways": [],"Tricky Conditions": [],"Breakdowns": [],},
-            this.message = { error: "", success: "" };
+            this.averaged_scores = {},
             this.toggle_view('instructions');
         },
         init_feedback() {
             // Setup for the feedback page
+            let input = this.feedback;
+            this.terminate_mock_exam();
             console.log("/feedback");
             this.$router.push({
                 path: `/feedback`,
-                query: { input: this.feedback }
+                query: { input: input }
             })
         },
         async update_user_exp() {
@@ -541,24 +545,22 @@ export default {
                 this.message.error = update_response.msg || "Score update Failed."
             }
         },
-        add_update_score(topic, score) {
+        async add_update_score(topic, score) {
             // Adding score to database
-            console.log(`Adding score for ${topic}: ${score}`);
             this.update_scores[topic].push(score);
         },
         async db_update_scores(user_stats) {
-            // Calculate averages
             for (let topic in this.update_scores) {
                 const scores = this.update_scores[topic];
                 const average = scores.length > 0
-                    ? scores.reduce((sum, val) => sum + val, 0) / scores.length
-                    : 0; // default to 0 if no scores
+                    ? (scores.reduce((sum, val) => sum + val, 0) / scores.length)
+                    : 0;
 
-                this.update_scores[topic] = Number(average.toPrecision(2)); // 1 sig fig
+                this.averaged_scores[topic] = parseFloat(average.toFixed(2));
             }
-            console.log(this.update_scores);
             // Update database
-            const input = { 'id': user_stats.id, 'updates': this.update_scores }
+            const input = { 'id': user_stats.id, 'updates': this.averaged_scores }
+            console.log(input);
             const update = await this.azure_function("PUT", "/user/update/scores", input)
             if (update) {
                 console.log('Updated scores!');
@@ -616,6 +618,9 @@ export default {
       const minutes = String(Math.floor(this.timeLeft / 60)).padStart(2, '0');
       const seconds = String(this.timeLeft % 60).padStart(2, '0');
       return `${minutes}:${seconds}`;
+    },
+    progressBarWidth() {
+        return (this.current_Q / (this.questions.length - 1)) * 100;
     }
   },
 };

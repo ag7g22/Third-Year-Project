@@ -47,9 +47,6 @@
 import toastr from 'toastr';
 export default {
   name: "dashboard",
-  mounted: function() {
-        this.daily_quiz_reminder();
-    },
   data() {
     return {
       client_socket: this.$store.state.currentClientSocket,
@@ -62,24 +59,6 @@ export default {
     clearMessages() {
       this.message.error = "";
       this.message.success = "";
-    },
-    daily_quiz_reminder() {
-      const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const date = new Date(this.$store.state.currentStats.training_completion_date);
-        if (this.$store.state.currentStats.training_completion_date !== 'n/a') return;
-        if ((date.getFullYear() !== today.getFullYear() && date.getMonth() !== today.getMonth() && date.getDate() !== today.getDate()) ||
-            (this.$store.state.currentStats.training_completion_date === 'n/a')) {
-          toastr.error("Don't lose your streak >:(", `DO YOUR DAILY QUIZ!`, {
-            closeButton: true,
-            progressBar: true,
-            positionClass: "toast-top-right",
-            timeOut: 5000,
-            showMethod: "fadeIn",
-            hideMethod: "fadeOut",
-            preventDuplicates: true
-          });
-        }
     },
     logout() {
       this.client_socket.emit('logout', this.logged_in_user);

@@ -312,7 +312,7 @@ export default {
             // Add to feedback list to send to API later
             let question_image = this.questions[this.currentQuestion].image
             let q_obj = this.questions[this.currentQuestion]
-            console.log(JSON.stringify({question: q_obj.question, selected: this.selectedAnswer, correct: q_obj.correct_answer, image: question_image}))
+            console.log('Added feedback for Question ' + this.currentQuestion);
             this.feedback.push({question: q_obj.question, selected: this.selectedAnswer, correct: q_obj.correct_answer, image: question_image, explanation: q_obj.explanation})
         },
         add_image() {

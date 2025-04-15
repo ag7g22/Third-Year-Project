@@ -147,7 +147,7 @@
                     <h2>You've completed the daily quiz! 💡</h2>
                     <h1> Accuracy: {{ percentage }}% | Daily score: {{ daily_score }} </h1>
                     <div class="graph-box">
-                        <div class="score-row" v-for="(score, topic) in update_scores" :key="topic">
+                        <div class="score-row" v-for="(score, topic) in averaged_scores" :key="topic">
                             <div class="label">{{ topic }}</div>
                             <div class="bar-container">
                                 <div class="bar"
@@ -176,7 +176,7 @@ export default {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const date = new Date(this.$store.state.currentStats.training_completion_date);
-        if ((date.getFullYear() !== today.getFullYear() && date.getMonth() !== today.getMonth() && date.getDate() !== today.getDate()) ||
+        if ((date.getFullYear() !== today.getFullYear() || date.getMonth() !== today.getMonth() || date.getDate() !== today.getDate()) ||
             (this.$store.state.currentStats.training_completion_date === 'n/a')) {
             this.completed_daily_quiz = false;
         } else {
@@ -239,6 +239,7 @@ export default {
                 "Tricky Conditions": "#ffc107",   // amber
                 "Breakdowns": "#795548",          // brown
             },
+            averaged_scores: {},
 
             // Score, averaged out by number of questions.
             hazard_score: 0,
@@ -448,7 +449,12 @@ export default {
             }
         },
         async update_daily_score(user_stats) {
-            user_stats.daily_training_score = this.daily_score;
+            if (!this.completed_daily_quiz) {
+                console.log('Updated daily training score!');
+                user_stats.daily_training_score = this.daily_score;  
+            } else {
+                console.log('Keeping original daily training score!');
+            }
         },
         async update_training_completion_date(user_stats) {
             const today = new Date();
@@ -577,6 +583,7 @@ export default {
         terminate_daily_quiz() {
             // End the quiz early
             this.resetStopwatch();
+            this.completed_daily_quiz = false;
             this.current_part = 'Road sign section';
             this.next_part = 'Multiple choice section';
             this.r_questions = []; // Road sign questions
@@ -599,6 +606,7 @@ export default {
             this.too_many_clicks = false,
             this.feedback = [],
             this.update_scores = {"Driving Off": [], "Urban Driving": [],"Rural Driving": [],"Bigger Roads": [],"Motorways": [],"Tricky Conditions": [],"Breakdowns": [],},
+            this.averaged_scores = {},
             this.total_score = 0,
             this.percentage = null,
             this.final_score = null,
@@ -640,8 +648,8 @@ export default {
             // Add to feedback list to send to API later
             let question_image = this.questions[this.currentQuestion].image
             let q_obj = this.questions[this.currentQuestion]
-            console.log(JSON.stringify({question: q_obj.question, selected: this.selectedAnswer, correct: q_obj.correct_answer, image: question_image}))
-            this.feedback.push({question: q_obj.question, selected: this.selectedAnswer, correct: q_obj.correct_answer, image: question_image})
+            console.log('Added feedback for Question ' + this.currentQuestion);
+            this.feedback.push({question: q_obj.question, selected: this.selectedAnswer, correct: q_obj.correct_answer, image: question_image, explanation: q_obj.explanation})
         },
         add_update_score(topic, score) {
             // Adding score to database
@@ -649,18 +657,17 @@ export default {
             this.update_scores[topic].push(score);
         },
         async db_update_scores(user_stats) {
-            // Calculate averages
             for (let topic in this.update_scores) {
                 const scores = this.update_scores[topic];
                 const average = scores.length > 0
-                    ? scores.reduce((sum, val) => sum + val, 0) / scores.length
-                    : 0; // default to 0 if no scores
+                    ? (scores.reduce((sum, val) => sum + val, 0) / scores.length)
+                    : 0;
 
-                this.update_scores[topic] = Number(average.toPrecision(2)); // 1 sig fig
+                this.averaged_scores[topic] = parseFloat(average.toFixed(2));
             }
-            console.log(this.update_scores);
             // Update database
-            const input = { 'id': user_stats.id, 'updates': this.update_scores }
+            const input = { 'id': user_stats.id, 'updates': this.averaged_scores }
+            console.log(input);
             const update = await this.azure_function("PUT", "/user/update/scores", input)
             if (update) {
                 console.log('Updated scores!');
@@ -691,10 +698,12 @@ export default {
         },
         init_feedback() {
             // Setup for the feedback page
+            let input = this.feedback;
+            this.terminate_daily_quiz();
             console.log("/feedback");
             this.$router.push({
                 path: `/feedback`,
-                query: { input: this.feedback }
+                query: { input: input }
             })
         },
         get_stats() {
@@ -718,7 +727,6 @@ export default {
             }
             // Only update rank if they already did the daily quiz!
             let input = { id: user_stats.id, updates: { "rank": this.currentRank } };
-            const tcd = new Date(user_stats.training_completion_date);
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             if (!this.completed_daily_quiz) {// Only update exp
@@ -729,9 +737,6 @@ export default {
                     "training_completion_date": user_stats.training_completion_date
                 } };
                 this.completed_daily_quiz = true;
-            } else {
-                // Don't update the stats.
-                user_stats = this.$store.state.currentStats;
             }
             console.log(input);
 
