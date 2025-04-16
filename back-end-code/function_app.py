@@ -93,7 +93,7 @@ def user_login(req: func.HttpRequest) -> func.HttpResponse:
 
     try:
         # Search for the player's credentials in the database.
-        query = 'SELECT * FROM users WHERE CONTAINS(users.username, "{0}") AND users.password = "{1}"'.format(username, password)
+        query = 'SELECT * FROM users WHERE users.username = "{0}" AND users.password = "{1}"'.format(username, password)
         users = utility.query_items(proxy=users_proxy,query=query)
         if users:
             logging.info("SUCCESS: login credentials validated.")

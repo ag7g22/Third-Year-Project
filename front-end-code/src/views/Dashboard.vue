@@ -17,10 +17,10 @@
       <div class="progress-container">
         <div class="progress-title-row">
           <span class="progress-title">Exam-ready level:</span>
-          <span class="progress-percent">{{ progressBarWidth }}%</span>
+          <span class="progress-percent">{{ progress_bar_width }}%</span>
         </div>
         <div class="exam-ready-wrapper">
-          <div class="exam-ready-bar" :style="{ width: progressBarWidth + '%' }"></div>
+          <div class="exam-ready-bar" :style="{ width: progress_bar_width + '%' }"></div>
         </div>
       </div>
       <div class="buttons-grid">
@@ -53,18 +53,13 @@ export default {
     return {
       client_socket: this.$store.state.currentClientSocket,
       logged_in_user: this.$store.state.currentUser,
-      message: { error: "", success: "" },
       achievements: this.$store.state.currentAchievements,
     };
   },
   methods: {
-    clearMessages() {
-      this.message.error = "";
-      this.message.success = "";
-    },
     logout() {
+      // Let server know the user is logging out.
       this.client_socket.emit('logout', this.logged_in_user);
-      this.clearMessages();
 
       // Reset state
       this.$store.commit("setCurrentUser", "");
@@ -72,23 +67,20 @@ export default {
       this.$store.commit("setCurrentRank", { level: 'n/a', exp: 0, exp_threshold: 0 });
       this.$store.commit("setCurrentStats", { id: 'n/a', streak: 0, daily_training_score: 0, training_completion_date: 'n/a' });
       this.$store.commit("setCurrentSocialLists", { friends: [], friend_requests: [] });
-      console.log("User logged out.");
+      console.log("User logged out");
 
       this.next_page('authentication');
     },
     async load_friends_list() {
       const response = await this.azure_function("POST", "/user/friend/all", { username: this.logged_in_user });
-
       if (response.result) {
-        this.message.success = "Retrieved Friends List! Loading Socials Page ...";
         this.$store.commit("setCurrentSocialLists", {
           friends: response.msg.friends,
           friend_requests: response.msg.friend_requests
         });
         this.next_page('friends');
-      } else {
-        this.message.error = response.msg || "Unable to find user.";
       }
+      console.log(response.result);
     },
     async load_leaderboards() {
       const [publicRes, friendsRes] = await Promise.all([
@@ -120,7 +112,6 @@ export default {
         return result;
       } catch (error) {
         console.error("Error:", error);
-        this.message.error = "An API error occurred. Please try again later.";
       }
     },
     next_page(page) {
@@ -129,25 +120,22 @@ export default {
     },
   },
   computed: {
-        progressBarWidth() {
-          const averages = {};
+    progress_bar_width() {
+      const sums = {};
+      // Step 1: Sum for each category
+      for (const category in this.$store.state.currentRecentCatScores) {
+        const scores = this.$store.state.currentRecentCatScores[category];
+        const sum = scores.reduce((acc, score) => acc + score, 0);
+        sums[category] = sum;
+      }
+      // Step 2: Add all the sums
+      const totalSum = Object.values(sums).reduce((acc, val) => acc + val, 0);
+      
+      // Step 3: Divide by 70 and convert to percentage
+      const finalPercentage = ((totalSum / 70) * 100).toFixed(1);
 
-          // Calculate average for each category
-          for (const category in this.$store.state.currentRecentCatScores) {
-            const scores = this.$store.state.currentRecentCatScores[category];
-            const sum = scores.reduce((acc, score) => acc + score, 0);
-            averages[category] = (sum / scores.length).toFixed(3);  // Round to 3 decimal places
-          }
-
-          // Calculate the average of the averages
-          const avgOfAverages = (
-            Object.values(averages).reduce((acc, avg) => acc + parseFloat(avg), 0) / Object.values(averages).length
-          ).toFixed(3);
-
-          const percentage = parseFloat(avgOfAverages).toFixed(3) * 100;
-
-          // Return 0 if it's zero (or a falsey value), otherwise return the number
-          return percentage || 0;
+      // Step 4: Return as a number (not string), or 0 if NaN
+      return parseFloat(finalPercentage) || 0;
     }
   },
 };

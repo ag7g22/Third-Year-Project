@@ -5,28 +5,27 @@
     font-style: normal;
   }
 
-/* Add this to your global or component styles to remove default padding/margins */
 * { 
     font-family: "Pixelify Sans", cursive;
     margin: 0;
     padding: 0;
-    box-sizing: border-box; /* Ensures padding/margin don't mess with element dimensions */
+    box-sizing: border-box;
 }
 
 html, body {
     font-family: "Pixelify Sans", cursive;
-    height: 100%; /* Ensure full height for proper centering */
+    height: 100%;
 }
 
 .container {
     display: flex;
     flex-direction: column;
-    align-items: center;    /* Horizontal centering */
-    justify-content: center; /* Vertical centering */
-    height: calc(100vh - 80px); /* Full screen minus header */
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh - 80px);
     background-color: rgb(30, 30, 30);
     overflow: hidden;
-    text-align: center; /* Optional: centers inline content */
+    text-align: center;
 }
 
 input {
@@ -47,15 +46,15 @@ input:focus {
 
 .game-buttons {
     width: auto;
-    margin: 0 auto; /* Automatically center the container */
+    margin: 0 auto;
     margin-top: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 50px; /* spacing between buttons */
-    padding: 10px 20px; /* add padding inside the bar */
-    background-color: rgb(25, 25, 25); /* Black background */
-    border-radius: 50px; /* makes the bar curved */
+    gap: 50px;
+    padding: 10px 20px;
+    background-color: rgb(25, 25, 25);
+    border-radius: 50px;
 }
 
 .game-button {
@@ -69,21 +68,21 @@ input:focus {
   
 .game-button:hover {
     color: #fff;
-    transform: scale(1.05); /* Slight zoom without layout shift */
+    transform: scale(1.05);
 }
 
 .game-button:disabled {
     color: #646464;
-    transform: scale(1.05); /* Slight zoom without layout shift */
+    transform: scale(1.05);
 }
 
 .split-container {
     padding-left: 100px;
     padding-right: 100px;
     display: flex;
-    height: calc(100vh - 80px); /* 100% of the screen height minus the header's height */
+    height: calc(100vh - 80px);
     background-color: rgb(30, 30, 30);
-    align-items: center;       /* Horizontal centering */
+    align-items: center;
 }
 
 .left-side {
@@ -93,7 +92,7 @@ input:focus {
     justify-content: center;
     align-items: center;
     color: white;
-    font-size: 18px; /* Reduced from 24px to 18px */
+    font-size: 18px;
 }
 
 .left-side h1, h2, h3, p {
@@ -103,8 +102,8 @@ input:focus {
   
 .instructions-container {
     width: 100%;
-    max-width: 700px; /* Slightly narrower */
-    padding: 20px;    /* Reduced padding */
+    max-width: 700px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -115,17 +114,17 @@ input:focus {
 .feature-list {
     text-align: left;
     max-width: 600px;
-    margin: 10px 0;         /* Tighter spacing */
-    font-size: 14px;        /* Smaller font for features */
-    line-height: 1.5;       /* Slightly tighter line spacing */
+    margin: 10px 0;
+    font-size: 14px;
+    line-height: 1.5;
 }
 
 .right-side {
-    flex: 1; /* Takes up the right side space */
+    flex: 1;
     padding: 10px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Ensures the form takes up the full height */
+    justify-content: space-between;
     align-items: center;
     background-color: rgb(30, 30, 30);
 }
@@ -142,7 +141,7 @@ input:focus {
 
 .sidebar {
     color: white;
-    background-color: rgb(25, 25, 25); /* Black background */
+    background-color: rgb(25, 25, 25);
     width: 200px;
     display: flex;
     flex-direction: column;
@@ -156,27 +155,27 @@ input:focus {
 }
 
 .side-buttons {
-    background-color: rgb(25, 25, 25); /* Black background */
+    background-color: rgb(25, 25, 25);
     width: 200px;
     display: flex;
     flex-direction: column;
 }
 
 .side-buttons button {
-    font-size: 20px; /* Increase the font size */
+    font-size: 20px;
     text-align: left;
     left: 10px;
-    color: #f3af59; /* Set the text color to the original color */
-    background-color: rgb(25, 25, 25); /* Black background */
+    color: #f3af59;
+    background-color: rgb(25, 25, 25);
     width: 100%;
     height: 80px;
     box-sizing: border-box;
-    border: none; /* Remove the border */
+    border: none;
 }
 
 .side-buttons button:hover {
-    color: #f3af59; /* Set the text color to the original color */
-    background-color: rgb(15, 15, 15); /* Black background */
+    color: #f3af59;
+    background-color: rgb(15, 15, 15);
 }
 
 .side-buttons button:disabled {
@@ -198,27 +197,27 @@ input:focus {
 .cat-buttons {
     max-width: 70%;
     display: flex;
-    flex-direction: column; /* Arrange buttons in a vertical list */
+    flex-direction: column;
 }
 
 .cat-buttons button {
     color: white;
     background-color: #f3af59;
-    width: 100%; /* Ensure buttons take the full width of the container */
-    padding: 10px; /* Add padding to the buttons */
+    width: 100%;
+    padding: 10px;
 }
 
 .cat-buttons button:hover {
-  background-color: #e09548; /* Hover effect for the button */
+  background-color: #e09548;
 }
 
 .description-box {
     background-color: black;
     border: 2px solid #f3af59;
     padding: 20px;
-    color: #f3af59; /* Text color inside the box */
-    width: 80%; /* Adjust width as needed */
-    margin: 20px auto; /* Centers the box horizontally */
+    color: #f3af59;
+    width: 80%;
+    margin: 20px auto;
 }
 
 .options-dropdown {
@@ -245,45 +244,45 @@ select {
 }
 
 .questionnaire {
-    justify-content: center; /* Horizontal centering */
-    align-items: center; /* Vertical centering */
+    justify-content: center;
+    align-items: center;
     width: 85%;
     height: 90%;
     padding: 30px;
     border-radius: 10px;
-    background: linear-gradient(to bottom, #000000, #333333); /* Gradient from black to dark grey */
-    border: 2px solid #ccc; /* Optional: Add a grey border around the container */
+    background: linear-gradient(to bottom, #000000, #333333);
+    border: 2px solid #ccc;
 }
 
 .question-container {
     display: flex;
-    justify-content: space-between;  /* Align question text on the left and image on the right */
-    align-items: center; /* Vertically center content */
+    justify-content: space-between;
+    align-items: center;
     width: 100%;
-    height: 150px; /* Fixed height */
+    height: 150px;
     padding: 20px;
-    margin-bottom: 20px; /* Add space between question and buttons */
+    margin-bottom: 20px;
 }
 
 .question-text {
-    width: 65%;  /* Ensure question text takes up 65% of the space */
+    width: 65%;
     color: white;
     text-align: left;
-    padding-right: 20px;  /* Add space between text and image */
+    padding-right: 20px;
     word-wrap: break-word;
 }
 
 .question-image img {
-    max-width: 250px; /* Limits the width to 200px */
-    max-height: 150px; /* Limits the height to 100px */
-    width: auto; /* Maintain aspect ratio */
-    height: auto; /* Maintain aspect ratio */
+    max-width: 250px;
+    max-height: 150px;
+    width: auto;
+    height: auto;
 }
 
 .quiz-buttons-container {
     width: 100%;
     padding: 20px;
-    margin-top: 20px; /* Add space between question and button grid */
+    margin-top: 20px;
 }
 
 .quiz-buttons-grid {
@@ -329,7 +328,7 @@ select {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+    background: rgba(0, 0, 0, 0.7);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -339,12 +338,12 @@ select {
 .overlay-content {
     background-color: black;
     border: 2px solid #f3af59;
-    padding: 40px; /* Increased padding for more space */
+    padding: 40px;
     text-align: center;
     width: 60%;
-    min-height: 150px; /* Ensures the box has a minimum height */
-    height: auto; /* Let the height adjust based on content */
-    font-size: 1.5rem; /* Increase font size */
+    min-height: 150px;
+    height: auto;
+    font-size: 1.5rem;
 }
 
 .progress-bar {
@@ -369,12 +368,12 @@ select {
     height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: center; /* Vertical centering */
-    align-items: center;     /* Horizontal centering */
+    justify-content: center;
+    align-items: center;
     text-align: center;
     padding: 20px;
     box-sizing: border-box;
-    gap: 20px; /* Adds space between child elements */
+    gap: 20px;
 }
 
 .quiz-result h1, .quiz-result h2 {
@@ -392,13 +391,12 @@ select {
 }
 
 video {
-  display: block; /* Prevents inline spacing */
+  display: block;
   border: none;
   margin: 0;
   padding: 0;
 }
 
-/* Animated Click Circle */
 .click-circle {
   position: absolute;
   width: 30px;
@@ -422,8 +420,8 @@ video {
 
 .flags-container {
     font-size: medium;
-    display: flex; /* Display items in a row */
-    gap: 40px; /* Optional: Adds space between the items */
+    display: flex;
+    gap: 40px;
 }
 
 .video-footer {
@@ -446,7 +444,7 @@ video {
     width: 100%;
     max-width: 1400px;
     height: auto;
-    padding: 20px;  /* More internal padding */
+    padding: 20px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -469,16 +467,16 @@ video {
 
 .bar-container {
     flex: 1;
-    height: 6px; /* thinner */
+    height: 6px;
     background-color: black;
-    border-radius: 0; /* squared edges */
+    border-radius: 0;
     overflow: hidden;
 }
 
 .bar {
     height: 100%;
     transition: width 0.6s ease-in-out;
-    border-radius: 0; /* squared edges */
+    border-radius: 0;
 }
 
 .value {
@@ -496,7 +494,7 @@ video {
     max-width: 1400px;
     height: 180px;
     padding: 20px;
-    margin-top: 40px; /* Add space between question and button grid */
+    margin-top: 40px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -524,14 +522,14 @@ video {
 }
 
 .list-container {
-    background-color: rgb(25, 25, 25); /* Black background */
+    background-color: rgb(25, 25, 25);
     padding: 20px;
     border-radius: 14px;
     height: 70vh;
     max-width: 1000px;
     margin: 0 auto;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
     color: white;
+    margin-bottom: 10px;
 }
 
 .list-container h2 {
@@ -543,11 +541,11 @@ video {
     flex-direction: column;
     gap: 15px;
     padding: 0;
-    height: 55vh; /* 85% of the viewport height */
+    height: 55vh;
     overflow-y: auto;
     list-style: none;
     width: 100%;
-    max-width: 1000px; /* adjust to fit your layout */
+    max-width: 1000px;
     margin: 0 auto;
 }
 

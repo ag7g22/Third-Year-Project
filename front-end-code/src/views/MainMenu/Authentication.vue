@@ -1,6 +1,6 @@
 <template>
   <div class="split-container">
-    <!-- Left side: Empty or can contain an image -->
+    <!-- INTRO Information about the app here -->
     <div class="left-side">
       <div class="instructions-container">
         <h3>Welcome to GearUp!</h3>
@@ -19,26 +19,26 @@
           </div>
           <p>Whether you're studying solo or racing your friends to the finish line, you'll be ready to SMASH the theory test!</p>
       </div>
-      <button @click="navigateBack" class="game-button">Back</button>
+      <button @click="next_page('')" class="game-button">Back</button>
     </div>
-    
-    <!-- Right side: Contains the form -->
+
     <div class="right-side">
       <div class="form-container">
-        <div class="form-box" v-if="showLogin">
+        <!-- LOGIN FORM -->
+        <div class="form-box" v-if="show_login">
           <h2>Login to your account</h2>
           <p><span>username</span></p>
-          <input type="text" placeholder="Username" v-model="loginUsername" />
-          <div v-if="showPassword">
+          <input type="text" placeholder="Username" v-model="login_username"/>
+          <div v-if="show_password">
             <p><span @click="toggle_password">hide password</span></p>
-            <input type="text" placeholder="Password" v-model="loginPassword" />
+            <input type="text" placeholder="Password" v-model="login_password"/>
           </div>
           <div v-else>
             <p><span @click="toggle_password">show password</span></p>
-            <input type="password" placeholder="Password" v-model="loginPassword" />
+            <input type="password" placeholder="Password" v-model="login_password"/>
           </div>
           <div>
-            <div v-if="sentRequest">
+            <div v-if="sent_request">
               <button class="request-button" disabled>Loading ...</button>
             </div>
             <div v-else>
@@ -47,21 +47,21 @@
             <p>Don't have an account? <span @click="toggle_form">Register here</span></p>
           </div>
         </div>
-
+        <!-- REGISTER FORM -->
         <div class="form-box" v-else>
           <h2>Register a NEW account</h2>
           <p><span>username</span></p>
-          <input type="text" placeholder="Username" v-model="registerUsername" />
-          <div v-if="showPassword">
+          <input type="text" placeholder="Username" v-model="register_username" />
+          <div v-if="show_password">
             <p><span @click="toggle_password">hide password</span></p>
-            <input type="text" placeholder="Password" v-model="registerPassword" />
+            <input type="text" placeholder="Password" v-model="register_password" />
           </div>
           <div v-else>
             <p><span @click="toggle_password">show password</span></p>
-            <input type="password" placeholder="Password" v-model="registerPassword" />
+            <input type="password" placeholder="Password" v-model="register_password" />
           </div>
           <div>
-          <div v-if="sentRequest">
+          <div v-if="sent_request">
             <button class="request-button" disabled>Loading ...</button>
           </div>
           <div v-else>
@@ -70,6 +70,7 @@
             <p>Already have an account? <span @click="toggle_form">Login here</span></p>
           </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -82,14 +83,14 @@ export default {
   name: "authentication",
   data() {
     return {
-      showLogin: true,
-      showPassword: false,
-      sentRequest: false,
-      loginUsername: '',
-      loginPassword: '',
-      registerUsername: '',
-      registerPassword: '',
       client_socket: this.$store.state.currentClientSocket,
+      show_login: true,
+      show_password: false,
+      sent_request: false,
+      login_username: '',
+      login_password: '',
+      register_username: '',
+      register_password: '',
     };
   },
   mounted() {
@@ -99,6 +100,7 @@ export default {
     this.remove_socket_listeners();
   },
   methods: {
+    // Check if the user hasn't done the daily quiz yet.
     daily_quiz_reminder() {
       const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -116,28 +118,7 @@ export default {
           });
         }
     },
-    toggle_form() {
-      this.reset_inputs();
-      this.showLogin = !this.showLogin;
-    },
-    toggle_password() {
-      this.showPassword = !this.showPassword;
-    },
-    reset_inputs() {
-      this.sentRequest = false;
-      this.loginUsername = '';
-      this.loginPassword = '';
-      this.registerUsername = '';
-      this.registerPassword = '';
-    },
-    navigateBack() {
-      this.next_page('');
-    },
-    check_login() {
-      this.sentRequest = true;
-      console.log('Notifying server ...');
-      this.client_socket.emit('check-login', this.loginUsername);
-    },
+    // Notfication message for a successful action.
     successful_message(title, msg) {
         toastr.success(msg, title, {
           closeButton: true,
@@ -149,6 +130,7 @@ export default {
           preventDuplicates: true
         });
     },
+    // Notification message for an error.
     error_message(title, msg) {
       toastr.error(msg, title, {
           closeButton: true,
@@ -160,21 +142,44 @@ export default {
           preventDuplicates: true
         });
     },
+    // Toggles between register and login forms
+    toggle_form() {
+      this.reset_inputs();
+      this.show_login = !this.show_login;
+    },
+    // Toggle flag whether to show password or not.
+    toggle_password() {
+      this.show_password = !this.show_password;
+    },
+    // Remove the inputs in the username and password forms.
+    reset_inputs() {
+      this.sent_request = false;
+      this.login_username = '';
+      this.login_password = '';
+      this.register_username = '';
+      this.register_password = '';
+    },
+    // Check with server if the user has logged in already or not.
+    check_login() {
+      this.sent_request = true;
+      this.client_socket.emit('check-login', this.login_username);
+    },
+    // Check login details with the cosmos 'users' database and LOGIN
     async login() {
-      if (!this.validateLoginInputs()) return;
+      if (!this.validate_login_inputs()) return;
 
       const response = await this.azure_function('POST', '/user/login', {
-        username: this.loginUsername,
-        password: this.loginPassword,
+        username: this.login_username,
+        password: this.login_password,
       });
 
       if (response.msg === "OK" && response.result) {
-        this.$store.commit("setCurrentUser", this.loginUsername);
-        this.$store.commit("setCurrentPassword", this.loginPassword);
+        this.$store.commit("setCurrentUser", this.login_username);
+        this.$store.commit("setCurrentPassword", this.login_password);
 
-        await this.retrieve_user_info(this.loginUsername);
+        await this.retrieve_user_info(this.login_username);
 
-        this.client_socket.emit('login', this.loginUsername);
+        this.client_socket.emit('login', this.login_username);
         this.next_page('dashboard');
       } else {
         const message = response.msg || "API error.";
@@ -182,14 +187,15 @@ export default {
       }
       this.reset_inputs();
     },
+    // Check register details with the cosmos database and add it.
     async register() {
-      this.sentRequest = true;
+      this.sent_request = true;
 
-      if (!this.validateRegisterInputs()) return;
+      if (!this.validate_register_inputs()) return;
 
       const response = await this.azure_function('POST', '/user/register', {
-        username: this.registerUsername,
-        password: this.registerPassword,
+        username: this.register_username,
+        password: this.register_password,
       });
 
       if (response.msg === "OK" && response.result) {
@@ -200,26 +206,26 @@ export default {
       }
       this.reset_inputs();
     },
-    validateLoginInputs() {
-      if (this.loginUsername.length < 5 || this.loginUsername.length > 15) {
+    validate_login_inputs() {
+      if (this.login_username.length < 5 || this.login_username.length > 15) {
         this.error_message("Login failed!", "Username must be between 5 and 15 characters.");
         this.reset_inputs();
         return false;
       }
-      if (this.loginPassword.length < 8 || this.loginPassword.length > 15) {
+      if (this.login_password.length < 8 || this.login_password.length > 15) {
         this.error_message("Login failed!", "Password must be between 8 and 15 characters.");
         this.reset_inputs();
         return false;
       }
       return true;
     },
-    validateRegisterInputs() {
-      if (this.registerUsername.length < 5 || this.registerUsername.length > 15) {
+    validate_register_inputs() {
+      if (this.register_username.length < 5 || this.register_username.length > 15) {
         this.error_message("Register failed!", "Username must be between 5 and 15 characters.");
         this.reset_inputs();
         return false;
       }
-      if (this.registerPassword.length < 8 || this.registerPassword.length > 15) {
+      if (this.register_password.length < 8 || this.register_password.length > 15) {
         this.error_message("Register failed!", "Password must be between 8 and 15 characters.");
         this.reset_inputs();
         return false;
