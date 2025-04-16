@@ -36,59 +36,80 @@
     <div class="main-content">
 
       <div class="list-container">
-      <!-- Top: Username and EXP Bar -->
-      <div class="profile-header">
-        <h2 class="username">🔥{{ stats.streak }} {{ username }}</h2>
-        <p class="level">LVL. {{ rank.level }}</p>
-      </div>
+        <!-- Top: Username and EXP Bar -->
+        <div class="profile-header">
+          <h2 class="username">🔥{{ stats.streak }} {{ username }}</h2>
+          <p class="level">LVL. {{ rank.level }}</p>
+        </div>
 
-      <div class="exp-bar-container">
-        <div class="exp-bar-fill" :style="{ width: ((rank.exp / rank.exp_threshold) * 100) + '%' }"></div>
-      </div>
-      <p class="exp-label">EXP: {{ rank.exp }} / {{ rank.exp_threshold }}</p>
+        <div class="exp-bar-container">
+          <div class="exp-bar-fill" :style="{ width: ((rank.exp / rank.exp_threshold) * 100) + '%' }"></div>
+        </div>
+        <p class="exp-label">EXP: {{ rank.exp }} / {{ rank.exp_threshold }}</p>
 
-        <div class="profile-content">
-          <!-- Left: User Stats -->
-          <div class="user-stats">
-            <p>ID: {{ stats.id }}</p>
-            <p>Daily Score: {{ stats.daily_training_score }}</p>
-            <p>Daily Completed: {{ stats.training_completion_date }}</p>
+        <!-- Middle: User Stats -->
+        <div class="user-stats">
+          <p>ID: {{ stats.id }}</p>
+          <p>Daily Score: {{ stats.daily_training_score }}</p>
+          <p>Daily Completed: {{ stats.training_completion_date }}</p>
+        </div>
+
+        <!-- Bottom: Graph Box -->
+        <div v-if="current_view === 'overall'">
+          <h3>Overall Stats</h3>
+          <div class="graph-box">
+            <div class="score-row" v-for="(score, topic) in progress_scores" :key="topic">
+              <div class="label">{{ topic }}</div>
+              <div class="bar-container">
+                <div class="bar"
+                    :style="{ width: (score * 100) + '%', backgroundColor: colorMap[topic] }">
+                </div>
+              </div>
+              <div class="value">{{ (score * 100).toFixed(0) }}%</div>
+            </div>
           </div>
+        </div>
 
-          <!-- Right: Achievements -->
+        <div v-if="current_view === 'achievements'">
+          <h3>Achievements</h3>
           <div class="achievements-box" v-if="user_achievements.length">
-            <h3>Achievements</h3>
             <ul>
               <li v-for="achievement in user_achievements" :key="achievement.name">
-                {{ achievement.name }} - {{ achievement.description }}
+                <div class="achievement-name">{{ achievement.name }}</div>
+                <div class="achievement-description">{{ achievement.description }}</div>
               </li>
             </ul>
           </div>
         </div>
 
-        <!-- Bottom: Graph Box -->
-        <div class="graph-box">
-          <div class="score-row" v-for="(score, topic) in progress_scores" :key="topic">
-            <div class="label">{{ topic }}</div>
-            <div class="bar-container">
-              <div class="bar"
-                  :style="{ width: (score * 100) + '%', backgroundColor: colorMap[topic] }">
-              </div>
-            </div>
-            <div class="value">{{ (score * 100).toFixed(0) }}%</div>
-          </div>
-        </div>
       </div>
 
       <!-- Buttons -->
       <div v-if="view !== 'logged_user'">
         <div class="game-buttons">
-          <button class="game-button" @click="handleBack">Return</button> 
+          <button class="game-button" @click="handleBack">Return</button>
+          <button
+            v-for="view in ['overall', 'achievements']"
+            :key="view"
+            @click="toggle_view(view)"
+            :disabled="current_view === view"
+            class="game-button"
+          >
+            {{ formatViewName(view) }}
+          </button>
         </div>
       </div>
       <div v-else>
         <div class="game-buttons">
-          <button class="game-button">Toggle graph</button> 
+          <button
+            v-for="view in ['overall', 'achievements']"
+            :key="view"
+            @click="toggle_view(view)"
+            :disabled="current_view === view"
+            class="game-button"
+          >
+            {{ formatViewName(view) }}
+          </button>
         </div>
       </div>
     </div>
@@ -101,6 +122,7 @@ export default {
   name: "account",
   data() {
     return {
+      current_view: 'achievements', // View only accounts only show the achievements
       client_socket: this.$store.state.currentClientSocket,
       logged_in_user: this.$store.state.currentUser,
       view: this.$route.query.view || 'logged_user',
@@ -148,12 +170,23 @@ export default {
         scores[category] = parseFloat((sum / 10).toFixed(2));
       }
       return scores;
-    }
+    },
   },
   methods: {
     clearMessages() {
       this.message.error = "";
       this.message.success = "";
+    },
+    toggle_view(view) {
+      this.current_view = view;
+    },
+    formatViewName(view) {
+      const mapping = {
+        overall: "Overall Stats",
+        category: "Category Stats",
+        forget: "Forgetting Curve"
+      };
+      return mapping[view] || view;
     },
     logout() {
       this.client_socket.emit('logout', this.logged_in_user);
@@ -282,7 +315,7 @@ export default {
   background-color: #333;
   border-radius: 6px;
   overflow: hidden;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
 }
 
 .exp-bar-fill {
@@ -291,26 +324,70 @@ export default {
   transition: width 0.3s ease-in-out;
 }
 
-.profile-content {
-  display: flex;
-  justify-content: space-between;
-  gap: 40px;
-  margin-bottom: 30px;
-}
-
 .user-stats {
   color: #f3af59;
-  flex: 1;
+  display: flex;
   text-align: left;
   justify-content: center;
   gap: 20px;
+  margin-bottom: 15px;
 }
 
+.graph-box,
 .achievements-box {
-  flex: 2;
+    color: #ffffff;
+    background-color: black;
+    border: 2px solid #f3af59;
+    width: 100%;
+    max-width: 1400px;
+    height: 40vh;
+    padding: 20px;  /* More internal padding */
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+}
+
+.curve-box {
+    border: 2px solid #f3af59;
+    width: 100%;
+    max-width: 1400px;
+    height: 40vh;
+    padding: 20px;  /* More internal padding */
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
 }
 
 .achievements-box ul {
-  padding-left: 20px;
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
+
+.achievements-box li {
+  text-align: left;
+  background-color: #1a1a1a;
+  border: 1px solid #f3af59;
+  padding: 12px 16px;
+  border-radius: 8px;
+}
+
+.achievement-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.achievement-description {
+  font-size: 0.9rem;
+  color: #cccccc;
+}
+
 </style>

@@ -15,9 +15,12 @@
     <!-- Main Content -->
     <div class="main-content">
       <div class="progress-container">
-        <p class="progress-title">Exam-ready level</p>
-        <div class="progress-bar-wrapper">
-          <div class="progress-bar" style="width: 60%;"></div>
+        <div class="progress-title-row">
+          <span class="progress-title">Exam-ready level:</span>
+          <span class="progress-percent">{{ progressBarWidth }}%</span>
+        </div>
+        <div class="exam-ready-wrapper">
+          <div class="exam-ready-bar" :style="{ width: progressBarWidth + '%' }"></div>
         </div>
       </div>
       <div class="buttons-grid">
@@ -143,7 +146,26 @@ export default {
       console.log("/" + page);
       this.$router.push(`/${page}`);
     },
-  }
+  },
+  computed: {
+        progressBarWidth() {
+          const averages = {};
+
+          // Calculate average for each category
+          for (const category in this.$store.state.currentRecentCatScores) {
+            const scores = this.$store.state.currentRecentCatScores[category];
+            const sum = scores.reduce((acc, score) => acc + score, 0);
+            averages[category] = (sum / scores.length).toFixed(3);  // Round to 3 decimal places
+          }
+
+          // Calculate the average of the averages
+          const avgOfAverages = (
+            Object.values(averages).reduce((acc, avg) => acc + parseFloat(avg), 0) / Object.values(averages).length
+          ).toFixed(3);
+
+          return avgOfAverages * 100;
+    }
+  },
 };
 </script>
 
@@ -186,30 +208,39 @@ export default {
 .progress-container {
   width: 90%;
   margin: 20px auto;
-  text-align: center;
+}
+
+.progress-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
 }
 
 .progress-title {
   color: #079cb0;
   font-size: 18px;
-  margin-bottom: 10px;
   font-weight: bold;
-  text-align: left;
 }
 
-.progress-bar-wrapper {
+.progress-percent {
+  font-size: 16px;
+  font-weight: bold;
+  color: #079cb0;
+}
+
+.exam-ready-wrapper {
   width: 100%;
   height: 20px;
-  background-color: #000; /* Black outline */
-  border-radius: 10px; /* Optional rounded corners */
+  background-color: #000;
+  border-radius: 10px;
   overflow: hidden;
 }
 
-.progress-bar {
+.exam-ready-bar {
   height: 100%;
   background-color: #079cb0;
-  border-radius: 5px 0 0 5px; /* Optional rounded corners on the left */
-  transition: width 0.5s ease-in-out; /* Smooth animation when width changes */
+  transition: width 0.5s ease-in-out;
 }
 
 </style>

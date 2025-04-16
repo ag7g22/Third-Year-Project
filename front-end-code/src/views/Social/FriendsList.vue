@@ -28,7 +28,7 @@
               </div>
             </li>
           </ul>
-          <h3 v-else>*cricket noises*</h3>
+          <h3 v-else>"I work alone" ahh list 💀</h3>
         </div>
         <div class="game-buttons">
           <button class="game-button" disabled>Friends</button>
@@ -50,7 +50,7 @@
               </div>
             </li>
           </ul>
-          <h3 v-else>Hey man, just click the "Search Users" button to get you some friends ...</h3>
+          <h3 v-else>*cricket noises*</h3>
         </div>
         <div class="game-buttons">
           <button class="game-button" @click="toggle_list('friends')">Friends</button>
