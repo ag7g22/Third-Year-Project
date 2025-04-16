@@ -423,7 +423,7 @@ export default {
             if ((this.click_x <= this.selected_clip.x + 50 && this.click_x >= this.selected_clip.x - 50) && 
                 (this.click_y <= this.selected_clip.y + 50 && this.click_y >= this.selected_clip.y - 50)) {
 
-                let interval = 1;
+                let interval = 1.5;
 
                 // Then check if the user clicked at the right time:
                 if (this.click_time >= this.selected_clip.time && this.click_time < this.selected_clip.time + interval) {

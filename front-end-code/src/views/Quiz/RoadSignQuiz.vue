@@ -175,7 +175,6 @@ export default {
             this.message.error = "";
             this.message.success = "";
             this.current_view = view;
-            this.num_questions = { options: [8, 10, 12], selected: 8 }
         },
         async init_quiz() {
             // Reset messages
@@ -355,7 +354,7 @@ export default {
         terminate_quiz() {
             // Reset everything
             this.resetStopwatch();
-            this.num_questions = { options: [5, 10, 15, 20], selected: 10 } // Dropdown menu
+            this.num_questions = { options: [8, 10, 12], selected: 8 } // Dropdown menu
             this.questions = [] // Quiz questions by API
             this.currentQuestion = 0 // Question pointer
             this.selectedAnswer = null // This is the selected question

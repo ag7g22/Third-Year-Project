@@ -174,6 +174,7 @@ export default {
       });
 
       if (response.msg === "OK" && response.result) {
+        console.log(response.result);
         this.$store.commit("setCurrentUser", this.login_username);
         this.$store.commit("setCurrentPassword", this.login_password);
 
@@ -199,6 +200,7 @@ export default {
       });
 
       if (response.msg === "OK" && response.result) {
+        console.log(response.result);
         this.successful_message('Register success!', 'You may now login.');
       } else {
         const message = response.msg || "API error.";

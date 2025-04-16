@@ -5,7 +5,7 @@
       <img src="@/assets/titles/TitleLogo.png" alt="Logo" class="logo" />
       <div class="side-buttons">
         <button @click="next_page('dashboard')"> 🎲 Dashboard</button>
-        <button @click="next_page('account')"> 👤 Account</button>
+        <button @click="go_to_own_account()"> 👤 Account</button>
         <button disabled> 👥 Friends</button>
         <button @click="load_leaderboards"> 🏆 Leaderboard</button>
         <button @click="logout"> 🔒 Log out</button> 
@@ -15,7 +15,7 @@
       <img src="@/assets/titles/TitleLogo.png" alt="Logo" class="logo" />
       <div class="side-buttons">
         <button @click="next_page('dashboard')"> 🎲 Dashboard</button>
-        <button @click="next_page('account')"> 👤 Account</button>
+        <button @click="go_to_own_account()"> 👤 Account</button>
         <button @click="load_friends_list"> 👥 Friends</button>
         <button disabled> 🏆 Leaderboard</button>
         <button @click="logout"> 🔒 Log out</button> 
@@ -127,7 +127,7 @@ import toastr from 'toastr';
 export default {
   name: "account",
   mounted() {
-      if (this.view !== 'logged_user') {
+      if (this.view !== 'logged_user' && this.username !== this.logged_in_user) {
         this.add_achievement('STALKER!','👀');
       }
   },
@@ -198,7 +198,6 @@ export default {
                 "Tricky Conditions": "#ffc107",   // amber
                 "Breakdowns": "#795548",          // brown
       },
-      message: { error: "", success: "" }
     };
   },
   computed: {
@@ -224,10 +223,6 @@ export default {
     },
   },
   methods: {
-    clearMessages() {
-      this.message.error = "";
-      this.message.success = "";
-    },
     toggle_view(view) {
       this.current_view = view;
     },
@@ -241,7 +236,6 @@ export default {
     },
     logout() {
       this.client_socket.emit('logout', this.logged_in_user);
-      this.clearMessages();
 
       // Reset state
       this.$store.commit("setCurrentUser", "");
@@ -257,14 +251,14 @@ export default {
       const response = await this.azure_function("POST", "/user/friend/all", { username: this.logged_in_user });
 
       if (response.result) {
-        this.message.success = "Retrieved Friends List! Loading Socials Page ...";
         this.$store.commit("setCurrentSocialLists", {
           friends: response.msg.friends,
           friend_requests: response.msg.friend_requests
         });
         this.next_page('friends');
       } else {
-        this.message.error = response.msg || "Unable to find user.";
+        const message = response.msg || "Unable to find user.";
+        console.log(message);
       }
     },
     async load_leaderboards() {
@@ -319,8 +313,19 @@ export default {
         return result;
       } catch (error) {
         console.error("Error:", error);
-        this.message.error = "An API error occurred. Please try again later.";
       }
+    },
+    go_to_own_account() {
+      // Go to own account from friend account
+      this.current_view = 'achievements';
+      this.view = 'logged_user';
+      this.username = this.$store.state.currentUser;
+      this.rank = this.$store.state.currentRank;
+      this.stats = this.$store.state.currentStats;
+      this.achievements = this.$store.state.currentAchievements;
+      this.recent_category_scores = this.$store.state.currentRecentCatScores;
+      this.current_list = "friends";
+      this.search = { query: "", users: [] };
     },
     next_page(page) {
       console.log("/" + page);

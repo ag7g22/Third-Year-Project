@@ -61,12 +61,15 @@ export default {
       // Let server know the user is logging out.
       this.client_socket.emit('logout', this.logged_in_user);
 
-      // Reset state
+      // Reset state of the store
       this.$store.commit("setCurrentUser", "");
       this.$store.commit("setCurrentPassword", "");
       this.$store.commit("setCurrentRank", { level: 'n/a', exp: 0, exp_threshold: 0 });
       this.$store.commit("setCurrentStats", { id: 'n/a', streak: 0, daily_training_score: 0, training_completion_date: 'n/a' });
+      this.$store.commit("setCurrentAchievements", []);
+      this.$store.commit("setCurrentRecentCatScores",{"Driving Off": [], "Urban Driving": [], "Rural Driving": [], "Bigger Roads": [], "Motorways": [], "Tricky Conditions": [], "Breakdowns": []});
       this.$store.commit("setCurrentSocialLists", { friends: [], friend_requests: [] });
+      this.$store.commit("setCurrentLeaderboards", {public: [], friends: []});
       console.log("User logged out");
 
       this.next_page('authentication');

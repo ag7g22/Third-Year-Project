@@ -565,64 +565,64 @@ export default {
         },
         async finish_video_clip() {
         // Check if the user clicked on the appropriate (x,y) range:
-        if ((this.click_x <= this.selected_clip.x + 50 && this.click_x >= this.selected_clip.x - 50) && 
-            (this.click_y <= this.selected_clip.y + 50 && this.click_y >= this.selected_clip.y - 50)) {
-            let interval = 1;
-            // Then check if the user clicked at the right time:
-            let score = 0
-            if (this.click_time >= this.selected_clip.time && this.click_time < this.selected_clip.time + interval) {
-                score = 1;
-                this.multipler+=1;
+            if ((this.click_x <= this.selected_clip.x + 50 && this.click_x >= this.selected_clip.x - 50) && 
+                (this.click_y <= this.selected_clip.y + 50 && this.click_y >= this.selected_clip.y - 50)) {
+                let interval = 1.5;
+                // Then check if the user clicked at the right time:
+                let score = 0
+                if (this.click_time >= this.selected_clip.time && this.click_time < this.selected_clip.time + interval) {
+                    score = 1;
+                    this.multipler+=1;
 
-                if (this.selected_clip.name === "Urban Driving 5") {
-                    this.add_achievement('Takin out the trash','🗑️');
-                } 
-                if (this.selected_clip.name === "Rural Driving 2") {
-                    this.add_achievement('NEIGHHHHHH!','🐎');
-                } 
-                if (this.selected_clip.name === "Bigger Roads 1") {
-                    this.add_achievement('Fireman sam','👨‍🚒');
-                } 
-                if (this.selected_clip.name === "Tricky Conditions 2") {
-                    this.add_achievement('Oh deer','🦌');
-                } 
-                if (this.selected_clip.name === "Tricky Conditions 4") {
-                    this.add_achievement('You snooze you lose!','💤');
-                } 
+                    if (this.selected_clip.name === "Urban Driving 5") {
+                        this.add_achievement('Takin out the trash','🗑️');
+                    } 
+                    if (this.selected_clip.name === "Rural Driving 2") {
+                        this.add_achievement('NEIGHHHHHH!','🐎');
+                    } 
+                    if (this.selected_clip.name === "Bigger Roads 1") {
+                        this.add_achievement('Fireman sam','👨‍🚒');
+                    } 
+                    if (this.selected_clip.name === "Tricky Conditions 2") {
+                        this.add_achievement('Oh deer','🦌');
+                    } 
+                    if (this.selected_clip.name === "Tricky Conditions 4") {
+                        this.add_achievement('You snooze you lose!','💤');
+                    } 
 
-            } else if (this.click_time >= this.selected_clip.time + interval && this.click_time < this.selected_clip.time + interval*2) {
-                score = 0.8;
-                this.multipler = 1;
-            } else if (this.click_time >= this.selected_clip.time + interval*2 && this.click_time < this.selected_clip.time + interval*3) {
-                score = 0.6;
-                this.multipler = 1;
-            } else if (this.click_time >= this.selected_clip.time + interval*3 && this.click_time < this.selected_clip.time + interval*4) {
-                score = 0.4;
-                this.multipler = 1;
-            } else if (this.click_time >= this.selected_clip.time + interval*4 && this.click_time < this.selected_clip.time + interval*5) {
-                score = 0.2;
-                this.multipler = 1;
-            } else {
-                this.multipler = 1;
+                } else if (this.click_time >= this.selected_clip.time + interval && this.click_time < this.selected_clip.time + interval*2) {
+                    score = 0.8;
+                    this.multipler = 1;
+                } else if (this.click_time >= this.selected_clip.time + interval*2 && this.click_time < this.selected_clip.time + interval*3) {
+                    score = 0.6;
+                    this.multipler = 1;
+                } else if (this.click_time >= this.selected_clip.time + interval*3 && this.click_time < this.selected_clip.time + interval*4) {
+                    score = 0.4;
+                    this.multipler = 1;
+                } else if (this.click_time >= this.selected_clip.time + interval*4 && this.click_time < this.selected_clip.time + interval*5) {
+                    score = 0.2;
+                    this.multipler = 1;
+                } else {
+                    this.multipler = 1;
+                }
+                const topic = this.selected_clip.name.replace(/\s\d+$/, '');
+                this.add_update_score(topic, score);
+                this.total_score += score;
+                console.log(`Added score: ${score}, Total Score: ${this.total_score}`)
+
+                // Add mulitpled score to daily score.
+                this.daily_score += score * this.multipler * 100;
+                this.daily_score_message(score * this.multipler * 100);
             }
-            const topic = this.selected_clip.name.replace(/\s\d+$/, '');
-            this.add_update_score(topic, score);
-            this.total_score += score;
-            console.log(`Added score: ${score}, Total Score: ${this.total_score}`)
-
-            // Add mulitpled score to daily score.
-            this.daily_score += score * this.multipler * 100;
-            this.daily_score_message(score * this.multipler * 100);
-        }
-        // Clicking the video
-        this.click_x = 0;
-        this.click_y = 0;
-        this.click_time = 0;
-        this.click_history = [];
-        this.clicks = [];
-        this.too_many_clicks = false;
-        this.current_C++;
-        this.load_video_clip();
+            // Clicking the video
+            this.click_x = 0;
+            this.click_y = 0;
+            this.click_time = 0;
+            this.click_history = [];
+            this.clicks = [];
+            this.too_many_clicks = false;
+            this.current_C++;
+            this.load_video_clip();
         },
         terminate_daily_quiz() {
             // End the quiz early

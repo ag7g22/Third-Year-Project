@@ -188,16 +188,9 @@ export default {
         },
         toggle_view(view) {
             // Reset state
-            this.message.error = "";
-            this.message.success = "";
             this.state.current_view = view;
-            this.num_questions = { options: [5, 10, 15, 20], selected: 10 }
         },
         init_quiz_instructions(topic) {
-            // Reset messages
-            this.message.error = "";
-            this.message.success = "";
-
             // Initalise the quiz instructions
             this.state.current_topic = topic;
 
@@ -235,17 +228,11 @@ export default {
             this.toggle_view('instructions')
         },
         async init_quiz() {
-            // Reset messages
-            this.message = { error: "", success: "" };
-
-            this.message.success = 'Loading quiz ...';
-
             // Initalise the quiz
             const input = { "No_of_Qs": this.num_questions.selected, "topic": this.state.current_topic }
             const quiz = await this.azure_function('POST', '/question/get/category', input);
             if (quiz.result) {
                 // Populate the questions list
-                this.message.success = 'Loading quiz successful!';
                 this.questions = quiz.msg;
 
                 this.add_image();
@@ -254,7 +241,8 @@ export default {
                 this.toggle_view('quiz');
                 this.startStopwatch();
             } else {
-                this.message.error = quiz.msg || "Loading quiz failed.";
+                const message = quiz.msg || "Loading quiz failed.";
+                console.log(message);
             }
         },
         selectAnswer(option) {
