@@ -144,7 +144,7 @@ export default {
             Object.values(averages).reduce((acc, avg) => acc + parseFloat(avg), 0) / Object.values(averages).length
           ).toFixed(3);
 
-          const percentage = parseFloat(avgOfAverages) * 100;
+          const percentage = parseFloat(avgOfAverages).toFixed(3) * 100;
 
           // Return 0 if it's zero (or a falsey value), otherwise return the number
           return percentage || 0;

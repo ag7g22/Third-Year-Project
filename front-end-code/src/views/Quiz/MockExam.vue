@@ -414,6 +414,7 @@ export default {
             // Run this method if the user clicks more than 10 times
             const video = this.$refs.hazard_perception;
             video.pause();
+            this.add_achievement('Where are you clicking lil bro','🚩');
             this.too_many_clicks = true;
             this.current_C++;
         },
@@ -427,6 +428,23 @@ export default {
                 // Then check if the user clicked at the right time:
                 if (this.click_time >= this.selected_clip.time && this.click_time < this.selected_clip.time + interval) {
                     this.scores_2+=5;
+
+                    if (this.selected_clip.name === "Urban Driving 5") {
+                        this.add_achievement('Takin out the trash','🗑️');
+                    } 
+                    if (this.selected_clip.name === "Rural Driving 2") {
+                        this.add_achievement('NEIGHHHHHH!','🐎');
+                    } 
+                    if (this.selected_clip.name === "Bigger Roads 1") {
+                        this.add_achievement('Fireman sam','👨‍🚒');
+                    } 
+                    if (this.selected_clip.name === "Tricky Conditions 2") {
+                        this.add_achievement('Oh deer','🦌');
+                    } 
+                    if (this.selected_clip.name === "Tricky Conditions 4") {
+                        this.add_achievement('You snooze you lose!','💤');
+                    } 
+
                 } else if (this.click_time >= this.selected_clip.time + interval && this.click_time < this.selected_clip.time + interval*2) {
                     this.scores_2+=4;
                 } else if (this.click_time >= this.selected_clip.time + interval*2 && this.click_time < this.selected_clip.time + interval*3) {

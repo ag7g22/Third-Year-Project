@@ -175,8 +175,8 @@ export default {
         { name: 'Oh deer', description: 'Get 5/5 score in a certain video hazard perception.', emoji: '🦌' },//
         { name: 'You snooze you lose!', description: 'Get 5/5 score in a certain video hazard perception.', emoji: '💤' },//
         // Crash Quiz Off Challenges:
-        { name: 'The Crash-off King', description: 'Win a CRASH QUIZ OFF GAME.', emoji: '👑' },//
-        { name: 'The Humble King', description: 'Lose a CRASH QUIZ OFF GAME.', emoji: '🏳️' },//
+        { name: 'The Crash-off King', description: 'Win a CRASH QUIZ OFF GAME (without any players quitting).', emoji: '👑' },//
+        { name: 'The Humble King', description: 'Lose a CRASH QUIZ OFF GAME (without any players quitting).', emoji: '🏳️' },//
         { name: 'The Crash-out King', description: 'Quit a CRASH QUIZ OFF GAME.', emoji: '🥀' },//
         // Mock Exam Challenges:
         { name: '"Just put the license in the bag bro"', description: 'Score 100% on a mock exam.', emoji: '💯' },//
