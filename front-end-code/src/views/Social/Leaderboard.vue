@@ -38,7 +38,7 @@
               </div>
             </li>
           </ul>
-          <h3 v-else>Damn, no one has done the daily quiz yet. Bunch of procrasinators</h3>
+          <h3 v-else>Damn, no one has done the daily quiz yet. Bunch of procrasinators!</h3>
         </div>
         <div class="game-buttons">
           <button class="game-button" disabled>Public</button>
@@ -68,7 +68,7 @@
               </div>
             </li>
           </ul>
-          <h3 v-else>You have no friends! What's the point of a friend leaderboard if you have no friends, you loser!</h3>
+          <h3 v-else>Damn, no one has done the daily quiz yet. Bunch of procrasinators!</h3>
         </div>
         <div class="game-buttons">
           <button class="game-button" @click="toggle_list('public')">Public</button>
@@ -81,8 +81,17 @@
 </template>
 
 <script>
+import toastr from 'toastr';
 export default {
   name: "leaderboard",
+  mounted() {
+    if (this.leaderboards.public.length >= 10 && this.leaderboards.public[0] === this.logged_in_user) {
+      this.add_achievement('The Dragon Warrior','🐉');
+    }
+    if (this.leaderboards.friends.length >= 10 && this.leaderboards.friends[0] === this.logged_in_user) {
+      this.add_achievement('In your face!','🤪');
+    }
+  },
   data() {
     return {
       client_socket: this.$store.state.currentClientSocket,
@@ -149,24 +158,28 @@ export default {
         this.message.error = response.msg || "Unable to find user.";
       }
     },
-  async add_achievement(name) {
-    this.achievements.push(name);
-    const userId = this.$store.state.currentStats.id;
-    const input = { id: userId, updates: { achievements: this.achievements } };
-    const update = await this.azure_function("PUT", "/user/update/info", input);
-
-    if (update) {
-      this.$store.commit("setCurrentAchievements", this.achievements);
-      this.message.success = 'Achievements update Successful!';
-
-      toastr.success(`"${name}"`, "Achievement Unlocked:", {
-        closeButton: true, progressBar: true, positionClass: "toast-top-right",
-        showDuration: "300", hideDuration: "1000", timeOut: "5000",
-        extendedTimeOut: "1000", showEasing: "swing", hideEasing: "linear",
-        showMethod: "fadeIn", hideMethod: "fadeOut"
-      });
-    }
-  },
+    async add_achievement(name, emoji) {
+    // Add an achievement in the user's data!
+        if (this.$store.state.currentAchievements.includes(name)) {
+            console.log("Already gotten the " + name + " achievement!")
+            return;
+        }
+        const user_stats = this.$store.state.currentStats;
+        const achievements = [...this.$store.state.currentAchievements, name];
+        const input = { id: user_stats.id, updates: { achievements } };
+        const update = await this.azure_function("PUT", "/user/update/info", input);
+        if (update) {
+            this.$store.commit("setCurrentAchievements", achievements);
+            toastr.success(`${name} ${emoji}`, "Achievement Unlocked:", {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-right",
+                timeOut: 10000,
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut"
+            });
+        }
+    },
   async azure_function(method, route, body) {
     console.log(route);
     const url = `${process.env.VUE_APP_BACKEND_URL}${route}?code=${process.env.VUE_APP_MASTER_KEY}`;

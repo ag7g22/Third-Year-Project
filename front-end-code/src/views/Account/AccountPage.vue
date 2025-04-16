@@ -54,6 +54,23 @@
           <p>Daily Completed: {{ stats.training_completion_date }}</p>
         </div>
 
+        <div v-if="current_view === 'achievements'">
+          <h3>Achievements</h3>
+          <div class="achievements-box" v-if="user_achievements.length">
+            <ul>
+              <li v-for="achievement in user_achievements" :key="achievement.name" :class="{ locked: !achievement.unlocked }">
+                <div class="achievement-content">
+                  <div class="achievement-emoji">{{ achievement.emoji }}</div>
+                  <div>
+                    <div class="achievement-name">{{ achievement.name }}</div>
+                    <div class="achievement-description">{{ achievement.description }}</div>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
         <!-- Bottom: Graph Box -->
         <div v-if="current_view === 'overall'">
           <h3>Overall Stats</h3>
@@ -70,18 +87,6 @@
           </div>
         </div>
 
-        <div v-if="current_view === 'achievements'">
-          <h3>Achievements</h3>
-          <div class="achievements-box" v-if="user_achievements.length">
-            <ul>
-              <li v-for="achievement in user_achievements" :key="achievement.name">
-                <div class="achievement-name">{{ achievement.name }}</div>
-                <div class="achievement-description">{{ achievement.description }}</div>
-              </li>
-            </ul>
-          </div>
-        </div>
-
       </div>
 
       <!-- Buttons -->
@@ -89,7 +94,7 @@
         <div class="game-buttons">
           <button class="game-button" @click="handleBack">Return</button>
           <button
-            v-for="view in ['overall', 'achievements']"
+            v-for="view in ['achievements', 'overall']"
             :key="view"
             @click="toggle_view(view)"
             :disabled="current_view === view"
@@ -102,7 +107,7 @@
       <div v-else>
         <div class="game-buttons">
           <button
-            v-for="view in ['overall', 'achievements']"
+            v-for="view in ['achievements', 'overall']"
             :key="view"
             @click="toggle_view(view)"
             :disabled="current_view === view"
@@ -118,8 +123,14 @@
 </template>
 
 <script>
+import toastr from 'toastr';
 export default {
   name: "account",
+  mounted() {
+      if (this.view !== 'logged_user') {
+        this.add_achievement('STALKER!','👀');
+      }
+  },
   data() {
     return {
       current_view: 'achievements', // View only accounts only show the achievements
@@ -134,13 +145,49 @@ export default {
       current_list: this.$route.query.current_list || "friends",
       search: this.$route.query.search || { query: "", users: [] },
       achievementsWithDescriptions: [
-        { name: 'Start of a Journey', description: 'Unlocked after logging in for the first time.' },
-        { name: 'Gearin up', description: 'Done a daily quiz for the first time.' },
-        { name: 'Levelin up', description: 'Reached level 10 for the first time.' },
-        { name: 'Gear 2nd', description: 'Reached a streak of 10' },
-        { name: 'Gear 3rd', description: 'Reached a streak of 50' },
-        { name: 'Gear 4th', description: 'Reached a streak of 100' },
-        { name: 'Gear 5th', description: 'Reached a streak of 500' },
+        { name: 'Start of a Journey', description: 'Logged into GearUp! for the first time as a new learner!', emoji: '🔑' }, //
+        // Exploring all the main quiz games:
+        { name: 'Day One Done', description: 'Done a DAILY QUIZ for the first time.', emoji: '💡' }, //
+        { name: 'Switchin Gears', description: 'Done a CATEGORY QUIZ for the first time.', emoji: '🔎' }, //
+        { name: 'A Sign of Things to Come', description: 'Done a ROAD SIGN quiz for the first time.', emoji: '🛑' },//
+        { name: 'Eyes on the Road', description: 'Done HAZARD PERCEPTION for the first time.', emoji: '💀' },//
+        { name: '1 v 1 me rn m8', description: 'Done CRASH QUIZ OFF for the first time.', emoji: '💥' },//
+        { name: 'Mock & Roll', description: 'Done a MOCK TEST for the first time.', emoji: '📖' },//
+        // Daily Quiz Challenges:
+        { name: 'ITS OVER 9000!', description: 'Get a daily score of over 9000 in the first attempt of the day', emoji: '🤯' }, //
+        { name: 'The Dragon Warrior', description: 'Come first in the TOP 10 in the PUBLIC daily leaderboard!', emoji: '🐉' }, //
+        { name: 'In your face!', description: 'Come first in the TOP 10 in the FRIEND daily leaderboard!', emoji: '🤪' }, //
+        // Category Quiz challenges:
+        { name: 'Transform and roll out!', description: 'Get 100% score for 20 questions in the "Driving Off" category quiz.', emoji: '🚗' },//
+        { name: "I'm from the city", description: 'Get 100% score for 20 questions in the "Urban Driving" category quiz.', emoji: '🏙️' },//
+        { name: 'A force of nature', description: 'Get 100% score for 20 questions in the "Rural Driving" category quiz.', emoji: '🌳' },//
+        { name: "Size doesn't matter", description: 'Get 100% score for 20 questions in the "Bigger Roads" category quiz.', emoji: '🛤️' },//
+        { name: 'King of the Motorways', description: 'Get 100% score for 20 questions in the "Motorways" category quiz.', emoji: '🛣️' },//
+        { name: 'The weather forcaster', description: 'Get 100% score for 20 questions in the "Tricky Conditions" category quiz.', emoji: '🌧️' },//
+        { name: 'Oopsies!', description: 'Get 100% score for 20 questions in the "Breakdowns" category quiz.', emoji: '⚠️' },//
+        // Road Sign Challenges:
+        { name: 'Mastering the Sign language', description: 'Get 100% score for 12 questions in a ROAD SIGN QUIZ.', emoji: '🚦' }, //
+        // Hazard Perception Challenges:
+        { name: 'Where are you clicking lil bro', description: 'Click more than 10 times in the hazard perception practice.', emoji: '🚩' },//
+        { name: 'Takin out the trash', description: 'Get 5/5 score in a certain video hazard perception.', emoji: '🗑️' },//
+        { name: 'NEIGHHHHHH!', description: 'Get 5/5 score in a certain video hazard perception.', emoji: '🐎' },//
+        { name: 'Fireman sam', description: 'Get 5/5 score in a certain video hazard perception.', emoji: '👨‍🚒' },//
+        { name: 'Oh deer', description: 'Get 5/5 score in a certain video hazard perception.', emoji: '🦌' },//
+        { name: 'You snooze you lose!', description: 'Get 5/5 score in a certain video hazard perception.', emoji: '💤' },//
+        // Crash Quiz Off Challenges:
+        { name: 'The Crash-off King', description: 'Win a CRASH QUIZ OFF GAME.', emoji: '👑' },//
+        { name: 'The Humble King', description: 'Lose a CRASH QUIZ OFF GAME.', emoji: '🏳️' },//
+        { name: 'The Crash-out King', description: 'Quit a CRASH QUIZ OFF GAME.', emoji: '🥀' },//
+        // Mock Exam Challenges:
+        { name: '"Just put the license in the bag bro"', description: 'Score 100% on a mock exam.', emoji: '💯' },//
+        // Friend Achievements:
+        { name: 'STALKER!', description: 'View another user profile', emoji: '👀' }, //
+        { name: 'Request for alliance', description: 'Send a friend request.', emoji: '📨' },//
+        { name: 'A remarkable ally', description: 'Accept a friend request.', emoji: '🤝' },//
+        { name: 'A sworn enemy', description: 'Remove a friend.', emoji: '💔' },//
+        // Stat Achievements:
+        { name: 'Absolute Bang out', description: 'Reached level 20.', emoji: '🤓' }, 
+        { name: 'Thank you for playing my game!', description: 'Reached a streak of 7!', emoji: '🔥' }, //
       ],
       colorMap: {
                 "Driving Off": "#4caf50",         // green
@@ -156,9 +203,13 @@ export default {
   },
   computed: {
     user_achievements() {
-      return this.achievements.map(name => {
-        const match = this.achievementsWithDescriptions.find(a => a.name === name);
-        return match || { name, description: 'No description available' };
+      return this.achievementsWithDescriptions.map(a => {
+        const unlocked = this.achievements.includes(a.name);
+        return {
+          ...a,
+          unlocked,
+          emoji: unlocked ? a.emoji : '🔒'
+        };
       });
     },
     progress_scores() {
@@ -229,25 +280,29 @@ export default {
 
       this.next_page("leaderboard");
     },
-    async add_achievement(name) {
-      this.achievements.push(name);
-      const userId = this.$store.state.currentStats.id;
-      const input = { id: userId, updates: { achievements: this.achievements } };
-      const update = await this.azure_function("PUT", "/user/update/info", input);
-
-      if (update) {
-        this.$store.commit("setCurrentAchievements", this.achievements);
-        this.message.success = 'Achievements update Successful!';
-
-        toastr.success(`"${name}"`, "Achievement Unlocked:", {
-          closeButton: true, progressBar: true, positionClass: "toast-top-right",
-          showDuration: "300", hideDuration: "1000", timeOut: "5000",
-          extendedTimeOut: "1000", showEasing: "swing", hideEasing: "linear",
-          showMethod: "fadeIn", hideMethod: "fadeOut"
-        });
+    async add_achievement(name, emoji) {
+      // Add an achievement in the user's data!
+      if (this.$store.state.currentAchievements.includes(name)) {
+          console.log("Already gotten the " + name + " achievement!")
+          return;
       }
-    },
-    async azure_function(method, route, body) {
+      const user_stats = this.$store.state.currentStats;
+      const achievements = [...this.$store.state.currentAchievements, name];
+      const input = { id: user_stats.id, updates: { achievements } };
+      const update = await this.azure_function("PUT", "/user/update/info", input);
+      if (update) {
+          this.$store.commit("setCurrentAchievements", achievements);
+          toastr.success(`${name} ${emoji}`, "Achievement Unlocked:", {
+            closeButton: true,
+            progressBar: true,
+            positionClass: "toast-top-right",
+            timeOut: 7000,
+            showMethod: "fadeIn",
+            hideMethod: "fadeOut"
+          });
+      }
+  },
+  async azure_function(method, route, body) {
       console.log(route);
       const url = `${process.env.VUE_APP_BACKEND_URL}${route}?code=${process.env.VUE_APP_MASTER_KEY}`;
 
@@ -349,19 +404,6 @@ export default {
     overflow-y: auto;
 }
 
-.curve-box {
-    border: 2px solid #f3af59;
-    width: 100%;
-    max-width: 1400px;
-    height: 40vh;
-    padding: 20px;  /* More internal padding */
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    overflow-y: auto;
-}
-
 .achievements-box ul {
   list-style: none;
   padding-left: 0;
@@ -377,6 +419,19 @@ export default {
   border: 1px solid #f3af59;
   padding: 12px 16px;
   border-radius: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.achievement-content {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.achievement-emoji {
+  font-size: 2rem;
+  width: 2.5rem;
 }
 
 .achievement-name {
@@ -388,6 +443,11 @@ export default {
 .achievement-description {
   font-size: 0.9rem;
   color: #cccccc;
+}
+
+/* Locked styling */
+.locked {
+  opacity: 0.4;
 }
 
 </style>

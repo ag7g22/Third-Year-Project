@@ -47,7 +47,6 @@
   </div>
 </template>
 <script>
-import toastr from 'toastr';
 export default {
   name: "dashboard",
   data() {
@@ -104,24 +103,6 @@ export default {
 
       this.next_page("leaderboard");
     },
-    async add_achievement(name) {
-      this.achievements.push(name);
-      const userId = this.$store.state.currentStats.id;
-      const input = { id: userId, updates: { achievements: this.achievements } };
-      const update = await this.azure_function("PUT", "/user/update/info", input);
-
-      if (update) {
-        this.$store.commit("setCurrentAchievements", this.achievements);
-        this.message.success = 'Achievements update Successful!';
-
-        toastr.success(`"${name}"`, "Achievement Unlocked:", {
-          closeButton: true, progressBar: true, positionClass: "toast-top-right",
-          showDuration: "300", hideDuration: "1000", timeOut: "5000",
-          extendedTimeOut: "1000", showEasing: "swing", hideEasing: "linear",
-          showMethod: "fadeIn", hideMethod: "fadeOut"
-        });
-      }
-    },
     async azure_function(method, route, body) {
       console.log(route);
       const url = `${process.env.VUE_APP_BACKEND_URL}${route}?code=${process.env.VUE_APP_MASTER_KEY}`;
@@ -163,7 +144,10 @@ export default {
             Object.values(averages).reduce((acc, avg) => acc + parseFloat(avg), 0) / Object.values(averages).length
           ).toFixed(3);
 
-          return avgOfAverages * 100;
+          const percentage = parseFloat(avgOfAverages) * 100;
+
+          // Return 0 if it's zero (or a falsey value), otherwise return the number
+          return percentage || 0;
     }
   },
 };

@@ -98,8 +98,6 @@
 
 <script>
 import toastr from 'toastr';
-import 'toastr/build/toastr.min.css';
-
 export default {
   name: "friends",
   data() {
@@ -118,8 +116,8 @@ export default {
       toastr.info(msg, title, {
           closeButton: true,
           progressBar: true,
-          positionClass: "toast-bottom-left",
-          timeOut: 3000,
+          positionClass: "toast-top-right",
+          timeOut: 5000,
           showMethod: "fadeIn",
           hideMethod: "fadeOut",
           preventDuplicates: false
@@ -129,8 +127,8 @@ export default {
         toastr.success(msg, title, {
         closeButton: true,
         progressBar: true,
-        positionClass: "toast-bottom-left",
-        timeOut: 3000,
+        positionClass: "toast-top-right",
+        timeOut: 5000,
         showMethod: "fadeIn",
         hideMethod: "fadeOut",
         preventDuplicates: true
@@ -140,8 +138,8 @@ export default {
     toastr.error(msg, title, {
         closeButton: true,
         progressBar: true,
-        positionClass: "toast-bottom-left",
-        timeOut: 3000,
+        positionClass: "toast-top-right",
+        timeOut: 5000,
         showMethod: "fadeIn",
         hideMethod: "fadeOut",
         preventDuplicates: true
@@ -191,6 +189,7 @@ export default {
       const input = { id_1: this.stats.id, id_2: id };
       const response = await this.azure_function("POST", "/user/friend/remove", input);
       if (response.result) {
+        this.add_achievement('A sworn enemy','💔');
         this.successful_message('Removed friend:', username);
         const friends = this.social_lists.friends.filter(friend => friend.id !== id);
         this.update_social_lists(friends, this.social_lists.friend_requests);
@@ -203,6 +202,7 @@ export default {
       const input = { sender_id: this.stats.id, recipient_id: id };
       const response = await this.azure_function("POST", "/user/friend/accept", input);
       if (response.result) {
+        this.add_achievement('A remarkable ally','🤝');
         this.successful_message('Added friend:', username);
         const friend_requests = this.social_lists.friend_requests.filter(r => r.id !== id);
         const friends = [...this.social_lists.friends, { id, username }];
@@ -228,6 +228,7 @@ export default {
       const input = { sender_id: this.stats.id, sender_username: this.logged_in_user, recipient_id };
       const response = await this.azure_function("POST", "/user/friend/request", input);
       if (response.result) {
+        this.add_achievement('Request for alliance','📨');
         this.info_message('Sent request to user:', recipient_username);
       } else {
         this.error_message('Failed!', response.msg);
@@ -299,23 +300,27 @@ export default {
 
     this.next_page("leaderboard");
   },
-  async add_achievement(name) {
-    this.achievements.push(name);
-    const userId = this.$store.state.currentStats.id;
-    const input = { id: userId, updates: { achievements: this.achievements } };
-    const update = await this.azure_function("PUT", "/user/update/info", input);
-
-    if (update) {
-      this.$store.commit("setCurrentAchievements", this.achievements);
-      this.message.success = 'Achievements update Successful!';
-
-      toastr.success(`"${name}"`, "Achievement Unlocked:", {
-        closeButton: true, progressBar: true, positionClass: "toast-top-right",
-        showDuration: "300", hideDuration: "1000", timeOut: "5000",
-        extendedTimeOut: "1000", showEasing: "swing", hideEasing: "linear",
-        showMethod: "fadeIn", hideMethod: "fadeOut"
-      });
-    }
+  async add_achievement(name, emoji) {
+      // Add an achievement in the user's data!
+      if (this.$store.state.currentAchievements.includes(name)) {
+          console.log("Already gotten the " + name + " achievement!")
+          return;
+      }
+      const user_stats = this.$store.state.currentStats;
+      const achievements = [...this.$store.state.currentAchievements, name];
+      const input = { id: user_stats.id, updates: { achievements } };
+      const update = await this.azure_function("PUT", "/user/update/info", input);
+      if (update) {
+          this.$store.commit("setCurrentAchievements", achievements);
+          toastr.success(`${name} ${emoji}`, "Achievement Unlocked:", {
+            closeButton: true,
+            progressBar: true,
+            positionClass: "toast-top-right",
+            timeOut: 10000,
+            showMethod: "fadeIn",
+            hideMethod: "fadeOut"
+          });
+      }
   },
   async azure_function(method, route, body) {
     console.log(route);

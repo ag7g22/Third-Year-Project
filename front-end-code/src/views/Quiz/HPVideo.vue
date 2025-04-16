@@ -103,7 +103,7 @@ export default {
             toastr.info(" ", `Gained ${this.exp_gain} exp!`, {
                 closeButton: true,
                 progressBar: true,
-                positionClass: "toast-bottom-center",
+                positionClass: "toast-top-right",
                 timeOut: 5000,
                 showMethod: "fadeIn",
                 hideMethod: "fadeOut",
@@ -114,7 +114,7 @@ export default {
             toastr.info(" ", "LEVELED UP!", {
                 closeButton: true,
                 progressBar: true,
-                positionClass: "toast-bottom-center",
+                positionClass: "toast-top-right",
                 timeOut: 5000,
                 showMethod: "fadeIn",
                 hideMethod: "fadeOut",
@@ -180,13 +180,14 @@ export default {
             // Run this method if the user clicks more than 10 times
             const video = this.$refs.hazard_perception;
             video.pause();
+            this.add_achievement('Where are you clicking lil bro','🚩');
             this.too_many_clicks = true;
             this.score_message = "Don't give up! Every attempt makes you better. Keep pushing forward!";
             this.message.success = "Gained no exp."
             this.updateFinished = true;
         },
         async finish_video_clip() {
-
+            this.add_achievement('Eyes on the Road','💀');
             // Check if the user clicked on the appropriate (x,y) range:
             if ((this.click_x <= this.selected_clip.x + 50 && this.click_x >= this.selected_clip.x - 50) && 
                 (this.click_y <= this.selected_clip.y + 50 && this.click_y >= this.selected_clip.y - 50)) {
@@ -197,6 +198,23 @@ export default {
                 if (this.click_time >= this.selected_clip.time && this.click_time < this.selected_clip.time + interval) {
                     this.final_score = 5;
                     this.score_message = "Eagle eyed legend!";
+
+                    if (this.selected_clip.name === "Urban Driving 5") {
+                        this.add_achievement('Takin out the trash','🗑️');
+                    } 
+                    if (this.selected_clip.name === "Rural Driving 2") {
+                        this.add_achievement('NEIGHHHHHH!','🐎');
+                    } 
+                    if (this.selected_clip.name === "Bigger Roads 1") {
+                        this.add_achievement('Fireman sam','👨‍🚒');
+                    } 
+                    if (this.selected_clip.name === "Tricky Conditions 2") {
+                        this.add_achievement('Oh deer','🦌');
+                    } 
+                    if (this.selected_clip.name === "Tricky Conditions 4") {
+                        this.add_achievement('You snooze you lose!','💤');
+                    } 
+                    
                     this.exp_gain = 350;
                 } else if (this.click_time >= this.selected_clip.time + interval && this.click_time < this.selected_clip.time + interval*2) {
                     this.final_score = 4;
@@ -277,6 +295,9 @@ export default {
                 this.$store.commit("setCurrentRank", this.currentRank);
                 this.currentRank = this.$store.state.currentRank;
                 if (prev_level < this.currentRank.level) {
+                    if (this.currentRank.level === 20) {
+                        this.add_achievement('Absolute Bang out','🤓');
+                    }
                     this.level_up_message();
                 } else {
                     this.exp_message();
@@ -285,25 +306,25 @@ export default {
                 this.message.error = update_response.msg || "Score update Failed."
             }
         },
-        async add_achievement(name) {
-            // Add achievement to user's achievements and notify on the UI.
-            this.achievements.push(name)
-
-            // Update database
-            const input = { 'id': user_stats.id, 'updates': { 'achievements': this.achievements } }
-            const update = await this.azure_function("PUT", "/user/update/info", input)
+        async add_achievement(name, emoji) {
+            // Add an achievement in the user's data!
+            if (this.$store.state.currentAchievements.includes(name)) {
+                console.log("Already gotten the " + name + " achievement!")
+                return;
+            }
+            const user_stats = this.$store.state.currentStats;
+            const achievements = [...this.$store.state.currentAchievements, name];
+            const input = { id: user_stats.id, updates: { achievements } };
+            const update = await this.azure_function("PUT", "/user/update/info", input);
             if (update) {
-                this.$store.commit("setCurrentAchievements", this.achievements);
-                this.message.success = 'Achievements update Successful!'
-
-                toastr.success('"' + `/${name}` + '""', "Achievement Unlocked:", {
-                    closeButton: true,
-                    progressBar: true,
-                    positionClass: "toast-bottom-full-width",
-                    timeOut: 5000,
-                    showMethod: "fadeIn",
-                    hideMethod: "fadeOut",
-                    preventDuplicates: true
+                this.$store.commit("setCurrentAchievements", achievements);
+                toastr.success(`${name} ${emoji}`, "Achievement Unlocked:", {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-right",
+                timeOut: 10000,
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut"
                 });
             }
         },
@@ -339,6 +360,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+h1 {
+    color: white;
+}
+
 .buttons-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr); /* Exactly 3 buttons per row */

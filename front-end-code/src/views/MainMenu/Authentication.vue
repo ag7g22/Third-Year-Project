@@ -109,7 +109,7 @@ export default {
             closeButton: true,
             progressBar: true,
             positionClass: "toast-top-right",
-            timeOut: 5000,
+            timeOut: 6000,
             showMethod: "fadeIn",
             hideMethod: "fadeOut",
             preventDuplicates: true
@@ -241,7 +241,7 @@ export default {
         this.$store.commit("setCurrentRecentCatScores", info.recent_category_scores);
 
         if (info.achievements.length === 0) {
-          this.add_achievement('Start of a Journey');
+          this.add_achievement('Start of a Journey', '🔑');
         }
         
         this.daily_quiz_reminder();
@@ -250,19 +250,23 @@ export default {
         this.error_message("Account error", message)
       }
     },
-    async add_achievement(name) {
+    async add_achievement(name, emoji) {
+      // Add an achievement in the user's data!
+      if (this.$store.state.currentAchievements.includes(name)) {
+        console.log("Already gotten the " + name + " achievement!")
+        return;
+      }
       const user_stats = this.$store.state.currentStats;
       const achievements = [...this.$store.state.currentAchievements, name];
       const input = { id: user_stats.id, updates: { achievements } };
-
       const update = await this.azure_function("PUT", "/user/update/info", input);
       if (update) {
         this.$store.commit("setCurrentAchievements", achievements);
-        toastr.success(`"${name}"`, "Achievement Unlocked:", {
+        toastr.success(`${name} ${emoji}`, "Achievement Unlocked:", {
           closeButton: true,
           progressBar: true,
           positionClass: "toast-top-right",
-          timeOut: 5000,
+          timeOut: 10000,
           showMethod: "fadeIn",
           hideMethod: "fadeOut"
         });

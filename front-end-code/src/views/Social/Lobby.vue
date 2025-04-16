@@ -213,7 +213,7 @@ export default {
             toastr.info(" ", `Gained ${exp_gain} exp!`, {
                 closeButton: true,
                 progressBar: true,
-                positionClass: "toast-bottom-center",
+                positionClass: "toast-top-right",
                 timeOut: 5000,
                 showMethod: "fadeIn",
                 hideMethod: "fadeOut",
@@ -224,7 +224,7 @@ export default {
             toastr.info(" ", "LEVELED UP!", {
                 closeButton: true,
                 progressBar: true,
-                positionClass: "toast-bottom-center",
+                positionClass: "toast-top-right",
                 timeOut: 5000,
                 showMethod: "fadeIn",
                 hideMethod: "fadeOut",
@@ -307,6 +307,7 @@ export default {
         },
         leave_game(isWinner) {
             this.isWinner = isWinner;
+            this.add_achievement('The Crash-out King','🥀');
             // Remove players from game and end game.
             this.client_socket.emit('leave-game', this.logged_in_user, this.game_state.host);
         },
@@ -341,7 +342,7 @@ export default {
                 toastr.success(" ", "You WIN the round!", {
                     closeButton: true,
                     progressBar: true,
-                    positionClass: "toast-bottom-left",
+                    positionClass: "toast-top-right",
                     timeOut: 4000,
                     showMethod: "fadeIn",
                     hideMethod: "fadeOut",
@@ -351,7 +352,7 @@ export default {
                 toastr.warning(" ", "Round Tie!", {
                     closeButton: true,
                     progressBar: true,
-                    positionClass: "toast-bottom-left",
+                    positionClass: "toast-top-right",
                     timeOut: 4000,
                     showMethod: "fadeIn",
                     hideMethod: "fadeOut",
@@ -361,7 +362,7 @@ export default {
                 toastr.error(" ", `${winner} WINS the round!`, {
                     closeButton: true,
                     progressBar: true,
-                    positionClass: "toast-bottom-left",
+                    positionClass: "toast-top-right",
                     timeOut: 4000,
                     showMethod: "fadeIn",
                     hideMethod: "fadeOut",
@@ -372,24 +373,27 @@ export default {
         },
         async end_of_game(winner) {
             // Show both users the results
+            this.add_achievement('1 v 1 me rn m8','💥');
             this.message = { error: "", success: "" }
             if (winner === this.logged_in_user) {
+                this.add_achievement('The Crash-off King','👑');
                 this.user_state.isWinner = true;
                 toastr.success(" ", "You WIN the game!", {
                     closeButton: true,
                     progressBar: true,
-                    positionClass: "toast-bottom-left",
+                    positionClass: "toast-top-right",
                     timeOut: 4000,
                     showMethod: "fadeIn",
                     hideMethod: "fadeOut",
                     preventDuplicates: true
                 });
             } else {
+                this.add_achievement('The Humble King','🏳️');
                 this.user_state.isWinner = false;
                 toastr.error(" ", `${winner} WINS the game!`, {
                     closeButton: true,
                     progressBar: true,
-                    positionClass: "toast-bottom-left",
+                    positionClass: "toast-top-right",
                     timeOut: 4000,
                     showMethod: "fadeIn",
                     hideMethod: "fadeOut",
@@ -501,23 +505,26 @@ export default {
                 this.image = this.images.filter((image, index) => images.keys()[index].includes(question_image))[0];
             }
         },
-        async add_achievement(name) {
-            // Add achievement to user's achievements and notify on the UI.
-            this.achievements.push(name)
-
-            // Update database
-            const input = { 'id': user_stats.id, 'updates': { 'achievements': this.achievements } }
-            const update = await this.azure_function("PUT", "/user/update/info", input)
+        async add_achievement(name, emoji) {
+            // Add an achievement in the user's data!
+            if (this.$store.state.currentAchievements.includes(name)) {
+                console.log("Already gotten the " + name + " achievement!")
+                return;
+            }
+            const user_stats = this.$store.state.currentStats;
+            const achievements = [...this.$store.state.currentAchievements, name];
+            const input = { id: user_stats.id, updates: { achievements } };
+            const update = await this.azure_function("PUT", "/user/update/info", input);
             if (update) {
-                this.$store.commit("setCurrentAchievements", this.achievements);
-                this.message.success = 'Achievements update Successful!'
-
-                const options = { "closeButton": true, "debug": false, "newestOnTop": true, "progressBar": true,
-                "positionClass": "toast-top-right", "preventDuplicates": true, "onclick": null, "showDuration": "300",
-                "hideDuration": "1000", "timeOut": "5000", "extendedTimeOut": "1000", "showEasing": "swing",
-                "hideEasing": "linear", "showMethod": "fadeIn","hideMethod": "fadeOut"}
-
-                toastr.success('"' + `/${name}` + '""',"Achievement Unlocked:", options)
+                this.$store.commit("setCurrentAchievements", achievements);
+                toastr.success(`${name} ${emoji}`, "Achievement Unlocked:", {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-right",
+                timeOut: 10000,
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut"
+                });
             }
         },
         async update_user_exp(exp_gain) {
@@ -545,6 +552,9 @@ export default {
                 this.$store.commit("setCurrentRank", this.currentRank);
                 this.currentRank = this.$store.state.currentRank;
                 if (prev_level < this.currentRank.level) {
+                    if (this.currentRank.level === 20) {
+                        this.add_achievement('Absolute Bang out','🤓');
+                    }
                     this.level_up_message();
                 } else {
                     this.exp_message(exp_gain);
@@ -627,7 +637,7 @@ export default {
                 toastr.info("Waiting for other player to answer ...", "Answered question!", {
                     closeButton: true,
                     progressBar: true,
-                    positionClass: "toast-bottom-center",
+                    positionClass: "toast-top-right",
                     timeOut: 3000,
                     showMethod: "fadeIn",
                     hideMethod: "fadeOut",

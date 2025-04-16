@@ -34,7 +34,7 @@
         <div v-if="state.current_view === 'instructions'" class="split-container">
             <div class="left-side">
                 <div class="instructions-container">
-                    <h3>now lets test your game senses ...</h3>
+                    <h3>Now lets test your game senses ...</h3>
                     <div class="feature-list">
                         <p>The hazard perception test checks how quickly you can spot developing dangers while driving. 
                             You'll watch video clips and click when you see a potential hazard. The faster you respond, the higher your score, 
@@ -167,44 +167,44 @@ export default {
                 // Clips: (Video name, (x,y), time)
                 case 'Urban Driving':
                     clips = [
-                        {name: 'Urban Driving 1', x: 370, y: 270, time: 15.25},
-                        {name: 'Urban Driving 2', x: 540, y: 270, time: 18.00},
-                        {name: 'Urban Driving 3', x: 410, y: 260, time: 29.00},
-                        {name: 'Urban Driving 4', x: 415, y: 260, time: 37.60},
-                        {name: 'Urban Driving 5', x: 350, y: 260, time: 29.00}
+                        {name: 'Urban Driving 1', x: 455, y: 335, time: 15.00},
+                        {name: 'Urban Driving 2', x: 665, y: 330, time: 14.80},
+                        {name: 'Urban Driving 3', x: 485, y: 325, time: 28.45},
+                        {name: 'Urban Driving 4', x: 475, y: 325, time: 34.90},
+                        {name: 'Urban Driving 5', x: 415, y: 345, time: 29.60}
                     ];
                     break;
                 case 'Rural Driving':
                     clips = [
-                        {name: 'Rural Driving 1', x: 490, y: 220, time: 47.00},
-                        {name: 'Rural Driving 2', x: 250, y: 250, time: 31.00},
-                        {name: 'Rural Driving 3', x: 395, y: 230, time: 17.50},
-                        {name: 'Rural Driving 4', x: 450, y: 290, time: 13.45},
-                        {name: 'Rural Driving 5', x: 295, y: 240, time: 37.85}
+                        {name: 'Rural Driving 1', x: 620, y: 300, time: 47.65},
+                        {name: 'Rural Driving 2', x: 280, y: 325, time: 31.00},
+                        {name: 'Rural Driving 3', x: 475, y: 310, time: 18.70},
+                        {name: 'Rural Driving 4', x: 530, y: 370, time: 13.90},
+                        {name: 'Rural Driving 5', x: 350, y: 320, time: 38.85}
                     ];
                     break;
                 case 'Bigger Roads':
                     clips = [
-                        {name: 'Bigger Roads 1', x: 415, y: 250, time: 13.90},
-                        {name: 'Bigger Roads 2', x: 425, y: 240, time: 14.55},
-                        {name: 'Bigger Roads 3', x: 510, y: 260, time: 26.30},
-                        {name: 'Bigger Roads 4', x: 500, y: 245, time: 21.45}
+                        {name: 'Bigger Roads 1', x: 485, y: 320, time: 13.80},
+                        {name: 'Bigger Roads 2', x: 485, y: 315, time: 14.50},
+                        {name: 'Bigger Roads 3', x: 600, y: 320, time: 27.70},
+                        {name: 'Bigger Roads 4', x: 590, y: 325, time: 22.00}
                     ];
                     break;
                 case 'Motorways':
                     clips = [
-                        {name: 'Motorways 1', x: 25, y: 190, time: 2.55},
-                        {name: 'Motorways 2', x: 320, y: 250, time: 25.45},
-                        {name: 'Motorways 3', x: 690, y: 290, time: 30.20}
+                        {name: 'Motorways 1', x: 20, y: 263, time: 2.35},
+                        {name: 'Motorways 2', x: 400, y: 325, time: 26.85},
+                        {name: 'Motorways 3', x: 815, y: 360, time: 30.85}
                     ];
                     break;
                 case 'Tricky Conditions':
                     clips = [
-                        {name: 'Tricky Conditions 1', x: 110, y: 250, time: 17.10},
-                        {name: 'Tricky Conditions 2', x: 515, y: 240, time: 31.80},
-                        {name: 'Tricky Conditions 3', x: 280, y: 254, time: 33.45},
-                        {name: 'Tricky Conditions 4', x: 325, y: 235, time: 22.70},
-                        {name: 'Tricky Conditions 5', x: 320, y: 255, time: 24.00}
+                        {name: 'Tricky Conditions 1', x: 165, y: 325, time: 17.10},
+                        {name: 'Tricky Conditions 2', x: 600, y: 320, time: 31.90},
+                        {name: 'Tricky Conditions 3', x: 510, y: 335, time: 33.20},
+                        {name: 'Tricky Conditions 4', x: 400, y: 315, time: 23.50},
+                        {name: 'Tricky Conditions 5', x: 375, y: 335, time: 25.83}
                     ];
                     break;
             }

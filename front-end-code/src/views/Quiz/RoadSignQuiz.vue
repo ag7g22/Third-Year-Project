@@ -152,7 +152,7 @@ export default {
             toastr.info(" ", `Gained ${this.exp_gain} exp!`, {
                 closeButton: true,
                 progressBar: true,
-                positionClass: "toast-bottom-center",
+                positionClass: "toast-top-right",
                 timeOut: 5000,
                 showMethod: "fadeIn",
                 hideMethod: "fadeOut",
@@ -163,7 +163,7 @@ export default {
             toastr.info(" ", "LEVELED UP!", {
                 closeButton: true,
                 progressBar: true,
-                positionClass: "toast-bottom-center",
+                positionClass: "toast-top-right",
                 timeOut: 5000,
                 showMethod: "fadeIn",
                 hideMethod: "fadeOut",
@@ -224,6 +224,7 @@ export default {
                 await this.get_stats();
                 // Update score if quiz completed:
                 console.log("FINAL SCORE:", this.final_score);
+                this.add_achievement('A Sign of Things to Come','🛑');
                 await this.update_user_exp();
                 this.updateFinished = true;
             }
@@ -287,6 +288,10 @@ export default {
             this.final_score = parseFloat((this.total_score / this.num_questions.selected)).toPrecision(2);
             this.exp_gain = Math.round(((this.total_score / this.num_questions.selected) * 500) / 100) * 100; 
             console.log(this.exp_gain)
+
+            if (this.final_score === 1.0 && this.num_questions.selected === 12) {
+                this.add_achievement('Mastering the Sign language','🚦');
+            }
             
             if (this.final_score >= 0.9 && this.final_score < 1.0) {
                 this.quiz_message = "Amazing job! You crushed it! Your hard work really paid off!"
@@ -336,6 +341,9 @@ export default {
                 this.$store.commit("setCurrentRank", this.currentRank);
                 this.currentRank = this.$store.state.currentRank;
                 if (prev_level < this.currentRank.level) {
+                    if (this.currentRank.level === 20) {
+                        this.add_achievement('Absolute Bang out','🤓');
+                    }
                     this.level_up_message();
                 } else {
                     this.exp_message();
@@ -373,23 +381,26 @@ export default {
                 query: { input: this.feedback }
             })
         },
-        async add_achievement(name) {
-            // Add achievement to user's achievements and notify on the UI.
-            this.achievements.push(name)
-
-            // Update database
-            const input = { 'id': user_stats.id, 'updates': { 'achievements': this.achievements } }
-            const update = await this.azure_function("PUT", "/user/update/info", input)
+        async add_achievement(name, emoji) {
+            // Add an achievement in the user's data!
+            if (this.$store.state.currentAchievements.includes(name)) {
+                console.log("Already gotten the " + name + " achievement!")
+                return;
+            }
+            const user_stats = this.$store.state.currentStats;
+            const achievements = [...this.$store.state.currentAchievements, name];
+            const input = { id: user_stats.id, updates: { achievements } };
+            const update = await this.azure_function("PUT", "/user/update/info", input);
             if (update) {
-                this.$store.commit("setCurrentAchievements", this.achievements);
-                this.message.success = 'Achievements update Successful!'
-
-                const options = { "closeButton": true, "debug": false, "newestOnTop": true, "progressBar": true,
-                "positionClass": "toast-top-right", "preventDuplicates": true, "onclick": null, "showDuration": "300",
-                "hideDuration": "1000", "timeOut": "5000", "extendedTimeOut": "1000", "showEasing": "swing",
-                "hideEasing": "linear", "showMethod": "fadeIn","hideMethod": "fadeOut"}
-
-                toastr.success('"' + `/${name}` + '""',"Achievement Unlocked:", options)
+                this.$store.commit("setCurrentAchievements", achievements);
+                toastr.success(`${name} ${emoji}`, "Achievement Unlocked:", {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-right",
+                timeOut: 10000,
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut"
+                });
             }
         },
         async azure_function(function_type, function_route, json_doc) {
