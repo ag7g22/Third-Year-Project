@@ -488,29 +488,24 @@ io.on('connection', socket => {
 });
 
 // API Requests are handled here
-async function azure_function(function_type, function_route, json_doc) {
-    console.log(function_route);
-    // Call Azure function with request
+async function azure_function(method, route, body) {
+    // Send a request to the function app.
+    console.log(route);
+    const url = "https://driving-theory.azurewebsites.net" + route + '?code=' + "p8l8U5CrimGa5Z35x5bq3Tf2X1KiVJKsYY7yyGL8OQOeAzFuEHeOLA=="
     try {
-        const url = "https://driving-theory.azurewebsites.net" + function_route + '?code=' + "p8l8U5CrimGa5Z35x5bq3Tf2X1KiVJKsYY7yyGL8OQOeAzFuEHeOLA=="
-        
-        if (function_type === "GET") {
-            const response = await fetch( url, { method: function_type, headers: { "Content-Type": "application/json"} });
-            const API_reply = await response.json();
-            console.log("Result: " + JSON.stringify(API_reply.result));
-            return API_reply
-        } else {
-            const response = await fetch( url, { method: function_type, headers: { "Content-Type": "application/json"},body: JSON.stringify(json_doc)});
-            const API_reply = await response.json();
-            console.log("Result: " + JSON.stringify(API_reply.result));
-            return API_reply
-        }
-
+      const options = {
+        method,
+        headers: { "Content-Type": "application/json" },
+      };
+      if (method !== "GET") options.body = JSON.stringify(body);
+      const response = await fetch(url, options);
+      const result = await response.json();
+      console.log("Result:", JSON.stringify(result.result));
+      return result;
     } catch (error) {
-        console.error("Error:", error);
-        this.message.error = "An API error occurred. Please try again later.";
+      console.error("Error:", error);
     }
-}
+  }
 
 // Start the server
 function startServer() {

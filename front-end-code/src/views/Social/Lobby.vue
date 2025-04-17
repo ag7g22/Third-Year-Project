@@ -314,7 +314,6 @@ export default {
         },
         leave_game(isWinner) {
             this.isWinner = isWinner;
-            this.add_achievement('1 v 1 me rn m8','💥');
             this.add_achievement('The Crash-out King','🥀');
             // Remove players from game and end game.
             this.client_socket.emit('leave-game', this.logged_in_user, this.game_state.host);
@@ -667,6 +666,7 @@ export default {
             });
 
             this.client_socket.on('leave-game-success', () => {
+                this.add_achievement('1 v 1 me rn m8','💥');
                 this.toggle_view('GAMEOVER');
             });
         },

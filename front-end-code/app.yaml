@@ -1,4 +1,3 @@
-# Use NodeJS on flexible app engine
 runtime: nodejs
 env: flex
 
@@ -8,10 +7,11 @@ runtime_config:
 
 entrypoint: node server.js  # Start your Express server
 
-handlers:  
-  - url: /socket.io/.*
-    script: auto  # Ensure the socket.io path is handled correctly
-    
+env_variables:
+  VUE_APP_BACKEND_URL: "https://driving-theory.azurewebsites.net"
+  VUE_APP_MASTER_KEY: "p8l8U5CrimGa5Z35x5bq3Tf2X1KiVJKsYY7yyGL8OQOeAzFuEHeOLA=="
+
+handlers:
   - url: /css
     static_dir: dist/css
 
