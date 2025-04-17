@@ -341,7 +341,7 @@ export default {
             this.exp_gain = Math.round(((this.total_score / this.num_questions.selected) * 500) / 100) * 100; 
             console.log(this.exp_gain)
 
-            if (this.final_score === 1.0 && this.num_questions.selected === 20) {
+            if (this.final_score == 1.0 && this.num_questions.selected == 20) {
                 if (this.state.current_topic === "Driving Off") {
                     this.add_achievement('Transform and roll out!','🚗');
                 } else if (this.state.current_topic === "Urban Driving") {

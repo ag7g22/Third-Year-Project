@@ -287,7 +287,7 @@ export default {
             this.exp_gain = Math.round(((this.total_score / this.num_questions.selected) * 500) / 100) * 100; 
             console.log(this.exp_gain)
 
-            if (this.final_score === 1.0 && this.num_questions.selected === 12) {
+            if (this.final_score == 1.0 && this.num_questions.selected == 12) {
                 this.add_achievement('Mastering the Sign language','🚦');
             }
             
