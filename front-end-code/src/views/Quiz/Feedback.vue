@@ -48,7 +48,6 @@
 </template>
   
 <script>
-import toastr from 'toastr';
 const images = require.context('@/assets/questions/.', false, /\.(jpg|jpeg|png)$/);
 export default {
     // Page member variables and methods:
@@ -56,7 +55,7 @@ export default {
     mounted() {
         // Set up input to send to openai model
         this.input = this.$route.query.input || [];
-        this.get_feedback_explaination();
+        this.get_feedback_explanation();
     },
     data() {
         return {
@@ -70,48 +69,15 @@ export default {
             image: "",
 
             logged_in_user: this.$store.state.currentUser,
-            message: { error: "", success: "" },
         };
     },
     methods: {
         toggle_view(view) {
             // Reset state
-            this.message = { error: "", success: "" };
             this.state.current_view = view;
         },
-        async get_feedback() {
-            // Get feedback from API:
-            const new_input = this.input.map(item => {
-                const { image, explanation, ...rest } = item; // Destructure to remove the 'author' property
-                return rest; // Return the rest of the object
-            });
-            console.log(new_input);
-            
-            try {
-                const feedback = await this.azure_function('POST', '/question/get/feedback', {incorrect_answers: new_input});
-                if (feedback.result) {
-                    this.state.feedback = JSON.parse(feedback.msg);
-                    console.log('Is array:', Array.isArray(this.state.feedback));
-                    console.log('Type:', typeof this.state.feedback);
-                    console.log(this.state.feedback);
-                    console.log(this.state.feedback[this.current_Q]);
-                    this.add_image();
-                    this.toggle_view('feedback');
-                } else {
-                    this.message.error = feedback.msg || "Loading feedback failed."
-                }
-            } catch (error) {
-                console.log('Unable to generate, using the explanation as a substitute feedback.');
-                this.state.feedback = this.input.map(({ image, explanation, ...rest }) => ({
-                    feedback: explanation,
-                    ...rest
-                }));
-                this.add_image();
-                this.toggle_view('feedback');
-            }
-        },
-        async get_feedback_explaination() {
-        // alternative method due to budget constraints:
+        async get_feedback_explanation() {
+            // alternative method due to budget constraints:
             console.log('Generating instant feedback with explanations.');
             this.state.feedback = this.input.map(({ image, explanation, ...rest }) => ({
                 feedback: explanation,
@@ -135,54 +101,11 @@ export default {
                 this.image = this.images.filter((image, index) => images.keys()[index].includes(question_image))[0];
             }
         },
-        async add_achievement(name) {
-            // Add achievement to user's achievements and notify on the UI.
-            this.achievements.push(name)
-
-            // Update database
-            const input = { 'id': user_stats.id, 'updates': { 'achievements': this.achievements } }
-            const update = await this.azure_function("PUT", "/user/update/info", input)
-            if (update) {
-                this.$store.commit("setCurrentAchievements", this.achievements);
-                this.message.success = 'Achievements update Successful!'
-
-                const options = { "closeButton": true, "debug": false, "newestOnTop": true, "progressBar": true,
-                "positionClass": "toast-top-right", "preventDuplicates": true, "onclick": null, "showDuration": "300",
-                "hideDuration": "1000", "timeOut": "5000", "extendedTimeOut": "1000", "showEasing": "swing",
-                "hideEasing": "linear", "showMethod": "fadeIn","hideMethod": "fadeOut"}
-
-                toastr.success('"' + `/${name}` + '""',"Achievement Unlocked:", options)
-            }
-        },
-        async azure_function(function_type, function_route, json_doc) {
-            console.log(function_route);
-            // Call Azure function with request
-            try {
-                const url = process.env.VUE_APP_BACKEND_URL + function_route + '?code=' + process.env.VUE_APP_MASTER_KEY
-                
-                if (function_type === "GET") {
-                    const response = await fetch( url, { method: function_type, headers: { "Content-Type": "application/json"} });
-                    const API_reply = await response.json();
-                    console.log("Result: " + JSON.stringify(API_reply.result));
-                    return API_reply
-                } else {
-                    const response = await fetch( url, { method: function_type, headers: { "Content-Type": "application/json"},body: JSON.stringify(json_doc)});
-                    const API_reply = await response.json();
-                    console.log("Result: " + JSON.stringify(API_reply.result));
-                    return API_reply
-                }
-
-            } catch (error) {
-                console.error("Error:", error);
-                this.message.error = "An API error occurred. Please try again later.";
-            }
-        },
         next_page(page) {
             this.input = [];
             this.state = { current_view: 'loading', feedback: []};
             this.current_Q = 0;
             this.image = "";
-            this.message = { error: "", success: "" };
             console.log("/" + page);
             this.$router.push(`/${page}`);
         }

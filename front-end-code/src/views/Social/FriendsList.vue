@@ -89,9 +89,6 @@
           <button class="game-button" disabled>Search Users</button>
         </div>
       </div>
-  
-      <p v-if="message.error" class="error-message">{{ message.error }}</p>
-      <p v-else-if="message.success" class="success-message">{{ message.success }}</p>
     </div>
   </div>
 </template>
@@ -108,7 +105,6 @@ export default {
       logged_in_user: this.$store.state.currentUser,
       stats: this.$store.state.currentStats,
       social_lists: this.$store.state.currentSocialLists,
-      message: { error: "", success: "" }
     };
   },
   methods: {
@@ -145,12 +141,7 @@ export default {
         preventDuplicates: true
         });
     },
-    clearMessages() {
-      this.message.error = "";
-      this.message.success = "";
-    },
     toggle_list(list) {
-      this.message = { error: "", success: "" };
       this.search = { query: "", users: [] };
       this.current_list = list;
     },
@@ -185,7 +176,6 @@ export default {
       }
     },
     async remove_friend(id, username) {
-      this.reset_messages();
       const input = { id_1: this.stats.id, id_2: id };
       const response = await this.azure_function("POST", "/user/friend/remove", input);
       if (response.result) {
@@ -198,7 +188,6 @@ export default {
       }
     },
     async accept_request(id, username) {
-      this.reset_messages();
       const input = { sender_id: this.stats.id, recipient_id: id };
       const response = await this.azure_function("POST", "/user/friend/accept", input);
       if (response.result) {
@@ -212,7 +201,6 @@ export default {
       }
     },
     async reject_request(id, username) {
-      this.reset_messages();
       const input = { sender_id: id, sender_username: username, recipient_id: this.stats.id };
       const response = await this.azure_function("POST", "/user/friend/reject", input);
       if (response.result) {
@@ -224,7 +212,6 @@ export default {
       }
     },
     async send_friend_request(recipient_id, recipient_username) {
-      this.reset_messages();
       const input = { sender_id: this.stats.id, sender_username: this.logged_in_user, recipient_id };
       const response = await this.azure_function("POST", "/user/friend/request", input);
       if (response.result) {
@@ -235,9 +222,7 @@ export default {
       }
     },
     async search_users() {
-      this.reset_messages();
       if (this.search.query === this.logged_in_user) {
-        this.message.error = "This is you!";
         return;
       }
       const response = await this.azure_function("POST", "/user/search", {
@@ -263,83 +248,80 @@ export default {
         return await response.json();
       } catch (error) {
         console.error("Azure Function Error:", error);
-        this.message.error = "An API error occurred. Please try again later.";
       }
     },
     update_social_lists(friends, friend_requests) {
       this.$store.commit("setCurrentSocialLists", { friends, friend_requests });
       this.social_lists = { friends, friend_requests };
     },
-    reset_messages() {
-      this.message = { error: "", success: "" };
-    },
     logout() {
+      // Let server know the user is logging out.
       this.client_socket.emit('logout', this.logged_in_user);
-      this.clearMessages();
 
-      // Reset state
+      // Reset state of the store
       this.$store.commit("setCurrentUser", "");
       this.$store.commit("setCurrentPassword", "");
       this.$store.commit("setCurrentRank", { level: 'n/a', exp: 0, exp_threshold: 0 });
       this.$store.commit("setCurrentStats", { id: 'n/a', streak: 0, daily_training_score: 0, training_completion_date: 'n/a' });
+      this.$store.commit("setCurrentAchievements", []);
+      this.$store.commit("setCurrentRecentCatScores",{"Driving Off": [], "Urban Driving": [], "Rural Driving": [], "Bigger Roads": [], "Motorways": [], "Tricky Conditions": [], "Breakdowns": []});
       this.$store.commit("setCurrentSocialLists", { friends: [], friend_requests: [] });
-      console.log("User logged out.");
+      this.$store.commit("setCurrentLeaderboards", {public: [], friends: []});
+      console.log("User logged out");
 
       this.next_page('authentication');
     },
-  async load_leaderboards() {
-    const [publicRes, friendsRes] = await Promise.all([
-      this.azure_function("GET", "/user/leaderboard", {}),
-      this.azure_function("POST", "/user/leaderboard/friend", { id: this.$store.state.currentStats.id })
-    ]);
+    async load_leaderboards() {
+      const [publicRes, friendsRes] = await Promise.all([
+        this.azure_function("GET", "/user/leaderboard", {}),
+        this.azure_function("POST", "/user/leaderboard/friend", { id: this.$store.state.currentStats.id })
+      ]);
 
-    this.$store.commit("setCurrentLeaderboards", {
-      public: publicRes.result ? publicRes.msg : [],
-      friends: friendsRes.result ? friendsRes.msg : []
-    });
+      this.$store.commit("setCurrentLeaderboards", {
+        public: publicRes.result ? publicRes.msg : [],
+        friends: friendsRes.result ? friendsRes.msg : []
+      });
 
-    this.next_page("leaderboard");
-  },
-  async add_achievement(name, emoji) {
-      // Add an achievement in the user's data!
-      if (this.$store.state.currentAchievements.includes(name)) {
-          console.log("Already gotten the " + name + " achievement!")
-          return;
-      }
-      const user_stats = this.$store.state.currentStats;
-      const achievements = [...this.$store.state.currentAchievements, name];
-      const input = { id: user_stats.id, updates: { achievements } };
-      const update = await this.azure_function("PUT", "/user/update/info", input);
-      if (update) {
-          this.$store.commit("setCurrentAchievements", achievements);
-          toastr.success(`${name} ${emoji}`, "Achievement Unlocked:", {
-            closeButton: true,
-            progressBar: true,
-            positionClass: "toast-top-right",
-            timeOut: 10000,
-            showMethod: "fadeIn",
-            hideMethod: "fadeOut"
-          });
-      }
-  },
+      this.next_page("leaderboard");
+    },
+    async add_achievement(name, emoji) {
+        // Add an achievement in the user's data!
+        if (this.$store.state.currentAchievements.includes(name)) {
+          console.log(name + " achievement already unlocked.");
+            return;
+        }
+        const user_stats = this.$store.state.currentStats;
+        const achievements = [...this.$store.state.currentAchievements, name];
+        const input = { id: user_stats.id, updates: { achievements } };
+        const update = await this.azure_function("PUT", "/user/update/info", input);
+        if (update) {
+            this.$store.commit("setCurrentAchievements", achievements);
+            toastr.success(`${name} ${emoji}`, "Achievement Unlocked:", {
+              closeButton: true,
+              progressBar: true,
+              positionClass: "toast-top-right",
+              timeOut: 10000,
+              showMethod: "fadeIn",
+              hideMethod: "fadeOut"
+            });
+        }
+    },
   async azure_function(method, route, body) {
+    // Send a request to the function app.
     console.log(route);
     const url = `${process.env.VUE_APP_BACKEND_URL}${route}?code=${process.env.VUE_APP_MASTER_KEY}`;
-
     try {
       const options = {
         method,
         headers: { "Content-Type": "application/json" },
       };
       if (method !== "GET") options.body = JSON.stringify(body);
-
       const response = await fetch(url, options);
       const result = await response.json();
-      console.log("Result: ", JSON.stringify(result.result));
+      console.log("Result:", JSON.stringify(result.result));
       return result;
     } catch (error) {
       console.error("Error:", error);
-      this.message.error = "An API error occurred. Please try again later.";
     }
   },
   next_page(page) {

@@ -236,7 +236,6 @@ export default {
 
             logged_in_user: this.$store.state.currentUser,
             currentRank: this.$store.state.currentRank,
-            message: { error: "", success: "" },
         };
     },
     methods: {
@@ -264,15 +263,9 @@ export default {
             });
         },
         toggle_view(view) {
-            // Reset state
-            this.message = { error: "", success: "" };
             this.current_view = view;
         },
         async init_questions() {
-            // Set up the questions
-            this.message = { error: "", success: "" };
-            this.message.success = 'LOADING QUESTIONS ...';
-
             // Fetch the multiple choice questions:
             const input = { 'No_of_Qs': 50, 'username': this.logged_in_user };
             const quiz = await this.azure_function('POST', '/question/get/quiz', input);
@@ -284,15 +277,9 @@ export default {
                     item.flagged = false;
                 });
                 this.init_clips();
-            } else {
-                this.message.error = quiz.msg || 'LOADING QUIZ FAILED.'
             }
         },
         async init_clips() {
-            // Set up the clips
-            this.message = { error: "", success: "" };
-            this.message.success = 'SELECTING HAZARD PERCEPTION CLIPS';
-
             // Fetch the 14 clips:
             const dictList = [
                 {name: 'Urban Driving 1', x: 455, y: 335, time: 15.00},
@@ -321,9 +308,8 @@ export default {
             // Shuffle and select random clips
             this.clips = dictList
                 .sort(() => 0.5 - Math.random())  // Randomly shuffle
-                .slice(0, 2);           // Select the first 14 clips
-            
-            this.message.success = 'LOADING HAZARD PERCEPTION CLIPS';
+                .slice(0, 14);           // Select the first 14 clips
+
             this.clips.forEach(async item => {
                 const input = {'filename': item.name + ".mp4"};
                 const video = await this.azure_function('POST', '/question/get/video', input);
@@ -333,7 +319,6 @@ export default {
                     console.log(video.msg);
                 }
             });
-            this.message.success = 'LOADING SUCCESS';
             this.add_image();
             this.toggle_view('multiple_choice');
             this.startTimer();
@@ -586,8 +571,6 @@ export default {
                 } else {
                     this.exp_message();
                 }
-            } else {
-                this.message.error = update_response.msg || "Score update Failed."
             }
         },
         async add_update_score(topic, score) {
@@ -619,7 +602,7 @@ export default {
         async add_achievement(name, emoji) {
             // Add an achievement in the user's data!
             if (this.$store.state.currentAchievements.includes(name)) {
-                console.log("Already gotten the " + name + " achievement!")
+                console.log(name + " achievement already unlocked.");
                 return;
             }
             const user_stats = this.$store.state.currentStats;
@@ -638,27 +621,22 @@ export default {
                 });
             }
         },
-        async azure_function(function_type, function_route, json_doc) {
-            console.log(function_route);
-            // Call Azure function with request
+        async azure_function(method, route, body) {
+            // Send a request to the function app.
+            console.log(route);
+            const url = `${process.env.VUE_APP_BACKEND_URL}${route}?code=${process.env.VUE_APP_MASTER_KEY}`;
             try {
-                const url = process.env.VUE_APP_BACKEND_URL + function_route + '?code=' + process.env.VUE_APP_MASTER_KEY
-                
-                if (function_type === "GET") {
-                    const response = await fetch( url, { method: function_type, headers: { "Content-Type": "application/json"} });
-                    const API_reply = await response.json();
-                    console.log("Result: " + JSON.stringify(API_reply.result));
-                    return API_reply
-                } else {
-                    const response = await fetch( url, { method: function_type, headers: { "Content-Type": "application/json"},body: JSON.stringify(json_doc)});
-                    const API_reply = await response.json();
-                    console.log("Result: " + JSON.stringify(API_reply.result));
-                    return API_reply
-                }
-
+                const options = {
+                method,
+                headers: { "Content-Type": "application/json" },
+                };
+                if (method !== "GET") options.body = JSON.stringify(body);
+                const response = await fetch(url, options);
+                const result = await response.json();
+                console.log("Result:", JSON.stringify(result.result));
+                return result;
             } catch (error) {
                 console.error("Error:", error);
-                this.message.error = "An API error occurred. Please try again later.";
             }
         },
         next_page(page) {

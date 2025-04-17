@@ -176,8 +176,8 @@ export default {
         { name: 'You snooze you lose!', description: 'Get 5/5 score in a certain video hazard perception.', emoji: '💤' },//
         // Crash Quiz Off Challenges:
         { name: 'The Crash-off King', description: 'Win a CRASH QUIZ OFF GAME (without any players quitting).', emoji: '👑' },//
-        { name: 'The Humble King', description: 'Lose a CRASH QUIZ OFF GAME (without any players quitting).', emoji: '🏳️' },//
-        { name: 'The Crash-out King', description: 'Quit a CRASH QUIZ OFF GAME.', emoji: '🥀' },//
+        { name: 'Yes king', description: 'Lose a CRASH QUIZ OFF GAME (without any players quitting).', emoji: '🥀' },//
+        { name: 'The Crash-out King', description: 'Quit a CRASH QUIZ OFF GAME.', emoji: '🏳️' },//
         // Mock Exam Challenges:
         { name: '"Just put the license in the bag bro"', description: 'Score 100% on a mock exam.', emoji: '💯' },//
         // Friend Achievements:
@@ -235,30 +235,30 @@ export default {
       return mapping[view] || view;
     },
     logout() {
+      // Let server know the user is logging out.
       this.client_socket.emit('logout', this.logged_in_user);
 
-      // Reset state
+      // Reset state of the store
       this.$store.commit("setCurrentUser", "");
       this.$store.commit("setCurrentPassword", "");
       this.$store.commit("setCurrentRank", { level: 'n/a', exp: 0, exp_threshold: 0 });
       this.$store.commit("setCurrentStats", { id: 'n/a', streak: 0, daily_training_score: 0, training_completion_date: 'n/a' });
+      this.$store.commit("setCurrentAchievements", []);
+      this.$store.commit("setCurrentRecentCatScores",{"Driving Off": [], "Urban Driving": [], "Rural Driving": [], "Bigger Roads": [], "Motorways": [], "Tricky Conditions": [], "Breakdowns": []});
       this.$store.commit("setCurrentSocialLists", { friends: [], friend_requests: [] });
-      console.log("User logged out.");
+      this.$store.commit("setCurrentLeaderboards", {public: [], friends: []});
+      console.log("User logged out");
 
       this.next_page('authentication');
     },
     async load_friends_list() {
       const response = await this.azure_function("POST", "/user/friend/all", { username: this.logged_in_user });
-
       if (response.result) {
         this.$store.commit("setCurrentSocialLists", {
           friends: response.msg.friends,
           friend_requests: response.msg.friend_requests
         });
         this.next_page('friends');
-      } else {
-        const message = response.msg || "Unable to find user.";
-        console.log(message);
       }
     },
     async load_leaderboards() {
@@ -295,21 +295,20 @@ export default {
             hideMethod: "fadeOut"
           });
       }
-  },
-  async azure_function(method, route, body) {
+    },
+    async azure_function(method, route, body) {
+      // Send a request to the function app.
       console.log(route);
       const url = `${process.env.VUE_APP_BACKEND_URL}${route}?code=${process.env.VUE_APP_MASTER_KEY}`;
-
       try {
         const options = {
           method,
           headers: { "Content-Type": "application/json" },
         };
         if (method !== "GET") options.body = JSON.stringify(body);
-
         const response = await fetch(url, options);
         const result = await response.json();
-        console.log("Result: ", JSON.stringify(result.result));
+        console.log("Result:", JSON.stringify(result.result));
         return result;
       } catch (error) {
         console.error("Error:", error);

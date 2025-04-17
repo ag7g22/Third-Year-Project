@@ -91,7 +91,7 @@
 
                     <div v-if="end_of_round_timer !== null" class="question-container">
                         <div class="question-text">
-                            <h1>{{ game_state.questions[game_state.currentQuestion - 1].question }}</h1>
+                            <h1>{{ game_state.questions[game_state.currentQuestion - 1].question }}</h1> 
                         </div>
                         <div class="question-image" v-if="game_state.questions[game_state.currentQuestion - 1].image !== 'n/a'">
                             <img :src="image" alt="Question Image">
@@ -204,7 +204,6 @@ export default {
             client_socket: this.$store.state.currentClientSocket,
             logged_in_user: this.$store.state.currentUser,
             currentRank: this.$store.state.currentRank,
-            message: { error: "", success: "" },
         };
     },
     methods: {
@@ -254,8 +253,6 @@ export default {
             });
         },
         toggle_view(view) {
-            // Reset state
-            this.message = { error: "", success: "" };
             this.state.current_view = view;
             if (view === "HOST") {
                 this.state.role = "HOST"
@@ -275,26 +272,19 @@ export default {
 
         },
         start_game() {
-            // Tell server that game is starting.
             this.client_socket.emit('start-game', this.logged_in_user);
         },
         create_game() {
-            // Send to server to register game.
-            this.message.error = "";
-            this.message.success = "";
             const password = this.host_password;
             this.host_password = '';
             this.client_socket.emit('create-lobby', this.logged_in_user, password);
         },
         delete_game() {
-            // Send to server to remove game.
+
             this.reset_states();
             this.client_socket.emit('delete-lobby', this.logged_in_user);
         },
         join_game() {
-            // Send to server to join game.
-            this.message.error = "";
-            this.message.success = "";
             const password = this.host_password;
             this.host_password = '';
             this.client_socket.emit('join-lobby', this.logged_in_user, password);
@@ -307,13 +297,13 @@ export default {
         },
         leave_game(isWinner) {
             this.isWinner = isWinner;
+            this.add_achievement('1 v 1 me rn m8','💥');
             this.add_achievement('The Crash-out King','🥀');
             // Remove players from game and end game.
             this.client_socket.emit('leave-game', this.logged_in_user, this.game_state.host);
         },
         return_lobby() {
             // RESET STATES
-            this.message = { error: "", success: "" }
             this.game_state = {host: '', password: '', players: [], state: 0, questions: [], currentQuestion: 0, q_counter: 1, 
             home: { username: '', chances: 3, elapsedTime: 0, selected_answer: null }, 
             away: { username: '', chances: 3, elapsedTime: 0, selected_answer: null }}
@@ -374,7 +364,6 @@ export default {
         async end_of_game(winner) {
             // Show both users the results
             this.add_achievement('1 v 1 me rn m8','💥');
-            this.message = { error: "", success: "" }
             if (winner === this.logged_in_user) {
                 this.add_achievement('The Crash-off King','👑');
                 this.user_state.isWinner = true;
@@ -388,7 +377,7 @@ export default {
                     preventDuplicates: true
                 });
             } else {
-                this.add_achievement('The Humble King','🏳️');
+                this.add_achievement('Yes king','🏳️');
                 this.user_state.isWinner = false;
                 toastr.error(" ", `${winner} WINS the game!`, {
                     closeButton: true,
@@ -403,8 +392,6 @@ export default {
             await this.start_end_game_countdown(7, winner);
         },
         async next_question() {
-            // Transition client to next question.
-            this.message = { error: "", success: "" }
             this.client_socket.emit('next-question', this.user_state.host);
             await this.start_question_countdown(5);
         },
@@ -508,7 +495,7 @@ export default {
         async add_achievement(name, emoji) {
             // Add an achievement in the user's data!
             if (this.$store.state.currentAchievements.includes(name)) {
-                console.log("Already gotten the " + name + " achievement!")
+                console.log(name + " achievement already unlocked.");
                 return;
             }
             const user_stats = this.$store.state.currentStats;
@@ -561,27 +548,22 @@ export default {
                 }
             }
         },
-        async azure_function(function_type, function_route, json_doc) {
-            console.log(function_route);
-            // Call Azure function with request
+        async azure_function(method, route, body) {
+            // Send a request to the function app.
+            console.log(route);
+            const url = `${process.env.VUE_APP_BACKEND_URL}${route}?code=${process.env.VUE_APP_MASTER_KEY}`;
             try {
-                const url = process.env.VUE_APP_BACKEND_URL + function_route + '?code=' + process.env.VUE_APP_MASTER_KEY
-                
-                if (function_type === "GET") {
-                    const response = await fetch( url, { method: function_type, headers: { "Content-Type": "application/json"} });
-                    const API_reply = await response.json();
-                    console.log("Result: " + JSON.stringify(API_reply.result));
-                    return API_reply
-                } else {
-                    const response = await fetch( url, { method: function_type, headers: { "Content-Type": "application/json"},body: JSON.stringify(json_doc)});
-                    const API_reply = await response.json();
-                    console.log("Result: " + JSON.stringify(API_reply.result));
-                    return API_reply
-                }
-
+                const options = {
+                    method,
+                    headers: { "Content-Type": "application/json" },
+                };
+                if (method !== "GET") options.body = JSON.stringify(body);
+                const response = await fetch(url, options);
+                const result = await response.json();
+                console.log("Result:", JSON.stringify(result.result));
+                return result;
             } catch (error) {
                 console.error("Error:", error);
-                this.message.error = "An API error occurred. Please try again later.";
             }
         },
         next_page(page) {
@@ -714,10 +696,11 @@ export default {
     color: white;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    width: 80%;
+    justify-content: center;
+    width: 100%;
     position: relative;
-    margin: 20px auto;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
 /* Player Containers */
@@ -740,7 +723,7 @@ export default {
   width: 100%;
   height: 6px;
   background-color: #d53333;
-  border-radius: 0; /* squared edges */
+  border-radius: 0;
   overflow: hidden;
   position: relative;
 }
@@ -749,6 +732,7 @@ export default {
 .progress-fill {
   height: 100%;
   background-color: #2d94e3;
+  border-radius: 0;
   transition: width 0.3s ease-in-out;
 }
 </style>

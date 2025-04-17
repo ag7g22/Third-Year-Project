@@ -83,7 +83,6 @@ export default {
         });
         this.next_page('friends');
       }
-      console.log(response.result);
     },
     async load_leaderboards() {
       const [publicRes, friendsRes] = await Promise.all([
@@ -99,19 +98,18 @@ export default {
       this.next_page("leaderboard");
     },
     async azure_function(method, route, body) {
+      // Send a request to the function app.
       console.log(route);
       const url = `${process.env.VUE_APP_BACKEND_URL}${route}?code=${process.env.VUE_APP_MASTER_KEY}`;
-
       try {
         const options = {
           method,
           headers: { "Content-Type": "application/json" },
         };
         if (method !== "GET") options.body = JSON.stringify(body);
-
         const response = await fetch(url, options);
         const result = await response.json();
-        console.log("Result: ", JSON.stringify(result.result));
+        console.log("Result:", JSON.stringify(result.result));
         return result;
       } catch (error) {
         console.error("Error:", error);

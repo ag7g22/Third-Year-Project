@@ -78,7 +78,6 @@
 
 <script>
 import toastr from 'toastr';
-import 'toastr/build/toastr.min.css';
 export default {
   name: "authentication",
   data() {
@@ -174,7 +173,6 @@ export default {
       });
 
       if (response.msg === "OK" && response.result) {
-        console.log(response.result);
         this.$store.commit("setCurrentUser", this.login_username);
         this.$store.commit("setCurrentPassword", this.login_password);
 
@@ -183,8 +181,7 @@ export default {
         this.client_socket.emit('login', this.login_username);
         this.next_page('dashboard');
       } else {
-        const message = response.msg || "API error.";
-        this.error_message("Login failed!", message);
+        this.error_message("Register failed!", response.msg);
       }
       this.reset_inputs();
     },
@@ -200,11 +197,9 @@ export default {
       });
 
       if (response.msg === "OK" && response.result) {
-        console.log(response.result);
         this.successful_message('Register success!', 'You may now login.');
       } else {
-        const message = response.msg || "API error.";
-        this.error_message("Register failed!", message);
+        this.error_message("Register failed!", response.msg);
       }
       this.reset_inputs();
     },
@@ -253,15 +248,12 @@ export default {
         }
         
         this.daily_quiz_reminder();
-      } else {
-        const message = response.msg || "Failed to load account stats.";
-        this.error_message("Account error", message)
       }
     },
     async add_achievement(name, emoji) {
       // Add an achievement in the user's data!
       if (this.$store.state.currentAchievements.includes(name)) {
-        console.log("Already gotten the " + name + " achievement!")
+        console.log(name + " achievement already unlocked.");
         return;
       }
       const user_stats = this.$store.state.currentStats;
@@ -280,18 +272,22 @@ export default {
         });
       }
     },
-    async azure_function(method, route, data) {
+    async azure_function(method, route, body) {
+      // Send a request to the function app.
+      console.log(route);
+      const url = `${process.env.VUE_APP_BACKEND_URL}${route}?code=${process.env.VUE_APP_MASTER_KEY}`;
       try {
-        console.log(route);
-        const url = `${process.env.VUE_APP_BACKEND_URL}${route}?code=${process.env.VUE_APP_MASTER_KEY}`;
-        const response = await fetch(url, {
+        const options = {
           method,
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
-        return await response.json();
+        };
+        if (method !== "GET") options.body = JSON.stringify(body);
+        const response = await fetch(url, options);
+        const result = await response.json();
+        console.log("Result:", JSON.stringify(result.result));
+        return result;
       } catch (error) {
-        console.error("API Error:", error);
+        console.error("Error:", error);
       }
     },
     next_page(page) {

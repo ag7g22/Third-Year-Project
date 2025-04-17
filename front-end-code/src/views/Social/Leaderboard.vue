@@ -98,7 +98,6 @@ export default {
       current_list: "public",
       logged_in_user: this.$store.state.currentUser,
       leaderboards: this.$store.state.currentLeaderboards,
-      message: { error: "", success: "" },
     };
   },
   methods: {
@@ -131,37 +130,36 @@ export default {
       }
     },
     logout() {
+      // Let server know the user is logging out.
       this.client_socket.emit('logout', this.logged_in_user);
-      this.clearMessages();
 
-      // Reset state
+      // Reset state of the store
       this.$store.commit("setCurrentUser", "");
       this.$store.commit("setCurrentPassword", "");
       this.$store.commit("setCurrentRank", { level: 'n/a', exp: 0, exp_threshold: 0 });
       this.$store.commit("setCurrentStats", { id: 'n/a', streak: 0, daily_training_score: 0, training_completion_date: 'n/a' });
+      this.$store.commit("setCurrentAchievements", []);
+      this.$store.commit("setCurrentRecentCatScores",{"Driving Off": [], "Urban Driving": [], "Rural Driving": [], "Bigger Roads": [], "Motorways": [], "Tricky Conditions": [], "Breakdowns": []});
       this.$store.commit("setCurrentSocialLists", { friends: [], friend_requests: [] });
-      console.log("User logged out.");
+      this.$store.commit("setCurrentLeaderboards", {public: [], friends: []});
+      console.log("User logged out");
 
       this.next_page('authentication');
     },
     async load_friends_list() {
       const response = await this.azure_function("POST", "/user/friend/all", { username: this.logged_in_user });
-
       if (response.result) {
-        this.message.success = "Retrieved Friends List! Loading Socials Page ...";
         this.$store.commit("setCurrentSocialLists", {
           friends: response.msg.friends,
           friend_requests: response.msg.friend_requests
         });
         this.next_page('friends');
-      } else {
-        this.message.error = response.msg || "Unable to find user.";
       }
     },
     async add_achievement(name, emoji) {
-    // Add an achievement in the user's data!
+      // Add an achievement in the user's data!
         if (this.$store.state.currentAchievements.includes(name)) {
-            console.log("Already gotten the " + name + " achievement!")
+          console.log(name + " achievement already unlocked.");
             return;
         }
         const user_stats = this.$store.state.currentStats;
@@ -180,26 +178,24 @@ export default {
             });
         }
     },
-  async azure_function(method, route, body) {
-    console.log(route);
-    const url = `${process.env.VUE_APP_BACKEND_URL}${route}?code=${process.env.VUE_APP_MASTER_KEY}`;
-
-    try {
-      const options = {
-        method,
-        headers: { "Content-Type": "application/json" },
-      };
-      if (method !== "GET") options.body = JSON.stringify(body);
-
-      const response = await fetch(url, options);
-      const result = await response.json();
-      console.log("Result: ", JSON.stringify(result.result));
-      return result;
-    } catch (error) {
-      console.error("Error:", error);
-      this.message.error = "An API error occurred. Please try again later.";
-    }
-  },
+    async azure_function(method, route, body) {
+      // Send a request to the function app.
+      console.log(route);
+      const url = `${process.env.VUE_APP_BACKEND_URL}${route}?code=${process.env.VUE_APP_MASTER_KEY}`;
+      try {
+        const options = {
+          method,
+          headers: { "Content-Type": "application/json" },
+        };
+        if (method !== "GET") options.body = JSON.stringify(body);
+        const response = await fetch(url, options);
+        const result = await response.json();
+        console.log("Result:", JSON.stringify(result.result));
+        return result;
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    },
   next_page(page) {
     console.log("/" + page);
     this.$router.push(`/${page}`);

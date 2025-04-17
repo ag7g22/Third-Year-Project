@@ -298,7 +298,6 @@ export default {
         },
         toggle_view(view) {
             // Reset state
-            this.message = { error: "", success: "" };
             this.current_view = view;
         },
         async init_daily_quiz() {
@@ -320,9 +319,7 @@ export default {
             if (quiz.result) {
                 // Populate the questions list
                 this.r_questions = quiz.msg;
-            } else {
-                this.message.error = quiz.msg || "Loading quiz failed.";
-            } 
+            }
         },
         async init_multiple_choice() {
             // Initalise the road sign questions.
@@ -331,9 +328,7 @@ export default {
             if (quiz.result) {
                 // Populate the questions list
                 this.m_questions = quiz.msg;
-            } else {
-                this.message.error = quiz.msg || "Loading quiz failed.";
-            } 
+            }
         },
         async init_hazard_perception() {
             // Fetch the 3 clips:
@@ -803,14 +798,12 @@ export default {
                 } else {
                     this.exp_message();
                 }
-            } else {
-                this.message.error = update_response.msg || "Score update Failed."
             }
         },
         async add_achievement(name, emoji) {
         // Add an achievement in the user's data!
             if (this.$store.state.currentAchievements.includes(name)) {
-                console.log("Already gotten the " + name + " achievement!")
+                console.log(name + " achievement already unlocked.");
                 return;
             }
             const user_stats = this.$store.state.currentStats;
@@ -829,27 +822,22 @@ export default {
                 });
             }
         },
-        async azure_function(function_type, function_route, json_doc) {
-            console.log(function_route);
-            // Call Azure function with request
+        async azure_function(method, route, body) {
+            // Send a request to the function app.
+            console.log(route);
+            const url = `${process.env.VUE_APP_BACKEND_URL}${route}?code=${process.env.VUE_APP_MASTER_KEY}`;
             try {
-                const url = process.env.VUE_APP_BACKEND_URL + function_route + '?code=' + process.env.VUE_APP_MASTER_KEY
-                
-                if (function_type === "GET") {
-                    const response = await fetch( url, { method: function_type, headers: { "Content-Type": "application/json"} });
-                    const API_reply = await response.json();
-                    console.log("Result: " + JSON.stringify(API_reply.result));
-                    return API_reply
-                } else {
-                    const response = await fetch( url, { method: function_type, headers: { "Content-Type": "application/json"},body: JSON.stringify(json_doc)});
-                    const API_reply = await response.json();
-                    console.log("Result: " + JSON.stringify(API_reply.result));
-                    return API_reply
-                }
-
+                const options = {
+                    method,
+                    headers: { "Content-Type": "application/json" },
+                };
+                if (method !== "GET") options.body = JSON.stringify(body);
+                const response = await fetch(url, options);
+                const result = await response.json();
+                console.log("Result:", JSON.stringify(result.result));
+                return result;
             } catch (error) {
                 console.error("Error:", error);
-                this.message.error = "An API error occurred. Please try again later.";
             }
         },
         next_page(page) {
