@@ -4,11 +4,11 @@
     <div class="sidebar">
       <img src="@/assets/titles/TitleLogo.png" alt="Logo" class="logo" />
       <div class="side-buttons">
-        <button @click="next_page('dashboard')">🎲 Dashboard</button>
-        <button @click="next_page('account')">👤 Account</button>
-        <button @click="load_friends_list">👥 Friends</button>
-        <button disabled>🏆 Leaderboard</button>
-        <button @click="logout">🔒 Log out</button> 
+        <button @click="next_page('dashboard')"> 🎲 Dashboard</button>
+        <button @click="next_page('account')"> 👤 Account</button>
+        <button @click="load_friends_list"> 👥 Social Hub</button>
+        <button disabled> 🏆 Leaderboard</button>
+        <button @click="logout"> 🔒 Log out</button> 
       </div>
     </div>
     
@@ -68,7 +68,7 @@
               </div>
             </li>
           </ul>
-          <h3 v-else>Damn, no one has done the daily quiz yet. Bunch of procrasinators!</h3>
+          <h3 v-else>Where yo friends at? They're lacking right now</h3>
         </div>
         <div class="game-buttons">
           <button class="game-button" @click="toggle_list('public')">Public</button>
@@ -101,32 +101,61 @@ export default {
     };
   },
   methods: {
-    clearMessages() {
-      this.message.error = "";
-      this.message.success = "";
+    info_message(title, msg) {
+      toastr.info(msg, title, {
+          closeButton: true,
+          progressBar: true,
+          positionClass: "toast-top-right",
+          timeOut: 1000,
+          showMethod: "fadeIn",
+          hideMethod: "fadeOut",
+          preventDuplicates: false
+      });
+    },
+    error_message(title, msg) {
+    toastr.error(msg, title, {
+        closeButton: true,
+        progressBar: true,
+        positionClass: "toast-top-right",
+        timeOut: 1000,
+        showMethod: "fadeIn",
+        hideMethod: "fadeOut",
+        preventDuplicates: true
+        });
     },
     toggle_list(list) {
-      this.message = { error: "", success: "" };
       this.current_list = list;
     },
     async view_user(username) {
-      const response = await this.azure_function("POST", "/user/get/info", { username });
-      if (response?.result) {
-        const { id, streak, daily_training_score, training_completion_date, achievements, rank, recent_category_scores } = response.msg;
-
-        this.$router.push({
-          path: "/account",
+      this.info_message('Loading user profile ...', ' ');
+      if (username === this.logged_in_user) {
+        next_page('account');
+        return;
+      }
+      const response = await this.azure_function('POST', '/user/get/info', { username });
+      if (response.result) {
+        const info = response.msg;
+        const routeData = {
+          path: '/account',
           query: {
-            view: "leaderboard",
+            view: 'friends_list',
             username,
-            rank,
-            stats: { id, streak, daily_training_score, training_completion_date },
-            achievements,
-            recent_category_scores,
-          },
-        });
+            rank: info.rank,
+            stats: {
+              id: info.id,
+              streak: info.streak,
+              daily_training_score: info.daily_training_score,
+              training_completion_date: info.training_completion_date
+            },
+            achievements: info.achievements,
+            recent_category_scores: info.recent_category_scores,
+            current_list: this.current_list,
+            search: this.search
+          }
+        };
+        this.$router.push(routeData);
       } else {
-        this.message.error = response?.msg || "Loading user failed.";
+        this.error_message('Loading user failed!', ' ');
       }
     },
     logout() {
@@ -147,6 +176,7 @@ export default {
       this.next_page('authentication');
     },
     async load_friends_list() {
+      this.info_message('Loading socials page ...', ' ');
       const response = await this.azure_function("POST", "/user/friend/all", { username: this.logged_in_user });
       if (response.result) {
         this.$store.commit("setCurrentSocialLists", {

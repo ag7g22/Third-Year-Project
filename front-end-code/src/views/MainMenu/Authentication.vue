@@ -10,16 +10,20 @@
                 No more boring textbooks or endless note-taking — just engaging quizzes, bite-sized challenges, and real-time progress tracking that keeps you motivated.</p>
           </div>
           <div class="feature-list">
-            <p>✅ Daily quizzes to keep your brain sharp</p>
-            <p>✅ Category-specific practice</p>
-            <p>✅ Mock exams that feel just like the real thing</p>
-            <p>✅ Compete with friends on leaderboards</p>
-            <p>✅ Earn achievements as you hit milestones</p>
-            <p>✅ Track your stats and improve over time</p>
+            <p>✅ Daily quizzes to sharpen your skills & climb leaderboards</p>
+            <p>✅ Targeted practice by category</p>
+            <p>✅ Master every road sign</p>
+            <p>✅ Hazard perception to stay alert</p>
+            <p>✅ Challenge friends in quiz-offs</p>
+            <p>✅ Mock exams that feel real</p>
+            <p>✅ Unlock achievements as you progress</p>
+            <p>✅ Track stats & improve your game</p>
           </div>
-          <p>Whether you're studying solo or racing your friends to the finish line, you'll be ready to SMASH the theory test!</p>
+          <p>Good luck with your upcoming driving theory tests!</p>
       </div>
-      <button @click="next_page('')" class="game-button">Back</button>
+      <div v-if="sent_request"><button disabled class="game-button">Back</button></div>
+      <div v-else><button @click="next_page('')" class="game-button">Back</button></div>
+      
     </div>
 
     <div class="right-side">
@@ -106,7 +110,7 @@ export default {
         const date = new Date(this.$store.state.currentStats.training_completion_date);
         if ((date.getFullYear() !== today.getFullYear() || date.getMonth() !== today.getMonth() || date.getDate() !== today.getDate()) ||
             (this.$store.state.currentStats.training_completion_date === 'n/a')) {
-          toastr.error("Don't lose your streak >:(", `DO YOUR DAILY QUIZ!`, {
+          toastr.warning(" ", `Start with today's Daily Quiz!`, {
             closeButton: true,
             progressBar: true,
             positionClass: "toast-top-right",
@@ -115,6 +119,9 @@ export default {
             hideMethod: "fadeOut",
             preventDuplicates: true
           });
+          this.$store.commit("setCurrentDoneDailyQuizFlag", false);
+        } else {
+          this.$store.commit("setCurrentDoneDailyQuizFlag", true);
         }
     },
     // Notfication message for a successful action.
@@ -122,8 +129,8 @@ export default {
         toastr.success(msg, title, {
           closeButton: true,
           progressBar: true,
-          positionClass: "toast-bottom-full-width",
-          timeOut: 5000,
+          positionClass: "toast-top-right",
+          timeOut: 3000,
           showMethod: "fadeIn",
           hideMethod: "fadeOut",
           preventDuplicates: true
@@ -134,8 +141,8 @@ export default {
       toastr.error(msg, title, {
           closeButton: true,
           progressBar: true,
-          positionClass: "toast-bottom-full-width",
-          timeOut: 5000,
+          positionClass: "toast-top-right",
+          timeOut: 3000,
           showMethod: "fadeIn",
           hideMethod: "fadeOut",
           preventDuplicates: true

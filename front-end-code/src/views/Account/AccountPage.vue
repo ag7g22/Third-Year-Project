@@ -6,7 +6,7 @@
       <div class="side-buttons">
         <button @click="next_page('dashboard')"> 🎲 Dashboard</button>
         <button @click="go_to_own_account()"> 👤 Account</button>
-        <button disabled> 👥 Friends</button>
+        <button disabled> 👥 Social Hub</button>
         <button @click="load_leaderboards"> 🏆 Leaderboard</button>
         <button @click="logout"> 🔒 Log out</button> 
       </div>
@@ -16,7 +16,7 @@
       <div class="side-buttons">
         <button @click="next_page('dashboard')"> 🎲 Dashboard</button>
         <button @click="go_to_own_account()"> 👤 Account</button>
-        <button @click="load_friends_list"> 👥 Friends</button>
+        <button @click="load_friends_list"> 👥 Social Hub</button>
         <button disabled> 🏆 Leaderboard</button>
         <button @click="logout"> 🔒 Log out</button> 
       </div>
@@ -26,7 +26,7 @@
       <div class="side-buttons">
         <button @click="next_page('dashboard')"> 🎲 Dashboard</button>
         <button disabled> 👤 Account</button>
-        <button @click="load_friends_list"> 👥 Friends</button>
+        <button @click="load_friends_list"> 👥 Social Hub</button>
         <button @click="load_leaderboards"> 🏆 Leaderboard</button>
         <button @click="logout"> 🔒 Log out</button> 
       </div>
@@ -169,11 +169,11 @@ export default {
         { name: 'Mastering the Sign language', description: 'Get 100% score for 12 questions in a ROAD SIGN QUIZ.', emoji: '🚦' }, //
         // Hazard Perception Challenges:
         { name: 'Where are you clicking lil bro', description: 'Click more than 10 times in the hazard perception practice.', emoji: '🚩' },//
-        { name: 'Takin out the trash', description: 'Get 5/5 score in a certain video hazard perception.', emoji: '🗑️' },//
-        { name: 'NEIGHHHHHH!', description: 'Get 5/5 score in a certain video hazard perception.', emoji: '🐎' },//
-        { name: 'Fireman sam', description: 'Get 5/5 score in a certain video hazard perception.', emoji: '👨‍🚒' },//
-        { name: 'Oh deer', description: 'Get 5/5 score in a certain video hazard perception.', emoji: '🦌' },//
-        { name: 'You snooze you lose!', description: 'Get 5/5 score in a certain video hazard perception.', emoji: '💤' },//
+        { name: 'Takin out the trash', description: 'Get 5/5 score in a certain hazard perception video.', emoji: '🗑️' },//
+        { name: 'NEIGHHHHHH!', description: 'Get 5/5 score in a certain hazard perception video.', emoji: '🐎' },//
+        { name: 'Fireman sam', description: 'Get 5/5 score in a certain hazard perception video.', emoji: '👨‍🚒' },//
+        { name: 'Oh deer', description: 'Get 5/5 score in a certain hazard perception video.', emoji: '🦌' },//
+        { name: 'You snooze you lose!', description: 'Get 5/5 score in a certain hazard perception video.', emoji: '💤' },//
         // Crash Quiz Off Challenges:
         { name: 'The Crash-off King', description: 'Win a CRASH QUIZ OFF GAME (without any players quitting).', emoji: '👑' },//
         { name: 'Yes king', description: 'Lose a CRASH QUIZ OFF GAME (without any players quitting).', emoji: '🥀' },//
@@ -187,6 +187,7 @@ export default {
         { name: 'A sworn enemy', description: 'Remove a friend.', emoji: '💔' },//
         // Stat Achievements:
         { name: 'Absolute Bang out', description: 'Reached level 20.', emoji: '🤓' }, 
+        { name: 'You bloody rat', description: "If you get this achievement you're a rat.", emoji: '🐀' }, 
         { name: 'Thank you for playing my game!', description: 'Reached a streak of 7!', emoji: '🔥' }, //
       ],
       colorMap: {
@@ -223,6 +224,17 @@ export default {
     },
   },
   methods: {
+    info_message(title, msg) {
+      toastr.info(msg, title, {
+          closeButton: true,
+          progressBar: true,
+          positionClass: "toast-top-right",
+          timeOut: 1000,
+          showMethod: "fadeIn",
+          hideMethod: "fadeOut",
+          preventDuplicates: true
+        });
+    },
     toggle_view(view) {
       this.current_view = view;
     },
@@ -252,6 +264,7 @@ export default {
       this.next_page('authentication');
     },
     async load_friends_list() {
+      this.info_message('Loading socials page ...', ' ');
       const response = await this.azure_function("POST", "/user/friend/all", { username: this.logged_in_user });
       if (response.result) {
         this.$store.commit("setCurrentSocialLists", {
@@ -262,6 +275,7 @@ export default {
       }
     },
     async load_leaderboards() {
+      this.info_message('Loading leaderboards ...', ' ');
       const [publicRes, friendsRes] = await Promise.all([
         this.azure_function("GET", "/user/leaderboard", {}),
         this.azure_function("POST", "/user/leaderboard/friend", { id: this.$store.state.currentStats.id })
@@ -271,7 +285,6 @@ export default {
         public: publicRes.result ? publicRes.msg : [],
         friends: friendsRes.result ? friendsRes.msg : []
       });
-
       this.next_page("leaderboard");
     },
     async add_achievement(name, emoji) {

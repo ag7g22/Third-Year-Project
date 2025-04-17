@@ -4,11 +4,11 @@
     <div class="sidebar">
       <img src="@/assets/titles/TitleLogo.png" alt="Logo" class="logo" />
       <div class="side-buttons">
-        <button @click="next_page('dashboard')">🎲 Dashboard</button>
-        <button @click="next_page('account')">👤 Account</button>
-        <button disabled>👥 Friends</button>
-        <button @click="load_leaderboards">🏆 Leaderboard</button>
-        <button @click="logout">🔒 Log out</button> 
+        <button @click="next_page('dashboard')"> 🎲 Dashboard</button>
+        <button @click="next_page('account')"> 👤 Account</button>
+        <button disabled> 👥 Social Hub</button>
+        <button @click="load_leaderboards"> 🏆 Leaderboard</button>
+        <button @click="logout"> 🔒 Log out</button> 
       </div>
     </div>
 
@@ -97,6 +97,13 @@
 import toastr from 'toastr';
 export default {
   name: "friends",
+  mounted() {
+    if (this.social_lists.friend_requests.length === 1) {
+      this.info_message('You have a friend request!',' ');
+    } else if (this.social_lists.friend_requests.length > 1) {
+      this.info_message('You have friend requests!',' ');
+    }
+  },
   data() {
     return {
       client_socket: this.$store.state.currentClientSocket,
@@ -113,29 +120,29 @@ export default {
           closeButton: true,
           progressBar: true,
           positionClass: "toast-top-right",
-          timeOut: 5000,
+          timeOut: 1000,
           showMethod: "fadeIn",
           hideMethod: "fadeOut",
           preventDuplicates: false
       });
     },
     successful_message(title, msg) {
-        toastr.success(msg, title, {
+      toastr.success(msg, title, {
         closeButton: true,
         progressBar: true,
         positionClass: "toast-top-right",
-        timeOut: 5000,
+        timeOut: 1000,
         showMethod: "fadeIn",
         hideMethod: "fadeOut",
         preventDuplicates: true
-        });
+      });
     },
     error_message(title, msg) {
     toastr.error(msg, title, {
         closeButton: true,
         progressBar: true,
         positionClass: "toast-top-right",
-        timeOut: 5000,
+        timeOut: 1000,
         showMethod: "fadeIn",
         hideMethod: "fadeOut",
         preventDuplicates: true
@@ -149,6 +156,11 @@ export default {
       return this.social_lists.friends.some(friend => friend.username === username);
     },
     async view_user(username) {
+      this.info_message('Loading user profile ...', ' ');
+      if (username === this.logged_in_user) {
+        next_page('account');
+        return;
+      }
       const response = await this.azure_function('POST', '/user/get/info', { username });
       if (response.result) {
         const info = response.msg;
@@ -272,6 +284,7 @@ export default {
       this.next_page('authentication');
     },
     async load_leaderboards() {
+      this.info_message('Loading leaderboards ...', ' ');
       const [publicRes, friendsRes] = await Promise.all([
         this.azure_function("GET", "/user/leaderboard", {}),
         this.azure_function("POST", "/user/leaderboard/friend", { id: this.$store.state.currentStats.id })
@@ -281,7 +294,6 @@ export default {
         public: publicRes.result ? publicRes.msg : [],
         friends: friendsRes.result ? friendsRes.msg : []
       });
-
       this.next_page("leaderboard");
     },
     async add_achievement(name, emoji) {

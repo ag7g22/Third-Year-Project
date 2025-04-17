@@ -12,6 +12,7 @@ const state = {
     currentRecentCatScores: {"Driving Off": [], "Urban Driving": [], "Rural Driving": [], "Bigger Roads": [], "Motorways": [], "Tricky Conditions": [], "Breakdowns": []},
     currentSocialLists: {friends: [], friend_requests: []}, // Friends and friend requests of the current user
     currentLeaderboards: {public: [], friends: []}, // Public and friend leaderbaords
+    currentDoneDailyQuizFlag: false,
     currentClientSocket: null // Socket of connected client
 }
 
@@ -49,6 +50,10 @@ export default new Vuex.Store({
 
         setCurrentLeaderboards(state, leaderboards) {
             state.currentLeaderboards = leaderboards;
+        },
+
+        setCurrentDoneDailyQuizFlag(state, flag) {
+            state.currentDoneDailyQuizFlag = flag;
         },
 
         setCurrentClientSocket(state, clientSocket) {

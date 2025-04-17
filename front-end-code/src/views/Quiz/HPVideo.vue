@@ -47,7 +47,7 @@
         </div>
         <div v-if="state.current_view === 'score'" class="questionnaire">
             <div class="quiz-result">
-                <h1>You've completed the video! 🎉</h1>
+                <h1>You've completed the video! 💀</h1>
                 <h1> Score: {{ final_score }} / 5 </h1>
                 <h2> {{ score_message }} </h2>
                 <div class="game-buttons">
@@ -97,6 +97,17 @@ export default {
         };
     },
     methods: {
+        info_message(title, msg) {
+            toastr.info(msg, title, {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-right",
+                timeOut: 1000,
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut",
+                preventDuplicates: true
+            });
+        },
         exp_message() {
             if (this.exp_gain === 0) return;
             toastr.info(" ", `Gained ${this.exp_gain} exp!`, {
@@ -160,6 +171,7 @@ export default {
             this.state.current_view = view;
         },
         async load_video_clip(clip) {
+            this.info_message('Loading ...', ' ');
             // Load the corrosponding clip
             console.log(clip.name);
             this.selected_clip = clip;
@@ -211,23 +223,23 @@ export default {
                         this.add_achievement('You snooze you lose!','💤');
                     } 
                     
-                    this.exp_gain = 350;
+                    this.exp_gain = 500;
                 } else if (this.click_time >= this.selected_clip.time + interval && this.click_time < this.selected_clip.time + interval*2) {
                     this.final_score = 4;
                     this.score_message = "You almost got it, keep trying!";
-                    this.exp_gain = 280;
+                    this.exp_gain = 400;
                 } else if (this.click_time >= this.selected_clip.time + interval*2 && this.click_time < this.selected_clip.time + interval*3) {
                     this.final_score = 3;
                     this.score_message = "This is pretty good, you can do better!";
-                    this.exp_gain = 210;
+                    this.exp_gain = 300;
                 } else if (this.click_time >= this.selected_clip.time + interval*3 && this.click_time < this.selected_clip.time + interval*4) {
                     this.final_score = 2;
                     this.score_message = "You're learning, and that's what matters! Keep challenging yourself!";
-                    this.exp_gain = 140;
+                    this.exp_gain = 200;
                 } else if (this.click_time >= this.selected_clip.time + interval*4 && this.click_time < this.selected_clip.time + interval*5) {
                     this.final_score = 1;
                     this.score_message = "Not bad! Mistakes help us grow—review what you missed and try again!";
-                    this.exp_gain = 70;
+                    this.exp_gain = 100;
                 } else {
                     this.final_score = 0;
                     this.score_message = "Don't give up! Every attempt makes you better. Keep pushing forward!";
@@ -275,7 +287,7 @@ export default {
                 // Reset exp progress but add leftover exp and update exp threshold
                 this.currentRank.exp = (this.currentRank.exp + this.exp_gain) - this.currentRank.exp_threshold;
                 this.currentRank.level += 1;
-                this.currentRank.exp_threshold += 500;
+                this.currentRank.exp_threshold += 200;
             } else {
                 this.currentRank.exp += this.exp_gain;
             }

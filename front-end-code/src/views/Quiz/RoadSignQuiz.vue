@@ -2,9 +2,11 @@
     <div v-if="current_view === 'instructions'" class="split-container">
         <div class="left-side">
             <div class="instructions-container">
-                <h3>WHY ARE THERE SO MANY ROAD SIGNS!?!</h3>
-                <p>It's important to memorize these signs because they help ensure safety on the road by making you aware of potential hazards, speed limits, and important regulations. 
-                    Knowing road signs is essential for passing the driving theory exam and driving safely in real-life situations.</p>
+                <h3>WHY ARE THERE SO MANY ROAD SIGNS!?! 🛑</h3>
+                <div class="feature-list">
+                    <p>It's important to memorize these signs because they help ensure safety on the road by making you aware of potential hazards, speed limits, and important regulations. 
+                        Knowing road signs is essential for passing the driving theory exam and driving safely in real-life situations.</p>
+                </div>
                 <h3>The quiz rules as follows:</h3>
                 <div class="feature-list">
                     <p>- You are given 4 options, 1 is the correct answer.</p>
@@ -145,6 +147,17 @@ export default {
         };
     },
     methods: {
+        info_message(title, msg) {
+            toastr.info(msg, title, {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-right",
+                timeOut: 1000,
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut",
+                preventDuplicates: true
+            });
+        },
         exp_message() {
             if (this.exp_gain === 0) return;
             toastr.info(" ", `Gained ${this.exp_gain} exp!`, {
@@ -313,7 +326,7 @@ export default {
                 // Reset exp progress but add leftover exp and update exp threshold
                 this.currentRank.exp = (this.currentRank.exp + this.exp_gain) - this.currentRank.exp_threshold;
                 this.currentRank.level += 1;
-                this.currentRank.exp_threshold += 500;
+                this.currentRank.exp_threshold += 200;
             } else {
                 this.currentRank.exp += this.exp_gain;
             }

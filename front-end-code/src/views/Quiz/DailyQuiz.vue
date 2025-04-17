@@ -2,23 +2,30 @@
     <div v-if="current_view === 'instructions'" class="split-container">
         <div class="left-side">
             <div class="instructions-container">
-                <h3>Welcome to Your Daily Training Session!</h3>
+                <h3>Welcome to Your Daily Training Session! 💡</h3>
                 <div class="feature-list">
-                    <p>
-                        Daily training sessions are essential for combating the forgetting curve — a psychological principle that shows how quickly we forget information after learning it. 
-                        Without regular review, our memory of new knowledge fades rapidly over time. The training routine is as follows:
+                    <p> 
+                        These sessions cover the mechanics of GearUp! Daily training sessions are essential for combating the forgetting curve — 
+                        we tend to forget information quickly despite just learning it. With regular reviews, more information will be retained for you to be ready for the exam!
                     </p>
                 </div>
-                <p>1. 🚦 Warm-Up: 10 Road Sign Questions </p>
+                <p>1. 🚦 Warm-Up: 10 Multiple Choice Road Sign Questions </p>
                 <p>2. 🧠 Core Quiz: 10 Multiple Choice Questions</p>
+                <div class="feature-list">
+                    <p> - Multiple choice questions have 4 options, where one is the correct answer.</p>
+                    <p> - You may click the explanation if needed, but points will be reducted.</p>
+                </div>
                 <p>3. 🎥 Simulation: 3 Hazard Perception clips</p>
-                <p>Good luck!</p>
-                <h3>How the daily score works:</h3>
+                <div class="feature-list">
+                    <p> - Each 1 minute clip will show a POV of the driver, you need to click where you think is a developing hazard.</p>
+                    <p> - You have up to 12 clicks to use, please use them wisely or you score 0.</p>
+                    <p> - The clicks will be recorded with a flag. 🚩</p>
+                    <p> - Your most recent click will be used to score your accuracy.</p>
+                </div>
                 <div class="feature-list">
                     <p>
-                        Each time you answer a question correctly, you'll earn points based on both your speed and accuracy. 
-                        Keep the streak going with consecutive correct answers, and you'll unlock a multiplier to boost your score even higher! 
-                        Rack up those points and climb the leaderboard! (You get one shot a day to score on the leaderboard, but don't worry—you can still take the daily quiz for fun and practice! :p) 👑
+                        Earn points for each correct answer based on speed and accuracy. Keep a streak to unlock multipliers and boost your score! 
+                        You get one shot a day to climb the leaderboard—but feel free to replay for practice. Good luck! :D
                     </p>
                 </div>
             </div>
@@ -262,6 +269,17 @@ export default {
         };
     },
     methods: {
+        info_message(title, msg) {
+            toastr.info(msg, title, {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-right",
+                timeOut: 1000,
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut",
+                preventDuplicates: true
+            });
+        },
         exp_message() {
             if (this.exp_gain === 0) return;
             toastr.info(" ", `Gained ${this.exp_gain} exp!`, {
@@ -302,6 +320,7 @@ export default {
         },
         async init_daily_quiz() {
             // Load ALL assests 
+            this.info_message('Loading ...', ' ');
             await this.init_road_signs();
             await this.init_multiple_choice();
             await this.init_hazard_perception();
@@ -420,6 +439,12 @@ export default {
                 this.toggle_view('hazard_perception');
 
             } else if (section === "Results") {
+                // Unlock the other quiz games
+                if (!this.$store.state.currentDoneDailyQuizFlag) {
+                    console.log('Unlocked all the quiz games!')
+                   this.$store.commit("setCurrentDoneDailyQuizFlag", true); 
+                }
+
                 // Calculate the scores for upload.
                 await this.get_stats();
                 console.log("FINAL SCORE:", this.final_score);
@@ -764,7 +789,7 @@ export default {
                 // Reset exp progress but add leftover exp and update exp threshold
                 this.currentRank.exp = (this.currentRank.exp + this.exp_gain) - this.currentRank.exp_threshold;
                 this.currentRank.level += 1;
-                this.currentRank.exp_threshold += 500;
+                this.currentRank.exp_threshold += 200;
             } else {
                 this.currentRank.exp += this.exp_gain;
             }

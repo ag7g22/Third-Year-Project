@@ -3,7 +3,7 @@
         <!-- Left side: Empty or can contain an image -->
         <div class="left-side">
             <div class="instructions-container">
-                <h3>Time to practice specfics!</h3>
+                <h3>Time to practice specfics! 🔎</h3>
                 <div class="feature-list">
                     <p>Polishing your knowledge in these areas helps ensure you understand the details of each category, which can improve your overall driving skills and safety on the road. 
                         Mastering these categories increases your chances of passing the theory exam and becoming a more confident driver.</p>
@@ -11,7 +11,7 @@
                 <h3>The quiz rules as follows:</h3>
                 <div class="feature-list">
                     <p>- You are given 4 options, 1 is the correct answer.</p>
-                    <p>- You can see the question explanation, but that'll lower your final score.</p>
+                    <p>- You may click the explanation if needed, but points will be reducted.</p>
                     <p>- The score is also time-based, the quicker the better! (You'll need to spend at most a minute per question.)</p>
                 </div>
             </div>
@@ -162,6 +162,17 @@ export default {
         };
     },
     methods: {
+        info_message(title, msg) {
+            toastr.info(msg, title, {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-right",
+                timeOut: 1000,
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut",
+                preventDuplicates: true
+            });
+        },
         exp_message() {
             if (this.exp_gain === 0) return;
             toastr.info(" ", `Gained ${this.exp_gain} exp!`, {
@@ -190,6 +201,7 @@ export default {
             this.state.current_view = view;
         },
         init_quiz_instructions(topic) {
+            this.info_message('Loading ...', ' ');
             // Initalise the quiz instructions
             this.state.current_topic = topic;
 
@@ -382,7 +394,7 @@ export default {
                 // Reset exp progress but add leftover exp and update exp threshold
                 this.currentRank.exp = (this.currentRank.exp + this.exp_gain) - this.currentRank.exp_threshold;
                 this.currentRank.level += 1;
-                this.currentRank.exp_threshold += 500;
+                this.currentRank.exp_threshold += 200;
             } else {
                 this.currentRank.exp += this.exp_gain;
             }

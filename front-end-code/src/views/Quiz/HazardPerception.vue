@@ -2,7 +2,7 @@
     <div v-if="state.current_view === 'categories'" class="split-container">
         <div class="left-side">
             <div class="instructions-container">
-                <h3>Now lets test your game senses ...</h3>
+                <h3>Now lets test your game senses ... 💀</h3>
                 <div class="feature-list">
                     <p>The hazard perception test checks how quickly you can spot developing dangers while driving. 
                         You'll watch video clips and click when you see a potential hazard. The faster you respond, the higher your score, 
@@ -10,9 +10,10 @@
                 </div>
                 <h3>The hazard perception rules as follows:</h3>
                 <div class="feature-list">
-                    <p>- You have to click where you think is a developing hazard.</p>
-                    <p>- The clicks will be recorded with a flag. 🚩</p>
-                    <p>- If you click more than 10 times, you will be scored 0.</p>
+                    <p> - Each 1 minute clip will show a POV of the driver, you need to click where you think is a developing hazard.</p>
+                    <p> - You have up to 12 clicks to use, please use them wisely or you score 0.</p>
+                    <p> - The clicks will be recorded with a flag. 🚩</p>
+                    <p> - Your most recent click will be used to score your accuracy.</p>
                 </div>
             </div>
         </div>

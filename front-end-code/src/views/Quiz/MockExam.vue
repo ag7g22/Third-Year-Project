@@ -140,7 +140,7 @@
                     <div class="flags-container">
                         <div v-for="clicks in click_history" class="item">🚩</div>
                     </div>
-                    <button @click="terminate_daily_quiz()" class="game-button">Back</button>  
+                    <button @click="terminate_daily_quiz()" class="game-button">End Exam</button>  
                 </div>
             </div>
         </div>
@@ -239,6 +239,17 @@ export default {
         };
     },
     methods: {
+        info_message(title, msg) {
+            toastr.info(msg, title, {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-right",
+                timeOut: 1000,
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut",
+                preventDuplicates: true
+            });
+        },
         exp_message() {
             if (this.exp_gain === 0) return;
             toastr.info(" ", `Gained ${this.exp_gain} exp!`, {
@@ -458,6 +469,7 @@ export default {
         },
         start_hazard_perceptions() {
             // Start the hazard perception section
+            this.info_message("Finished multiple choice!", "Loading hazard perception ...");
             this.load_video_clip();
             this.toggle_view('hazard_perception');
         },
@@ -480,6 +492,7 @@ export default {
         },
         async finish_mock_exam() {
             this.add_achievement('Mock & Roll','📖');
+            this.info_message("Finished hazard perception!", "Loading results ...");
 
             if (this.scores_1 === 50 && this.scores_2 === 75) {
                 this.add_achievement('"Just put the license in the bag bro"','💯');
@@ -551,7 +564,7 @@ export default {
                 // Reset exp progress but add leftover exp and update exp threshold
                 this.currentRank.exp = (this.currentRank.exp + this.exp_gain) - this.currentRank.exp_threshold;
                 this.currentRank.level += 1;
-                this.currentRank.exp_threshold += 500;
+                this.currentRank.exp_threshold += 200;
             } else {
                 this.currentRank.exp += this.exp_gain;
             }

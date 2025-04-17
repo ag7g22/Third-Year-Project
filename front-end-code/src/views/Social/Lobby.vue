@@ -2,17 +2,20 @@
     <div v-if="state.current_view !== 'GAME' && state.current_view !== 'GAMEOVER'" class="split-container">
         <div class="left-side">
             <div class="instructions-container">
-                <h3>Win the CRASH OFF or CRASH OUT 🤬</h3>
-                <p>Crash Quiz-Off is a high-speed, 1v1 battle where two drivers face off to see who can answer driving theory questions the fastest and most accurately. 
-                    It's like a race—except instead of speedometers, you're racing against the clock and your brain! Buckle up, it's time to prove who's the real road genius!</p>
+                <h3>Win the CRASH OFF or CRASH OUT 💥</h3>
+                <div class="feature-list">
+                    <p>
+                        In Crash Quiz-Off, two players face off in a fast-paced quiz battle. You're both pushing from opposite sides of a shared meter—
+                        every correct answer drives it toward your victory. Fill your side first to win. It's a game of speed, smarts, and crashing out!
+                    </p>
+                </div>
                 <h3>The Crash Quiz-Off rules are as follows:</h3>
                 <div class="feature-list">
-                    <p>- You will both be given time to read a question.</p>
-                    <p>- After a countdown, you will be given 4 options in the question.</p>
-                    <p>- You will win the round if you're the fastest and most correct!</p>
-                    <p>- The bar will fill up on the winner's side and if it fills up, you WIN!</p>
+                    <p> - Get ready! A question with 4 options appears after the countdown.</p>
+                    <p> - Be the fastest to answer correctly and take the round!</p>
+                    <p> - Each win fills the meter bit by bit. Fill it up to get that dub!</p>
                 </div>
-                <p>Hope you're not the loser!</p>
+                <p>Good luck fellow player! 👑</p>
             </div>
         </div>
         <div class="right-side">
@@ -72,11 +75,11 @@
                     <h1>{{ countdown }}</h1>
                 </div>
                 <div v-else>
-                    <div v-if="end_of_round_timer !== null">
-                        <h2> Question {{ game_state.q_counter - 1}} </h2>
-                    </div>
-                    <div v-else-if="end_of_round_timer === null">
+                    <div v-if="end_of_round_timer === null || game_state.q_counter === 0">
                         <h2> Question {{ game_state.q_counter }} </h2>
+                    </div>
+                    <div v-else-if="end_of_round_timer !== null">
+                        <h2> Question {{ game_state.q_counter - 1}} </h2>
                     </div>
                     <div class="progress-container">
                         <!-- Player 1 (Left Side) -->
@@ -91,9 +94,9 @@
 
                     <div v-if="end_of_round_timer !== null" class="question-container">
                         <div class="question-text">
-                            <h1>{{ game_state.questions[game_state.currentQuestion - 1].question }}</h1> 
+                            <h1>{{ prev_question.question }}</h1> 
                         </div>
-                        <div class="question-image" v-if="game_state.questions[game_state.currentQuestion - 1].image !== 'n/a'">
+                        <div class="question-image" v-if="prev_question.image !== 'n/a'">
                             <img :src="image" alt="Question Image">
                         </div>
                     </div>
@@ -112,15 +115,15 @@
                     </div>
                     <!-- Show results for a few seconds -->
                     <div v-else-if="end_of_round_timer !== null" class="feedback-box">
-                        <div v-if="user_state.selected_answer === game_state.questions[game_state.currentQuestion - 1].correct_answer" class="answer-row">
+                        <div v-if="user_state.selected_answer === prev_question.correct_answer" class="answer-row">
                             <p class="correct">{{ user_state.selected_answer }}✔️</p>
                         </div>
                         <div v-else class="answer-row">
                             <p class="incorrect">{{ user_state.selected_answer }}❌</p>
-                            <p class="correct">{{ game_state.questions[game_state.currentQuestion - 1].correct_answer }}✔️</p>
+                            <p class="correct">{{ prev_question.correct_answer }}✔️</p>
                         </div>
                         <div class="feedback-text">
-                            <h3>{{ game_state.questions[game_state.currentQuestion - 1].explanation }}</h3>
+                            <h3>{{ prev_question.explanation }}</h3>
                         </div>
                     </div>
                     <div v-else class="quiz-buttons-container">
@@ -140,7 +143,12 @@
 
                     <!-- Buttons -->
                     <div class="game-buttons">
-                        <button class="game-button" @click="leave_game(false)">Concede</button>
+                        <div v-if="end_of_round_timer != null || question_timer != null">
+                            <button class="game-button" disabled>Quit</button>
+                        </div>
+                        <div v-else>
+                            <button class="game-button" @click="leave_game(false)">Quit</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -149,7 +157,7 @@
             <div class="questionnaire">
                 <div class="quiz-result">
                     <div v-if="user_state.isWinner === true">
-                        <h1> VICTORY! 🎉</h1>
+                        <h1> VICTORY! 💥</h1>
                     </div>
                     <div v-else>
                         <h1> DEFEATED! ⚰️</h1>
@@ -186,7 +194,7 @@ export default {
             game_state: {host: '', password: '', players: [], state: 0, questions: [], currentQuestion: 0, q_counter: 1, 
             home: { username: '', chances: 3, elapsedTime: 0, selected_answer: null }, 
             away: { username: '', chances: 3, elapsedTime: 0, selected_answer: null }},
-
+            prev_question: null,
             user_state: {username: '', host: '', role: '', isWinner: false, isCorrect: false, isWaiting: false, selected_answer: null},
 
             // Timer for user answering question
@@ -273,6 +281,15 @@ export default {
         },
         start_game() {
             this.client_socket.emit('start-game', this.logged_in_user);
+            toastr.info("Loading questions ...", "Starting game!", {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-right",
+                timeOut: 3000,
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut",
+                preventDuplicates: true
+            });
         },
         create_game() {
             const password = this.host_password;
@@ -304,11 +321,12 @@ export default {
         },
         return_lobby() {
             // RESET STATES
-            this.game_state = {host: '', password: '', players: [], state: 0, questions: [], currentQuestion: 0, q_counter: 1, 
-            home: { username: '', chances: 3, elapsedTime: 0, selected_answer: null }, 
-            away: { username: '', chances: 3, elapsedTime: 0, selected_answer: null }}
+            this.game_state = {host: '', password: '', players: [], state: 0, questions: [], currentQuestion: 0, q_counter: 1,
+            home: { username: '', chances: 3, elapsedTime: 0, selected_answer: null },
+            away: { username: '', chances: 3, elapsedTime: 0, selected_answer: null }};
+            this.prev_question = null;
             this.user_state = {username: '', host: '', role: '', isWinner: false, isCorrect: null, isWaiting: false, selected_answer: null};
-            this.state = { current_view: "HOST", role: 'HOST', gamemodes: ['quiz', 'hazard perception', 'road sign'], selected_gamemode: 'quiz' }
+            this.state = { current_view: "HOST", role: 'HOST', gamemodes: ['quiz', 'hazard perception', 'road sign'], selected_gamemode: 'quiz' };
         },
         // GAME METHODS
         async load_quiz() {
@@ -431,6 +449,8 @@ export default {
             }, 1000);
         },
         async start_end_round_countdown(countdown) {
+            // Set the previous question for the player to read the explanation:
+            this.set_prev_question();
             // Pick the timer and countdown setting
             this.countdown = countdown;
             this.end_of_round_timer = setInterval(async () => {
@@ -468,6 +488,13 @@ export default {
                     }
                 }
             }, 1000);
+        },
+        set_prev_question() {
+            if (this.game_state.q_counter === 0) {
+                this.prev_question = this.game_state.questions[0];
+            } else {
+                this.prev_question = this.game_state.questions[this.game_state.q_counter - 1];
+            }
         },
         startStopwatch() {
             if (!this.answer_time.stopwatchRunning) {
@@ -524,7 +551,7 @@ export default {
                 // Reset exp progress but add leftover exp and update exp threshold
                 this.currentRank.exp = (this.currentRank.exp + exp_gain) - this.currentRank.exp_threshold;
                 this.currentRank.level += 1;
-                this.currentRank.exp_threshold += 500;
+                this.currentRank.exp_threshold += 200;
             } else {
                 this.currentRank.exp += exp_gain;
             }

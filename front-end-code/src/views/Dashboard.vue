@@ -5,10 +5,10 @@
       <img src="@/assets/titles/TitleLogo.png" alt="Logo" class="logo" />
       <div class="side-buttons">
         <button disabled>🎲 Dashboard</button>
-        <button @click="next_page('account')">👤 Account</button>
-        <button @click="load_friends_list">👥 Social Hub</button>
-        <button @click="load_leaderboards">🏆 Leaderboard</button>
-        <button @click="logout">🔒 Log out</button> 
+        <button @click="next_page('account')"> 👤 Account</button>
+        <button @click="load_friends_list"> 👥 Social Hub</button>
+        <button @click="load_leaderboards"> 🏆 Leaderboard</button>
+        <button @click="logout"> 🔒 Log out</button> 
       </div>
     </div>
 
@@ -23,7 +23,7 @@
           <div class="exam-ready-bar" :style="{ width: progress_bar_width + '%' }"></div>
         </div>
       </div>
-      <div class="buttons-grid">
+      <div v-if="done_daily_quiz_flag" class="buttons-grid">
         <button @click="next_page('dailyquiz')">
           <img src="@/assets/titles/DailyQuiz.png" alt="Logo"/>
         </button>
@@ -43,10 +43,31 @@
           <img src="@/assets/titles/MockTest.png" alt="Logo"/>
         </button>
       </div>
+      <div v-else class="buttons-grid">
+        <button @click="next_page('dailyquiz')">
+          <img src="@/assets/titles/DailyQuiz.png" alt="Logo"/>
+        </button>
+        <button class="closed" @click="count_click()">
+          <img src="@/assets/titles/CategoryQuiz.png" alt="Logo"/>
+        </button>
+        <button class="closed" @click="count_click()">
+          <img src="@/assets/titles/RoadSign.png" alt="Logo"/>
+        </button>
+        <button class="closed" @click="count_click()">
+          <img src="@/assets/titles/HazardPerception.png" alt="Logo"/>
+        </button>
+        <button class="closed" @click="count_click()">
+          <img src="@/assets/titles/CrashQuizOff.png" alt="Logo"/>
+        </button>
+        <button class="closed" @click="count_click()">
+          <img src="@/assets/titles/MockTest.png" alt="Logo"/>
+        </button>
+      </div>
     </div>
   </div>
 </template>
 <script>
+import toastr from 'toastr';
 export default {
   name: "dashboard",
   data() {
@@ -54,9 +75,58 @@ export default {
       client_socket: this.$store.state.currentClientSocket,
       logged_in_user: this.$store.state.currentUser,
       achievements: this.$store.state.currentAchievements,
+      done_daily_quiz_flag: this.$store.state.currentDoneDailyQuizFlag,
+      clicks: 0
     };
   },
   methods: {
+    info_message(title, msg) {
+      toastr.info(msg, title, {
+          closeButton: true,
+          progressBar: true,
+          positionClass: "toast-top-right",
+          timeOut: 1000,
+          showMethod: "fadeIn",
+          hideMethod: "fadeOut",
+          preventDuplicates: true
+        });
+    },
+    warning_message(title, msg) {
+      toastr.warning(msg, title, {
+          closeButton: true,
+          progressBar: true,
+          positionClass: "toast-top-right",
+          timeOut: 1000,
+          showMethod: "fadeIn",
+          hideMethod: "fadeOut",
+          preventDuplicates: true
+        });
+    },
+    count_click() {
+      if (this.$store.state.currentAchievements.includes('You bloody rat')) {
+        this.warning_message("Start with today's Daily Quiz!"," ");
+      } else {
+        // Increment click counter
+        this.clicks += 1;
+        if (this.clicks === 50) {
+          this.add_achievement('You bloody rat','🐀');
+        }
+        if (this.clicks >= 40) {
+          this.warning_message("...",' ');
+        }
+        if (this.clicks >= 30) {
+          this.warning_message('Ok this is starting to annoy me.',' ');
+        }
+        if (this.clicks >= 20) {
+          this.warning_message('Yo bro, just do the quiz.',' ');
+        }
+        if (this.clicks >= 10) {
+          this.warning_message('Uhm, what are you doing?',' ');
+        } else {
+          this.warning_message("Start with today's Daily Quiz!"," ");
+        }
+      }
+    },
     logout() {
       // Let server know the user is logging out.
       this.client_socket.emit('logout', this.logged_in_user);
@@ -75,6 +145,7 @@ export default {
       this.next_page('authentication');
     },
     async load_friends_list() {
+      this.info_message('Loading socials page ...', ' ');
       const response = await this.azure_function("POST", "/user/friend/all", { username: this.logged_in_user });
       if (response.result) {
         this.$store.commit("setCurrentSocialLists", {
@@ -85,6 +156,7 @@ export default {
       }
     },
     async load_leaderboards() {
+      this.info_message('Loading leaderboards ...', ' ');
       const [publicRes, friendsRes] = await Promise.all([
         this.azure_function("GET", "/user/leaderboard", {}),
         this.azure_function("POST", "/user/leaderboard/friend", { id: this.$store.state.currentStats.id })
@@ -94,8 +166,29 @@ export default {
         public: publicRes.result ? publicRes.msg : [],
         friends: friendsRes.result ? friendsRes.msg : []
       });
-
       this.next_page("leaderboard");
+    },
+    async add_achievement(name, emoji) {
+        // Add an achievement in the user's data!
+        if (this.$store.state.currentAchievements.includes(name)) {
+            console.log(name + " achievement already unlocked.");
+            return;
+        }
+        const user_stats = this.$store.state.currentStats;
+        const achievements = [...this.$store.state.currentAchievements, name];
+        const input = { id: user_stats.id, updates: { achievements } };
+        const update = await this.azure_function("PUT", "/user/update/info", input);
+        if (update) {
+            this.$store.commit("setCurrentAchievements", achievements);
+            toastr.success(`${name} ${emoji}`, "Achievement Unlocked:", {
+            closeButton: true,
+            progressBar: true,
+            positionClass: "toast-top-right",
+            timeOut: 10000,
+            showMethod: "fadeIn",
+            hideMethod: "fadeOut"
+            });
+        }
     },
     async azure_function(method, route, body) {
       // Send a request to the function app.
@@ -176,6 +269,10 @@ export default {
 
 .buttons-grid button:hover {
   transform: scale(1.2); /* Grow the button when hovering */
+}
+
+.buttons-grid button.closed {
+  filter: grayscale(100%);
 }
 
 .progress-container {
