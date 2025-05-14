@@ -333,7 +333,7 @@ export default {
         },
         async init_road_signs() {
             // Initalise the road sign questions.
-            const input = { "No_of_Qs": 10, "topic": "sign_question" }
+            const input = { "No_of_Qs": 5, "topic": "sign_question" }
             const quiz = await this.azure_function('POST', '/question/get/category', input);
             if (quiz.result) {
                 // Populate the questions list
@@ -342,7 +342,7 @@ export default {
         },
         async init_multiple_choice() {
             // Initalise the road sign questions.
-            const input = { "No_of_Qs": 10, "topic": "no_sign_question" }
+            const input = { "No_of_Qs": 5, "topic": "no_sign_question" }
             const quiz = await this.azure_function('POST', '/question/get/category', input);
             if (quiz.result) {
                 // Populate the questions list
@@ -378,7 +378,7 @@ export default {
             // Shuffle and select random clips
             this.clips = dictList
                 .sort(() => 0.5 - Math.random())  // Randomly shuffle
-                .slice(0, 3);           // Select the first 3 clips
+                .slice(0, 1);           // Select the first 3 clips
             this.clips.forEach(async item => {
                 const input = {'filename': item.name + ".mp4"};
                 const video = await this.azure_function('POST', '/question/get/video', input);
@@ -775,9 +775,9 @@ export default {
             })
         },
         get_stats() {
-            this.percentage = parseFloat((this.total_score / 23) * 100).toFixed(1);
-            this.final_score = parseFloat((this.total_score / 23)).toPrecision(2);
-            this.exp_gain = Math.round(((this.total_score / 23) * 500) / 100) * 100; 
+            this.percentage = parseFloat((this.total_score / 11) * 100).toFixed(1);
+            this.final_score = parseFloat((this.total_score / 11)).toPrecision(2);
+            this.exp_gain = Math.round(((this.total_score / 11) * 500) / 100) * 100; 
             console.log(this.exp_gain)
         },
         async update_user_exp(user_stats) {
