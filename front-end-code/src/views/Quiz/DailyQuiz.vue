@@ -378,7 +378,7 @@ export default {
             // Shuffle and select random clips
             this.clips = dictList
                 .sort(() => 0.5 - Math.random())  // Randomly shuffle
-                .slice(0, 1);           // Select the first 3 clips
+                .slice(0, 2);           // Select the first 3 clips
             this.clips.forEach(async item => {
                 const input = {'filename': item.name + ".mp4"};
                 const video = await this.azure_function('POST', '/question/get/video', input);
