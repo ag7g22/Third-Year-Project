@@ -395,7 +395,7 @@ async function handle_next_question(socket, host_username) {
 }
 
 
-function handle_leave_game(playername, host_username, isWinner) {
+async function handle_leave_game(playername, host_username, isWinner) {
 
     // If game already terminated, don't run!
     if (!games.has(host_username)) {
@@ -412,14 +412,15 @@ function handle_leave_game(playername, host_username, isWinner) {
         // Assign the winner OR loser
         if (username == playername) {
             theUser.isWinner = isWinner;
+            console.log(username + ": WINNER");
         } else {
             theUser.isWinner = !isWinner;
+            console.log(username + ": LOSER");
         }
         update_user(theSocket, host_username);
 
         // Remove from the Maps:
         users.delete(username);
-
         theSocket.emit('leave-game-success');
     }
 

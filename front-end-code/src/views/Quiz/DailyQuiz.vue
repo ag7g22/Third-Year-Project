@@ -9,13 +9,13 @@
                         we tend to forget information quickly despite just learning it. With regular reviews, more information will be retained for you to be ready for the exam!
                     </p>
                 </div>
-                <p>1. 🚦 Warm-Up: 10 Multiple Choice Road Sign Questions </p>
-                <p>2. 🧠 Core Quiz: 10 Multiple Choice Questions</p>
+                <p>1. 🚦 Warm-Up: 5 Multiple Choice Road Sign Questions </p>
+                <p>2. 🧠 Core Quiz: 5 Multiple Choice Questions</p>
                 <div class="feature-list">
                     <p> - Multiple choice questions have 4 options, where one is the correct answer.</p>
                     <p> - You may click the explanation if needed, but points will be reducted.</p>
                 </div>
-                <p>3. 🎥 Simulation: 3 Hazard Perception clips</p>
+                <p>3. 🎥 Simulation: 2 Hazard Perception clips</p>
                 <div class="feature-list">
                     <p> - Each 1 minute clip will show a POV of the driver, you need to click where you think is a developing hazard.</p>
                     <p> - You have up to 12 clicks to use, please use them wisely or you score 0.</p>

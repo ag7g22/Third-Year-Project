@@ -189,7 +189,7 @@ export default {
 
             // Password to join a hosted game
             host_password: '', 
-            
+
             // States updated by server:
             game_state: {host: '', password: '', players: [], state: 0, questions: [], currentQuestion: 0, q_counter: 1, 
             home: { username: '', chances: 3, elapsedTime: 0, selected_answer: null }, 
@@ -313,10 +313,11 @@ export default {
             this.client_socket.emit('leave-lobby', this.logged_in_user, host);
         },
         leave_game(isWinner) {
-            this.isWinner = isWinner;
-            this.add_achievement('The Crash-out King','🥀');
+            if (!isWinner) {
+              this.add_achievement('The Crash-out King','🥀');  
+            }
             // Remove players from game and end game.
-            this.client_socket.emit('leave-game', this.logged_in_user, this.game_state.host);
+            this.client_socket.emit('leave-game', this.logged_in_user, this.game_state.host, isWinner);
         },
         return_lobby() {
             // RESET STATES
@@ -380,7 +381,6 @@ export default {
         },
         async end_of_game(winner) {
             // Show both users the results
-            this.add_achievement('1 v 1 me rn m8','💥');
             if (winner === this.logged_in_user) {
                 this.add_achievement('The Crash-off King','👑');
                 this.user_state.isWinner = true;
@@ -478,8 +478,8 @@ export default {
                         this.end_of_round_timer = null;
                         this.countdown = null;
                         console.log("Ending game ... ");
-                        this.client_socket.emit('leave-game', this.logged_in_user, this.game_state.host, this.user_state.isWinner);
                         if (this.logged_in_user === winner) {
+                            this.leave_game(true);
                             this.update_user_exp(500);
                         } else {
                             this.update_user_exp(100);
@@ -666,6 +666,7 @@ export default {
             });
 
             this.client_socket.on('leave-game-success', () => {
+                console.log("Is winner: " + this.user_state.isWinner);
                 this.add_achievement('1 v 1 me rn m8','💥');
                 this.toggle_view('GAMEOVER');
             });
