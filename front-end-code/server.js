@@ -492,7 +492,7 @@ io.on('connection', socket => {
 async function azure_function(method, route, body) {
     // Send a request to the function app.
     console.log(route);
-    const url = "https://driving-theory.azurewebsites.net" + route + '?code=' + "p8l8U5CrimGa5Z35x5bq3Tf2X1KiVJKsYY7yyGL8OQOeAzFuEHeOLA=="
+    const url = VUE_APP_BACKEND_URL + route + '?code=' + VUE_APP_MASTER_KEY;
     try {
       const options = {
         method,
